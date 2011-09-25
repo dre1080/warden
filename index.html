@@ -1,1 +1,261 @@
-Warden
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Warden</title>
+        <meta name="description" content="A user database authorization package for FuelPHP. Handles user login and logout, as well as secure password hashing.">
+        <meta name="author" content="Andrew Wayne">
+
+        <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+        <!--[if lt IE 9]>
+          <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <link href="assets/css/bootstrap.css" rel="stylesheet">
+        <link href="assets/css/docs.css" rel="stylesheet">
+        <link href="assets/js/google-code-prettify/prettify.css" rel="stylesheet">
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+        <script src="assets/js/google-code-prettify/prettify.js"></script>
+        <script>$(function () { prettyPrint() })</script>
+    </head>
+
+    <body>
+
+        <header class="jumbotron masthead">
+            <div class="inner">
+                <div class="container">
+                    <h1>Warden</h1>
+                </div><!-- /container -->
+            </div>
+        </header>
+
+        <div id="description">
+            <p class="lead">
+                Warden is a user database authorization package for FuelPHP. Handles user login and logout, as well as secure password hashing.<br />
+                It uses the Blowfish algorithm for password storage. Requires the FuelPHP ORM package. <br /><br />
+                <a href="https://github.com/dre1080/warden" class="btn danger large">Warden on GitHub</a>
+            </p>
+        </div>
+
+        <div class="container">
+
+            <!-- Examples
+            ================================================== -->
+            <section id="installation">
+                <div class="page-header">
+                    <h1>Installation <small>It relies on the following table structures</small></h1>
+                </div>
+
+                <div class="row">
+                    <div class="span16">
+                        <h3>Users table <small>User account details</small></h3>
+                        <p>
+                            The following fields: <em>sign_in_count</em>, <em>current_sign_in_at</em>,
+                            <em>last_sign_in_at</em>, <em>current_sign_in_ip</em>, <em>last_sign_in_ip</em>
+                            are optional, view config file in <em>config/warden.php</em> for more details on these columns.
+                        </p>
+                        <pre class="prettyprint lang-sql">
+CREATE TABLE `users` (
+ `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique user ID',
+ `username` varchar(32) COLLATE utf8_unicode_ci NOT NULL COMMENT 'User username',
+ `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'User email',
+ `encrypted_password` varbinary(60) NOT NULL COMMENT 'Blowfish encryption of the user password',
+ `sign_in_count` int(11) unsigned NOT NULL COMMENT 'Increased every time a sign in is made',
+ `current_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'A timestamp updated when the user signs in',
+ `last_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Holds the timestamp of the previous sign in',
+ `current_sign_in_ip` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'The remote IP updated when the user sign in',
+ `last_sign_in_ip` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Holds the remote IP of the previous sign in',
+ `created_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'When the user account was created',
+ `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'When the user account was last updated',
+ PRIMARY KEY (`id`),
+ UNIQUE KEY `index_users_on_email` (`email`),
+ UNIQUE KEY `index_users_on_username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'User account details';
+                        </pre>
+                    </div>
+                </div><!-- /row -->
+
+                <div class="row">
+                    <div class="span16">
+                        <h3>Users tokens table <small>User authentication tokens</small></h3>
+                        <pre class="prettyprint lang-sql">
+CREATE TABLE `user_tokens` (
+ `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique token ID',
+ `user_id` int(11) unsigned NOT NULL COMMENT 'Unique user ID the token belongs to',
+ `token` varchar(32) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Unique token value',
+ `user_agent` varbinary(40) NOT NULL COMMENT 'Hash of the user agent where the token was created',
+ `expires` int(10) unsigned NOT NULL COMMENT 'Expiration time of the token',
+ `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When the token was created',
+ PRIMARY KEY (`id`),
+ UNIQUE KEY `index_user_tokens_on_token` (`token`),
+ KEY `index_user_tokens_on_user_id` (`user_id`),
+ CONSTRAINT `fk_index_user_tokens_on_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'User authentication tokens';
+                        </pre>
+                    </div>
+                </div><!-- /row -->
+
+                <div class="row">
+                    <div class="span16">
+                        <h3>Roles table <small>Allowed user roles</small></h3>
+                        <pre class="prettyprint lang-sql">
+CREATE TABLE `roles` (
+ `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique role ID',
+ `name` varchar(255) NOT NULL COMMENT 'The name of the role',
+ PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'Allowed user roles';
+                        </pre>
+                    </div>
+                </div><!-- /row -->
+
+                <div class="row">
+                    <div class="span16">
+                        <h3>User-roles mapping table <small>User-role mapping</small></h3>
+                        <pre class="prettyprint lang-sql">
+CREATE TABLE `roles_users` (
+ `role_id` int(11) unsigned NOT NULL COMMENT 'Unique role ID',
+ `user_id` int(11) unsigned NOT NULL COMMENT 'Unique user ID',
+ PRIMARY KEY (`role_id`,`user_id`),
+ KEY `index_roles_users_on_user_id` (`user_id`),
+ CONSTRAINT `fk_index_roles_users_on_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+ CONSTRAINT `fk_index_roles_users_on_role_id` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'User to role mapping';
+                        </pre>
+                    </div>
+                </div><!-- /row -->
+
+
+                <div class="row">
+                    <div class="span16">
+                        <p>
+                            To change the table names all you have to do is extend any of the Warden models and add your custom table name and/or properties.
+                            All you have to do is create your roles in the roles table and assign roles to users. For more info see the FuelPHP ORM docs.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="configuration">
+                <div class="page-header">
+                    <h1>Configuration <small>Settings &amp; things</small></h1>
+                </div>
+
+                <div class="row">
+                    <div class="span16">
+                        <p>
+                            For now, only config options are:
+                            <ul>
+                                <li>(int) lifetime: The remember-me cookie lifetime, in seconds</li>
+                                <li>(bool) trackable: Set to track information about user sign ins</li>
+                            </ul>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="examples">
+                <div class="page-header">
+                    <h1>Examples <small>Brief overview &amp; usage</small></h1>
+                </div>
+
+                <div class="row">
+                    <div class="span16">
+                        <h3>Check for validated login</h3>
+                        <pre class="prettyprint lang-php">
+if (Warden::check()) {
+    echo "I'm logged in :D";
+} else {
+    echo "Failed, I'm NOT logged in :(";
+}
+                        </pre>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="span16">
+                        <h3>Getting the currently logged in user</h3>
+                        <pre class="prettyprint lang-php">
+if (Warden::check()) {
+    $current_user = Warden::current_user();
+    echo $current_user->username;
+}
+                        </pre>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="span16">
+                        <h3>Checking for a specific role</h3>
+                        <pre class="prettyprint lang-php">
+if (Warden::logged_in('admin')) {
+    echo "Current user logged in as an admin";
+}
+
+$user = Model_User::find(2);
+if (Warden::has_access(array('editor', 'moderator'), $user)) {
+    echo "Hey, editor - moderator";
+} else {
+    echo "Fail!";
+}
+                        </pre>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="span16">
+                        <h3>Log in a user by using a username/email and plain-text password</h3>
+                        <pre class="prettyprint lang-php">
+if (Input::method() === 'POST') {
+    if (Warden::authenticate_user(Input::post('username_or_email'), Input::post('password'))) {
+        Session::set_flash('success', 'Logged in successfully');
+    } else {
+        Session::set_flash('error', 'Username or password invalid');
+    }
+    Response::redirect();
+}
+                        </pre>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="span16">
+                        <h3>Log out a user by removing the related session variables</h3>
+                        <pre class="prettyprint lang-php">
+if (Warden::logout()) {
+     echo "I'm logged out";
+}
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="roadmap">
+                <div class="page-header">
+                    <h1>Roadmap <small>Where we're headed</small></h1>
+                </div>
+                <ul>
+                    <li>Bundle install task/method for migrations</li>
+                    <li>Caching support (APC, Memcached)</li>
+                    <li>User and Session Controllers + Views</li>
+                    <li>User account confirmation</li>
+                    <li>User password resetting</li>
+                    <li>Http auth support</li>
+                </ul>
+            </section>
+
+
+        </div><!-- /container -->
+
+        <footer class="footer">
+            <div class="container">
+                <p class="pull-right"><a href="#">Back to top</a></p>
+                <p>
+                    By <a href="http://twitter.com/heyinspire" target="_blank">@heyinspire</a>.<br />
+                    Licensed under the <a href="http://www.opensource.org/licenses/mit-license.php" target="_blank">MIT License</a>.
+                </p>
+            </div>
+        </footer>
+
+    </body>
+</html>
