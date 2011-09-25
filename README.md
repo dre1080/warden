@@ -27,15 +27,8 @@ It relies on the following table structures:
      UNIQUE KEY `index_users_on_username` (`username`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'User account details';
 
-    ***
-The following fields:
-+`sign_in_count`,
-+`current_sign_in_at`,
-+`last_sign_in_at`,
-+`current_sign_in_ip`,
-+`last_sign_in_ip`
-are optional, view config file in `config/warden.php` for more details on these columns.
-    ***
+The following fields: `sign_in_count`, `current_sign_in_at`, `last_sign_in_at`, `current_sign_in_ip`, `last_sign_in_ip` are optional, view config file in `config/warden.php` for more details on these columns.
+
 
     CREATE TABLE `user_tokens` (
      `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique token ID',
@@ -50,7 +43,7 @@ are optional, view config file in `config/warden.php` for more details on these 
      CONSTRAINT `fk_index_user_tokens_on_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'User authentication tokens';
 
-    ***
+    --
 
     CREATE TABLE `roles` (
      `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique role ID',
@@ -58,7 +51,7 @@ are optional, view config file in `config/warden.php` for more details on these 
      PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'Allowed user roles';
 
-    ***
+    --
 
     CREATE TABLE `roles_users` (
      `role_id` int(11) unsigned NOT NULL COMMENT 'Unique role ID',
@@ -77,7 +70,7 @@ For now, check the `classes/warden.php` file for usage examples. This is the mai
 file that holds the class that does authentication. All examples are in the doc
 comments for each method.
 
-## ROADMAP
+### ROADMAP
 + Bundle install task/method for migrations
 + Caching support (APC, Memcached)
 + User and Session Controllers + Views
