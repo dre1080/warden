@@ -6,7 +6,7 @@ Handles user login and logout, as well as secure password hashing.
 This package requires the FuelPHP ORM package.
 It uses the Blowfish algorithm for password storage.
 
-# Installation
+## Installation
 
 It relies on the following table structures:
 
@@ -64,11 +64,57 @@ The following fields: `sign_in_count`, `current_sign_in_at`, `last_sign_in_at`, 
 
 
 To change the table names all you have to do is extend any of the Warden models and add
-your custom table name and/or properties. For more info see the FuelPHP ORM docs.
+your custom table name and/or properties. All you have to do is create your roles in the roles table and assign roles to users.
+For more info see the FuelPHP ORM docs.
 
-For now, check the `classes/warden.php` file for usage examples. This is the main
-file that holds the class that does authentication. All examples are in the doc
-comments for each method.
+## Configuration
+For now, only config options are `lifetime` and `trackable`:
++ (int)  lifetime : The remember-me cookie lifetime, in seconds
++ (bool) trackable: Set to track information about user sign ins
+
+## Usage
+
+Check for validated login:
+    if (Warden::check()) {
+        echo "I'm logged in :D";
+    } else {
+        echo "Failed, I'm NOT logged in :(";
+    }
+
+Getting the currently logged in user:
+    if (Warden::check()) {
+        $current_user = Warden::current_user();
+        echo $current_user->username;
+    }
+
+Checking for a specific role:
+    if (Warden::logged_in('admin')) {
+        echo "Current user logged in as an admin";
+    }
+
+    $user = Model_User::find(2);
+    if (Warden::has_access(array('editor', 'moderator'), $user)) {
+        echo "Hey, editor - moderator";
+    } else {
+        echo "Fail!";
+    }
+
+Log in a user by using a username or email and plain-text password:
+    if (Input::method() === 'POST') {
+        if (Warden::authenticate_user(Input::post('username_or_email'), Input::post('password'))) {
+            Session::set_flash('success', 'Logged in successfully');
+        } else {
+            Session::set_flash('error', 'Username or password invalid');
+        }
+        Response::redirect();
+    }
+
+Log out a user by removing the related session variables:
+    if (Warden::logout()) {
+         echo "I'm logged out";
+    }
+
+More examples are in the doc comments for each method.
 
 ### ROADMAP
 + Bundle install task/method for migrations

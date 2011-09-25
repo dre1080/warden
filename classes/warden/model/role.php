@@ -32,24 +32,13 @@ class Model_Role extends \Orm\Model
     );
 
     protected static $_properties = array(
-        'id' => array(
-            'type' => 'int',
-            'min'  => 0
-        ),
+        'id',
 
         'name' => array(
-            'type'  => 'varchar',
             'validation' => array(
                 'required',
                 'min_length' => array(4),
                 'max_length' => array(32),
-            ),
-        ),
-
-        'description' => array(
-            'type'  => 'varchar',
-            'validation' => array(
-                'max_length' => array(255),
             ),
         ),
     );

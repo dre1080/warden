@@ -97,8 +97,8 @@ class Model_User extends \Orm\Model
             ),
         ),
 
-        'created_at' => array('type' => 'timestamp'),
-        'updated_at' => array('type' => 'timestamp'),
+        'created_at',
+        'updated_at',
     );
 
     /**

@@ -20,38 +20,22 @@ namespace Warden;
  */
 class Model_UserToken extends \Orm\Model
 {
-    // Relationships
     protected static $_belongs_to = array(
         'user' => array(
             'key_from' => 'user_id',
-            'model_to' => '\\Model_User',
+            'model_to' => 'Model_User',
             'key_to' => 'id',
             'cascade_delete' => true,
         )
     );
 
     protected static $_properties = array(
-        'id' => array(
-            'type' => 'int'
-        ),
-
-        'user_id' => array(
-            'type'  => 'int',
-        ),
-
-        'token' => array(
-            'type'  => 'varchar',
-        ),
-
-        'user_agent' => array(
-            'type'  => 'varbinary',
-        ),
-
-        'expires' => array(
-            'type'  => 'int',
-        ),
-
-        'created_at' => array('type'  => 'timestamp'),
+        'id',
+        'user_id',
+        'token',
+        'user_agent',
+        'expires',
+        'created_at',
     );
 
     protected static $_observers = array(
@@ -77,7 +61,7 @@ class Model_UserToken extends \Orm\Model
     }
 
     /**
-     * Overload saving to set the created time and to create a new token
+     * Event to set the created time and to create a new token
      * when the object is saved.
      */
     public function _event_before_save()
@@ -92,15 +76,10 @@ class Model_UserToken extends \Orm\Model
 
     /**
      * Deletes all expired tokens.
-     *
-     * @return  void
      */
     public function delete_expired()
     {
-        // Delete all expired tokens
         static::find()->where('expires', '<', time())->delete();
-
-        return $this;
     }
 
     /**

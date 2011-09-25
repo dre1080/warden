@@ -23,7 +23,7 @@ class Warden
     /**
      * Warden driver
      *
-     * @var Merchant\Warden\Warden_Driver
+     * @var Warden\Warden_Driver
      */
     public $driver;
 
@@ -42,7 +42,9 @@ class Warden
     }
 
     /**
-     * Create an instance of Warden.
+     * Create an instance of Warden. An alias for Warden::instance()
+     *
+     * @see Warden::instance()
      *
      * @return Warden
      */
@@ -137,9 +139,9 @@ class Warden
      * }
      * </code>
      *
-     * @param mixed      $role The role name(s) to check
-     * @param Model_User $user The user to check against, if no user is given (null)
-     *                         it will check against the currently logged in user
+     * @param mixed              $role The role name(s) to check
+     * @param \Warden\Model_User $user The user to check against, if no user is given (null)
+     *                                 it will check against the currently logged in user
      *
      * @return bool Returns true on success or false on failure
      */
@@ -158,7 +160,7 @@ class Warden
      * }
      * </code>
      *
-     * @return \Model_User|null Returns a \Model_User object on success or null on failure
+     * @return \Warden\Model_User|null Returns a \Warden\Model_User object on success or null on failure
      */
     public static function current_user()
     {
@@ -188,7 +190,7 @@ class Warden
      */
     public static function authenticate_user($username_or_email, $password, $remember = false)
     {
-        if (!$password) {
+        if (empty($username_or_email) || empty($password)) {
             return false;
         }
 
@@ -258,7 +260,7 @@ class Warden
      */
     public function encrypt_password($password)
     {
-        static $hasher;
+        static $hasher = null;
         $hasher || $hasher = new \CryptLib\Password\Implementation\Blowfish();
         return $hasher->create($password);
     }
@@ -273,7 +275,7 @@ class Warden
      */
     public function has_password(Model_Warden_User $user, $submitted_password)
     {
-        if (!$user->encrypted_password || !$submitted_password) {
+        if (empty($user->encrypted_password) || empty($submitted_password)) {
             return false;
         }
 
