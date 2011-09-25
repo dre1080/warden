@@ -3,7 +3,7 @@
 A user database authorization package for FuelPHP.
 Handles user login and logout, as well as secure password hashing.
 
-This package uses the requires the FuelPHP ORM package.
+This package requires the FuelPHP ORM package.
 It uses the Blowfish algorithm for password storage.
 
 # Installation
@@ -76,3 +76,4 @@ comments for each method.
 + User and Session Controllers + Views
 + User account confirmation
 + User password resetting
++ Http auth support
