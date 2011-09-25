@@ -68,13 +68,15 @@ your custom table name and/or properties. All you have to do is create your role
 For more info see the FuelPHP ORM docs.
 
 ## Configuration
-For now, only config options are `lifetime` and `trackable`:
+For now, only config options are:
+
 + (int)  lifetime : The remember-me cookie lifetime, in seconds
 + (bool) trackable: Set to track information about user sign ins
 
 ## Usage
 
 Check for validated login:
+
     if (Warden::check()) {
         echo "I'm logged in :D";
     } else {
@@ -82,12 +84,14 @@ Check for validated login:
     }
 
 Getting the currently logged in user:
+
     if (Warden::check()) {
         $current_user = Warden::current_user();
         echo $current_user->username;
     }
 
 Checking for a specific role:
+
     if (Warden::logged_in('admin')) {
         echo "Current user logged in as an admin";
     }
@@ -100,6 +104,7 @@ Checking for a specific role:
     }
 
 Log in a user by using a username or email and plain-text password:
+
     if (Input::method() === 'POST') {
         if (Warden::authenticate_user(Input::post('username_or_email'), Input::post('password'))) {
             Session::set_flash('success', 'Logged in successfully');
@@ -110,6 +115,7 @@ Log in a user by using a username or email and plain-text password:
     }
 
 Log out a user by removing the related session variables:
+
     if (Warden::logout()) {
          echo "I'm logged out";
     }
