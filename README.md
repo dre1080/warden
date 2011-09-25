@@ -81,3 +81,5 @@ comments for each method.
 + Bundle install task/method for migrations
 + Caching support (APC, Memcached)
 + User and Session Controllers + Views
++ User account confirmation
++ User password resetting
