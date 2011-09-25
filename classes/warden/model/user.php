@@ -96,11 +96,7 @@ class Model_User extends \Orm\Model
                 'match_pattern' => array(self::REGEX_EMAIL),
             ),
         ),
-        'sign_in_count'      => array('default' => 0),
-        'current_sign_in_at' => array('default' => '0000-00-00 00:00:00'),
-        'last_sign_in_at'    => array('default' => '0000-00-00 00:00:00'),
-        'current_sign_in_ip' => array('default' => 0),
-        'last_sign_in_ip'    => array('default' => 0),
+
         'created_at' => array('type' => 'timestamp'),
         'updated_at' => array('type' => 'timestamp'),
     );
@@ -115,6 +111,22 @@ class Model_User extends \Orm\Model
         'Orm\\Observer_Validation',
         'Orm\\Observer_Self'
     );
+
+    /**
+     * Loads configuration options.
+     */
+    public static function _init()
+    {
+        if (\Config::get('warden.trackable', false)) {
+            static::$_properties = array_merge(static::$_properties, array(
+                'sign_in_count'      => array('default' => 0),
+                'current_sign_in_at' => array('default' => '0000-00-00 00:00:00'),
+                'last_sign_in_at'    => array('default' => '0000-00-00 00:00:00'),
+                'current_sign_in_ip' => array('default' => 0),
+                'last_sign_in_ip'    => array('default' => 0),
+            ));
+        }
+    }
 
     /**
      * {@inheritdoc}
@@ -303,8 +315,12 @@ class Model_User extends \Orm\Model
      */
     public function update_tracked_fields()
     {
+        if (!\Config::get('warden.trackable', false)) {
+            return true;
+        }
+
         $old_current = $this->current_sign_in_at;
-        $new_current = \DB::expr('NOW()');
+        $new_current = \DB::expr('CURRENT_TIMESTAMP');
 
         $this->last_sign_in_at = ($old_current != static::$_properties['last_sign_in_at']['default'])
                                ? $old_current
