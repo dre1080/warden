@@ -268,12 +268,12 @@ class Warden
     /**
      * Checks that a submitted password matches the users password
      *
-     * @param  Model_Warden_User $user
-     * @param  string            $submitted_password
+     * @param  \Warden\Model_User $user
+     * @param  string             $submitted_password
      *
      * @return bool
      */
-    public function has_password(Model_Warden_User $user, $submitted_password)
+    public function has_password(Model_User $user, $submitted_password)
     {
         if (empty($user->encrypted_password) || empty($submitted_password)) {
             return false;

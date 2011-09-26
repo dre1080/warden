@@ -70,7 +70,7 @@ class Warden_Driver
             }
         }
 
-        return $this->has_access($role, $this->user);
+        return $this->has_access($role ? $role : 'user', $this->user);
     }
 
     /**
@@ -82,41 +82,22 @@ class Warden_Driver
      *
      * @return bool
      */
-    public function has_access($role, Model_User $user)
+    public function has_access($role, Model_User $user = null)
     {
-        $acl_user = $user;
-        $status   = !!$acl_user;
+        $status   = !!$user;
 
         if (!empty($role) && $status) {
-            // If role is an array
-            if (is_array($role)) {
-                // Check each role
-                foreach ($role as $r) {
-                    if (!is_object($r)) {
-                        $r = Model_Role::find('first', array(
-                            'where' => array('name' => $r)
-                        ));
-                    }
+            $role = (is_array($role) ? $role : array($role));
 
-                    // If the user doesn't have the role
-                    if (!in_array($r, $acl_user->roles)) {
-                        // Set the status false and get outta here
-                        $status = false;
-                        break;
-                    }
-                }
-            } else {
-                // Else just check the one supplied roles
-                if (!is_object($role)) {
-                    // Load the role
-                    $role = Model_Role::find('first', array(
-                        'where' => array('name' => $role)
-                    ));
-                }
+            $diff = array_udiff($role, $user->roles, function ($r, $ur) {
+                // check for a role object
+                $r = (is_object($r) ? $r->name : $r);
+                // compare each given role against the user's roles
+                return $r != $ur->name;
+            });
 
-                // Check that the user has the given role
-                $status = in_array($role, $acl_user->roles);
-            }
+            // empty = true
+            $status = empty($diff);
         }
 
         return $status;
@@ -184,11 +165,6 @@ class Warden_Driver
     public function force_login($username_or_email)
     {
         $user = Model_User::authenticate($username_or_email);
-
-        // Mark the session as forced, to prevent users from changing account information
-        \Session::set('warden.auth_forced', true);
-
-        // Run the standard completion
         return $user && $this->complete_login($user);
     }
 
@@ -241,10 +217,12 @@ class Warden_Driver
     public function logout($destroy)
     {
         $this->user = null;
+
+        // Delete the session identifier for the user
         \Session::delete('warden.authenticity_token');
 
         if (\Cookie::get('warden.remember_user_token')) {
-            // Delete the autologin cookie to prevent re-login
+            // Delete the remember-me cookie to prevent re-login
             \Cookie::delete('warden.remember_user_token');
         }
 

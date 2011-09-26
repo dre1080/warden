@@ -25,7 +25,8 @@ class Model_Role extends \Orm\Model
             'key_from' => 'id',
             'key_through_from' => 'role_id',
             'key_through_to'   => 'user_id',
-            'model_to' => 'Model_User',
+            'table_through' => 'roles_users',
+            'model_to' => '\Warden\Model_User',
             'key_to' => 'id',
             'cascade_delete' => true,
         )
@@ -38,8 +39,14 @@ class Model_Role extends \Orm\Model
             'validation' => array(
                 'required',
                 'min_length' => array(4),
-                'max_length' => array(32),
-            ),
+                'max_length' => array(40)
+            )
+        ),
+
+        'description' => array(
+            'validation' => array(
+                'required'
+            )
         ),
     );
 }

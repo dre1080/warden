@@ -47,7 +47,7 @@ class Model_User extends \Orm\Model
     protected static $_has_many = array(
         'user_tokens' => array(
             'key_from' => 'id',
-            'model_to' => 'Model_UserToken',
+            'model_to' => '\Warden\Model_UserToken',
             'key_to'   => 'user_id',
             'cascade_delete' => true,
         )
@@ -63,7 +63,8 @@ class Model_User extends \Orm\Model
             'key_from' => 'id',
             'key_through_from' => 'user_id',
             'key_through_to'   => 'role_id',
-            'model_to' => 'Model_Role',
+            'table_through' => 'roles_users',
+            'model_to' => '\Warden\Model_Role',
             'key_to' => 'id',
             'cascade_delete' => true,
         )
@@ -76,12 +77,7 @@ class Model_User extends \Orm\Model
      */
     protected static $_properties = array(
         'id',
-        'encrypted_password' => array(
-            'validation' => array(
-                'required',
-                'exact_length' => array(60),
-            ),
-        ),
+        'encrypted_password',
         'username' => array(
             'validation' => array(
                 'required',
@@ -138,11 +134,7 @@ class Model_User extends \Orm\Model
         // This is needed for validation and encryption later
         if (isset($data['password'])) {
             $this->password = $data['password'];
-            $this->encrypted_password = null;
         }
-
-        $val = \Validation::instance(get_class($this));
-        $val->add_field('password', 'Password', 'required|min_length[6]|max_length[128]');
     }
 
     /**
@@ -150,18 +142,12 @@ class Model_User extends \Orm\Model
      */
     public function & __get($property)
     {
-        $value = null;
-        switch($property) {
-            case 'current_sign_in_ip':
-            case 'last_sign_in_ip'   :
-                $value = $this->get_sign_in_ip($property);
-                break;
-            default:
-                $value = parent::__get($property);
-                break;
+        if ($property == 'current_sign_in_ip' || $property == 'last_sign_in_ip') {
+            $value = $this->get_sign_in_ip($property);
+            return $value;
         }
 
-        return $value;
+        return parent::__get($property);
     }
 
     /**
@@ -169,11 +155,8 @@ class Model_User extends \Orm\Model
      */
     public function __set($property, $value)
     {
-        switch($property) {
-            case 'current_sign_in_ip':
-            case 'last_sign_in_ip'   :
-                $value = $this->get_ip_as_int($value);
-                break;
+        if ($property == 'current_sign_in_ip' || $property == 'last_sign_in_ip') {
+            $value = $this->get_ip_as_int($value);
         }
 
         parent::__set($property, $value);
@@ -267,7 +250,7 @@ class Model_User extends \Orm\Model
         // Add the fields
         $fieldset->add('session[username]', 'Username', array('type' => 'text'));
         $fieldset->add('session[password]', 'Password', array('type' => 'password'));
-        $fieldset->add('commit', '', array('value' => 'Sign up', 'type' => 'submit'));
+        $fieldset->add('commit', '', array('value' => 'Login', 'type' => 'submit'));
 
         // Populate with your $user instance and second param is true to use POST
         // to overwrite those values when available
@@ -353,7 +336,17 @@ class Model_User extends \Orm\Model
     public function _event_before_save()
     {
         if (!empty($this->password)) {
+            if (\Str::length($this->password) < 6) {
+                throw new \Orm\ValidationFailed('Password is too short (minimum is 6 characters)');
+            } elseif (\Str::length($this->password) > 128) {
+                throw new \Orm\ValidationFailed('Password is too long (maximum is 128 characters)');
+            }
+
             $this->encrypted_password = Warden::instance()->encrypt_password($this->password);
+        }
+
+        if (empty($this->encrypted_password)) {
+            throw new \Orm\ValidationFailed('Password is required');
         }
 
         // Let's not do unnecessary database queries
@@ -414,15 +407,16 @@ class Model_User extends \Orm\Model
      */
     private function _username_or_email_exists()
     {
-        $user = static::find('first', array(
-            'where' => array(
-                'email' => $this->email,
-                array('username', '=', $this->username),
-            )
-        ));
+        $user = \DB::select('email')
+                ->from(static::table())
+                ->where('email', '=', $this->email)
+                ->or_where('username', '=', $this->username)
+                ->limit(1)
+                ->execute()
+                ->current();
 
-        if (!is_null($user)) {
-            if ($user->email === $this->email) {
+        if ($user != false) {
+            if ($user['email'] === $this->email) {
                 throw new \Orm\ValidationFailed('Email address already exists');
             } else {
                 throw new \Orm\ValidationFailed('Username already exists');

@@ -4,7 +4,6 @@ A user database authorization package for FuelPHP.
 Handles user login and logout, as well as secure password hashing.
 
 This package requires the FuelPHP ORM package.
-It uses the Blowfish algorithm for password storage.
 
 ## Installation
 
@@ -14,7 +13,7 @@ It relies on the following table structures:
      `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique user ID',
      `username` varchar(32) COLLATE utf8_unicode_ci NOT NULL COMMENT 'User username',
      `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'User email',
-     `encrypted_password` varbinary(60) NOT NULL COMMENT 'Blowfish encryption of the user password',
+     `encrypted_password` varbinary(60) NOT NULL COMMENT 'Encryption of the user password',
      `sign_in_count` int(11) unsigned NOT NULL COMMENT 'Increased every time a sign in is made',
      `current_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'A timestamp updated when the user signs in',
      `last_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Holds the timestamp of the previous sign in',
@@ -47,9 +46,13 @@ The following fields: `sign_in_count`, `current_sign_in_at`, `last_sign_in_at`, 
 
     CREATE TABLE `roles` (
      `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique role ID',
-     `name` varchar(255) NOT NULL COMMENT 'The name of the role',
-     PRIMARY KEY (`id`)
+     `name` varchar(40) NOT NULL COMMENT 'The name of the role',
+     `description` varchar(255) NOT NULL COMMENT 'The description of the role',
+     PRIMARY KEY (`id`),
+     UNIQUE KEY `index_roles_on_name` (`name`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'Allowed user roles';
+
+    INSERT INTO `roles` (`id`, `name`, `description`) VALUES(1, 'user', 'Default login privileges, granted after account confirmation');
 
     --
 
