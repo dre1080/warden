@@ -362,6 +362,10 @@ class Model_User extends \Orm\Model
         } catch(\Orm\ValidationFailed $ex) {
             throw $ex;
         }
+
+        if (empty($this->roles) || !static::query()->related('roles')->get_one()) {
+            $this->roles[] = Model_Role::find(1);
+        }
     }
 
     /**
