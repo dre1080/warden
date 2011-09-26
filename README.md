@@ -11,8 +11,8 @@ It relies on the following table structures:
 
     CREATE TABLE `users` (
      `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique user ID',
-     `username` varchar(32) COLLATE utf8_unicode_ci NOT NULL COMMENT 'User username',
-     `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'User email',
+     `username` varchar(32) NOT NULL COMMENT 'User username',
+     `email` varchar(255) NOT NULL COMMENT 'User email',
      `encrypted_password` varbinary(60) NOT NULL COMMENT 'Encryption of the user password',
      `authentication_token` varbinary(60) DEFAULT NULL COMMENT 'Session authentication token',
      `remember_token` varbinary(60) DEFAULT NULL COMMENT 'Cookie remember token',
@@ -26,7 +26,7 @@ It relies on the following table structures:
      PRIMARY KEY (`id`),
      UNIQUE KEY `index_users_on_email` (`email`),
      UNIQUE KEY `index_users_on_username` (`username`)
-    ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='User account details';
+    ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COMMENT='User account details';
 
 The following fields: `sign_in_count`, `current_sign_in_at`, `last_sign_in_at`, `current_sign_in_ip`, `last_sign_in_ip` are optional, view config file in `config/warden.php` for more details on these columns.
 
@@ -37,9 +37,10 @@ The following fields: `sign_in_count`, `current_sign_in_at`, `last_sign_in_at`, 
      `description` varchar(255) NOT NULL COMMENT 'The description of the role',
      PRIMARY KEY (`id`),
      UNIQUE KEY `index_roles_on_name` (`name`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'Allowed user roles';
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT 'Allowed user roles';
 
     INSERT INTO `roles` (`id`, `name`, `description`) VALUES(1, 'user', 'Default login privileges, granted after account confirmation');
+    INSERT INTO `roles` (`id`, `name`, `description`) VALUES(2, 'admin', 'Administrative user, has access to everything.');
 
     --
 
@@ -50,7 +51,7 @@ The following fields: `sign_in_count`, `current_sign_in_at`, `last_sign_in_at`, 
      KEY `index_roles_users_on_user_id` (`user_id`),
      CONSTRAINT `fk_index_roles_users_on_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
      CONSTRAINT `fk_index_roles_users_on_role_id` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'User to role mapping';
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT 'User to role mapping';
 
 
 To change the table names all you have to do is extend any of the Warden models and add
