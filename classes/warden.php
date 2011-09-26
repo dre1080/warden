@@ -282,4 +282,15 @@ class Warden
         $hasher = \CryptLib\Password\Implementation\Blowfish::loadFromHash($user->encrypted_password);
         return $hasher->verify($submitted_password, $user->encrypted_password);
     }
+
+    /**
+     * Generate a unique friendly string to be used as a token.
+     *
+     * @return string
+     */
+    public static function generate_token()
+    {
+        $token = \Str::random('unique').'_'.time();
+        return str_replace(array('+', '/', '='), array('x', 'y', 'z'), base64_encode($token));
+    }
 }

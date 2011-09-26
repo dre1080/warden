@@ -41,32 +41,25 @@ class Warden_Driver
     /**
      * Checks if a session is active.
      *
-     * @param  string  $role role name
+     * @param  string $role The role name (optional)
      *
-     * @return boolean
+     * @return bool
      */
     public function logged_in($role = null)
     {
         $auth_token = \Session::get('warden.authenticity_token');
 
-        $token = $username_hash = '';
-        @list($token, $username_hash) = explode(':', $auth_token);
-
-        if (!empty($token) &&
-            !empty($username_hash) &&
-            (is_null($this->user) || md5($this->user->username) != $username_hash))
+        if (!empty($auth_token) &&
+            (is_null($this->user) || $this->user->authentication_token != $auth_token))
         {
             $this->user = null;
 
-            $user_token = Model_UserToken::find('first', array(
-                'where' => array('token' => $token)
+            $user = Model_User::find('first', array(
+                'where' => array('authentication_token' => $auth_token)
             ));
 
-            if (!is_null($user_token) &&
-                isset($user_token->user) &&
-                md5($user_token->user->username) == $username_hash)
-            {
-                $this->user = $user_token->user;
+            if (!is_null($user)) {
+                $this->user = $user;
             }
         }
 
@@ -106,11 +99,11 @@ class Warden_Driver
     /**
      * Logs a user in.
      *
-     * @param   string  $user     username
-     * @param   string  $password password
-     * @param   boolean $remember enable auto-login
+     * @param string $username_or_email
+     * @param string $password
+     * @param bool   $remember
      *
-     * @return  boolean
+     * @return  bool
      */
     public function authenticate_user($username_or_email, $password, $remember)
     {
@@ -118,17 +111,12 @@ class Warden_Driver
             Warden::instance()->has_password($user, $password))
         {
             if ($remember === true) {
-                // Create a new autologin token
-                $token = new \Model_UserToken;
-
                 // Set token data
-                $token->user_id = $user->id;
-                $token->expires = time() + $this->config['lifetime'];
-                $token->save();
+                $user->remember_token = Warden::generate_token();
 
-                // Set the autologin cookie
-                \Cookie::set('warden.remember_user_token',
-                             $token->token,
+                // Set the remember-me cookie
+                \Cookie::set('warden.remember_token',
+                             $user->remember_token,
                              $this->config['lifetime']);
             }
 
@@ -159,8 +147,9 @@ class Warden_Driver
     /**
      * Forces a user to be logged in, without specifying a password.
      *
-     * @param   mixed    username
-     * @return  bool
+     * @param string $username_or_email
+     *
+     * @return bool
      */
     public function force_login($username_or_email)
     {
@@ -170,37 +159,22 @@ class Warden_Driver
 
     /**
      * Logs a user in, based on stored credentials, typically cookies.
-     * Not supported by default.
      *
-     * @return  boolean
+     * @return bool
      */
     public function auto_login()
     {
-        if (($token = \Cookie::get('warden.remember_user_token'))) {
-            // Load the token and user
-            $token = Model_UserToken::find('first', array(
-                'where' => array('token' => $token)
+        if (($token = \Cookie::get('warden.remember_token'))) {
+            $user = Model_User::find('first', array(
+                'where' => array('remember_token' => $token)
             ));
 
-            if ($token && $token->user) {
-                if ($token->user_agent === sha1(\Input::server('HTTP_USER_AGENT'))) {
-                    // Save the token to create a new unique token
-                    $token->save();
+            if (!is_null($user)) {
+                // Complete the login with the found data
+                $this->complete_login($user);
 
-                    // Set the new token
-                    \Cookie::set('warden.remember_user_token',
-                                 $token->token,
-                                 $token->expires - time());
-
-                    // Complete the login with the found data
-                    $this->complete_login($token->user);
-
-                    // Automatic login was successful
-                    return true;
-                }
-
-                // Token is invalid
-                $token->delete();
+                // Automatic login was successful
+                return true;
             }
         }
 
@@ -210,9 +184,9 @@ class Warden_Driver
     /**
      * Log a user out.
      *
-     * @param   boolean  completely destroy the session
+     * @param bool $destroy Whether to completely destroy the session
      *
-     * @return  boolean
+     * @return bool
      */
     public function logout($destroy)
     {
@@ -221,9 +195,9 @@ class Warden_Driver
         // Delete the session identifier for the user
         \Session::delete('warden.authenticity_token');
 
-        if (\Cookie::get('warden.remember_user_token')) {
+        if (\Cookie::get('warden.remember_token')) {
             // Delete the remember-me cookie to prevent re-login
-            \Cookie::delete('warden.remember_user_token');
+            \Cookie::delete('warden.remember_token');
         }
 
         if ($destroy === true) {
@@ -247,17 +221,16 @@ class Warden_Driver
      */
     protected function complete_login(Model_User $user)
     {
-        // Create a new authentication token
-        $authtoken = new Model_UserToken;
+        // Create and set new authentication token
+        $user->authentication_token = Warden::generate_token();
 
-        // Set token data
-        $authtoken->user_id = $user->id;
-        $authtoken->expires = time() + \Config::get('session.expiration_time', 86400);
-        $authtoken->save();
+        if (\Config::get('warden.trackable')) {
+            $user->update_tracked_fields();
+        } else {
+            $user->save();
+        }
 
-        $user->update_tracked_fields();
-
-        \Session::set('warden.authenticity_token', $authtoken->token.':'.md5($user->username));
+        \Session::set('warden.authenticity_token', $user->authentication_token);
         \Session::instance()->rotate();
 
         $this->user = $user;

@@ -14,6 +14,8 @@ It relies on the following table structures:
      `username` varchar(32) COLLATE utf8_unicode_ci NOT NULL COMMENT 'User username',
      `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'User email',
      `encrypted_password` varbinary(60) NOT NULL COMMENT 'Encryption of the user password',
+     `authentication_token` varbinary(60) DEFAULT NULL COMMENT 'Session authentication token',
+     `remember_token` varbinary(60) DEFAULT NULL COMMENT 'Cookie remember token',
      `sign_in_count` int(11) unsigned NOT NULL COMMENT 'Increased every time a sign in is made',
      `current_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'A timestamp updated when the user signs in',
      `last_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Holds the timestamp of the previous sign in',
@@ -24,25 +26,10 @@ It relies on the following table structures:
      PRIMARY KEY (`id`),
      UNIQUE KEY `index_users_on_email` (`email`),
      UNIQUE KEY `index_users_on_username` (`username`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'User account details';
+    ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='User account details';
 
 The following fields: `sign_in_count`, `current_sign_in_at`, `last_sign_in_at`, `current_sign_in_ip`, `last_sign_in_ip` are optional, view config file in `config/warden.php` for more details on these columns.
 
-
-    CREATE TABLE `user_tokens` (
-     `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique token ID',
-     `user_id` int(11) unsigned NOT NULL COMMENT 'Unique user ID the token belongs to',
-     `token` varchar(32) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Unique token value',
-     `user_agent` varbinary(40) NOT NULL COMMENT 'Hash of the user agent where the token was created',
-     `expires` int(10) unsigned NOT NULL COMMENT 'Expiration time of the token',
-     `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When the token was created',
-     PRIMARY KEY (`id`),
-     UNIQUE KEY `index_user_tokens_on_token` (`token`),
-     KEY `index_user_tokens_on_user_id` (`user_id`),
-     CONSTRAINT `fk_index_user_tokens_on_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'User authentication tokens';
-
-    --
 
     CREATE TABLE `roles` (
      `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique role ID',

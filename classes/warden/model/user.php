@@ -40,20 +40,6 @@ class Model_User extends \Orm\Model
     public $password;
 
     /**
-     * Has Many; relationship properties
-     *
-     * @var array
-     */
-    protected static $_has_many = array(
-        'user_tokens' => array(
-            'key_from' => 'id',
-            'model_to' => '\Warden\Model_UserToken',
-            'key_to'   => 'user_id',
-            'cascade_delete' => true,
-        )
-    );
-
-    /**
      * Many Many; relationship properties
      *
      * @var array
@@ -93,8 +79,11 @@ class Model_User extends \Orm\Model
             ),
         ),
 
-        'created_at',
-        'updated_at',
+        'authentication_token' => array('default' => null),
+        'remember_token'       => array('default' => null),
+
+        'created_at'  => array('default' => '0000-00-00 00:00:00'),
+        'updated_at'  => array('default' => '0000-00-00 00:00:00'),
     );
 
     /**
