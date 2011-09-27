@@ -56,7 +56,7 @@ class Warden_Driver
      */
     public function logged_in($role = null)
     {
-        $auth_token = \Session::get('warden.authenticity_token');
+        $auth_token = \Session::get('authenticity_token');
 
         if (!empty($auth_token) &&
             (is_null($this->user) || $this->user->authentication_token != $auth_token))
@@ -124,7 +124,7 @@ class Warden_Driver
                 $user->remember_token = Warden::generate_token();
 
                 // Set the remember-me cookie
-                \Cookie::set('warden.remember_token',
+                \Cookie::set('remember_token',
                              $user->remember_token,
                              $this->config['lifetime'],
                              null, null, null, true);
@@ -174,7 +174,6 @@ class Warden_Driver
      */
     public function auto_login()
     {
-        var_dump(\Cookie::get('warden.remember_token'));
         if (($token = \Cookie::get('remember_token'))) {
             $user = Model_User::find('first', array(
                 'where' => array('remember_token' => $token)
@@ -204,7 +203,7 @@ class Warden_Driver
         $this->user = null;
 
         // Delete the session identifier for the user
-        \Session::delete('warden.authenticity_token');
+        \Session::delete('authenticity_token');
 
         if (\Cookie::get('remember_token')) {
             // Delete the remember-me cookie to prevent re-login
@@ -241,7 +240,7 @@ class Warden_Driver
             $user->save(false);
         }
 
-        \Session::set('warden.authenticity_token', $user->authentication_token);
+        \Session::set('authenticity_token', $user->authentication_token);
         \Session::instance()->rotate();
 
         $this->user = $user;
