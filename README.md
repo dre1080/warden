@@ -173,11 +173,3 @@ Resetting a user's password
 
 
 More examples are in the doc comments for each method.
-
-### ROADMAP
-+ Bundle install task/method for migrations
-+ Caching support (APC, Memcached)
-+ User and Session Controllers + Views
-+ User account confirmation
-+ ~~User password resetting~~
-+ Http auth support
