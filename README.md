@@ -10,6 +10,7 @@ Features:
 + User ACL
 + Remember-me functionality
 + Reset-password functionality
++ Http authentication
 and many more to come
 
 ## Why use BCrypt?
@@ -89,6 +90,12 @@ Log in a user by using a username or email and plain-text password:
             Session::set_flash('error', 'Username or password invalid');
         }
         Response::redirect();
+    }
+
+Log in a user using a http based authentication method:
+
+    if (($user_array = Warden::http_authenticate_user())) {
+        echo "Welcome {$user_array['username']}";
     }
 
 Log out a user by removing the related session variables:

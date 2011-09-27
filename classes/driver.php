@@ -277,7 +277,7 @@ class Warden_Driver
         if (!isset($users[$username]) || $users[$username] !== $password) {
             $response->set_header('WWW-Authenticate', "Basic realm=\"{$this->config['http_authenticatable']['realm']}\"");
             $response->send_headers();
-            exit('You must enter a valid username and password');
+            exit($this->config['http_authenticatable']['failure_text']);
         }
 
         return array('username' => $username, 'password' => $password);
@@ -320,7 +320,7 @@ class Warden_Driver
             $header_value = "Digest realm=\"{$realm}\",qop=\"auth\", nonce=\"{$nonce}\",opaque=\"{$opaque}\"";
             $response->set_header('WWW-Authenticate', $header_value);
             $response->send_headers();
-            exit('You must enter a valid username and password');
+            exit($this->config['http_authenticatable']['failure_text']);
         }
 
         return array('username' => $data['username'], 'password' => $password);

@@ -118,7 +118,16 @@ return array(
          * (array) key => value pair of username => password
          */
         'users' => array(
-            'warden' => 'warden'
-        )
+            //'warden' => 'warden'
+        ),
+
+        /**
+         * The message to display on failure
+         *
+         * @todo move to lang file
+         *
+         * (string)
+         */
+        'failure_text' => 'You must enter a valid username and password'
     )
 );
