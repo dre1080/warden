@@ -313,7 +313,7 @@ class Model_User extends \Orm\Model
 
         $this->sign_in_count += 1;
 
-        return $this->save();
+        return $this->save(false);
     }
 
     /**
