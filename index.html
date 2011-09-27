@@ -82,6 +82,7 @@
                 <div class="row">
                     <div class="span16">
                         <h3>Packages</h3>
+                        <p>The following packages are needed for Warden to work:</p>
                         <ul>
                             <li><a href="https://github.com/fuel/orm">Orm</a></li>
                         </ul>
@@ -101,7 +102,7 @@
                         <p>
                             This package follows standard installation rules, which can be found within the
                             <a href="http://fuelphp.com/docs/general/packages.html">FuelPHP Documentation for Packages</a>
-                            You have two options you can autoload the package in your app/config.php:
+                            You have two options you can autoload the package in your <em>app/config.php</em>:
                         </p>
                         <pre class="prettyprint lang-php">
 'always_load' => array(
@@ -117,7 +118,8 @@ Fuel::add_package('warden');
                         </pre>
 
                         <p>
-                            View <em>config/install.sql</em> for table structures.
+                            View <a href="https://raw.github.com/dre1080/warden/master/config/install.sql"><em>config/install.sql</em></a>
+                            for table structures.
                             Create your roles in the <em>roles</em> table to assign roles to users.
                         </p>
                     </div>
