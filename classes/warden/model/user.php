@@ -335,7 +335,7 @@ class Model_User extends \Orm\Model
      * Checks if the reset password token sent is within the limit time.
      *
      * <code>
-     * \Config::set('warden.reset_password_within', 86400);
+     * \Config::set('warden.reset_password_within', '+1 day');
      * $user->reset_password_sent_at = \Date::time()->format('mysql');
      * $user->is_reset_password_period_valid(); // returns true
      * </code>
@@ -348,8 +348,14 @@ class Model_User extends \Orm\Model
             return true;
         }
 
-        return (($this->reset_password_sent_at != static::$_properties['reset_password_sent_at']['default']) &&
-                (strtotime($this->reset_password_sent_at) >= \Config::get('warden.recoverable.reset_password_within')));
+        if ($this->reset_password_sent_at == static::$_properties['reset_password_sent_at']['default']) {
+            return false;
+        }
+
+        $lifetime = \Config::get('warden.recoverable.reset_password_within');
+        $expires  = strtotime($lifetime, strtotime($this->reset_password_sent_at));
+
+        return (bool)($expires >= time());
     }
 
     /**

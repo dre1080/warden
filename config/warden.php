@@ -76,11 +76,13 @@ return array(
 
         /**
          * The limit time within which the reset password token is valid.
-         * Must always be an integer value.
-         * Default is '0', which means no limit (always valid).
+         * Must always be a valid php date/time value.
+         * Default is '+1 week', which means no limit (always valid).
          *
-         * (integer)
+         * @see http://www.php.net/manual/en/datetime.formats.php
+         * 
+         * (string)
          */
-        'reset_password_within' => 0
+        'reset_password_within' => '+1 week'
     )
 );

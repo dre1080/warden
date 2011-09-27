@@ -96,7 +96,7 @@ For now, only config options are:
 + (bool) `trackable`: Set to track information about user sign ins
 + `recoverable`: Takes care of resetting the user password.
     + (bool) `in_use`: Set to false, to disable (default: true)
-    + (int) `reset_password_within`: The limit time within which the reset password token is valid.
+    + (string) `reset_password_within`: The limit time within which the reset password token is valid.
 
 ## Usage
 
