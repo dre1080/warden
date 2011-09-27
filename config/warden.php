@@ -36,7 +36,7 @@ return array(
     'lifetime' => 1209600,
 
     /**
-     * Set the default role a newly created user has, it must already exist,
+     * Set the default role to assign a newly created user, it must already exist,
      * Set to `null` to disable. This role is also used by Warden's driver as
      * a default when checking if a user is logged in.
      *
