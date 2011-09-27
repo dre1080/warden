@@ -39,9 +39,6 @@ The following fields: `sign_in_count`, `current_sign_in_at`, `last_sign_in_at`, 
      UNIQUE KEY `index_roles_on_name` (`name`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT 'Allowed user roles';
 
-    INSERT INTO `roles` (`id`, `name`, `description`) VALUES(1, 'user', 'Default login privileges, granted after account confirmation');
-    INSERT INTO `roles` (`id`, `name`, `description`) VALUES(2, 'admin', 'Administrative user, has access to everything.');
-
     --
 
     CREATE TABLE `roles_users` (
