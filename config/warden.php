@@ -62,7 +62,7 @@ return array(
      * Recoverable takes care of resetting the user password.
      *
      * It requires the following columns:
-     * 
+     *
      *   - `reset_password_token`
      *   - `reset_password_sent_at`
      */
@@ -73,16 +73,6 @@ return array(
          * (bool)
          */
         'in_use'   => true,
-
-        /**
-         * The keys you want to use when recovering the password for an account.
-         * Eg. array('email', 'username')
-         *
-         * (array of strings)
-         */
-        'reset_password_keys'   => array(
-            'email'
-        ),
 
         /**
          * The limit time within which the reset password token is valid.

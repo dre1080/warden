@@ -289,14 +289,13 @@ class Model_User extends \Orm\Model
 
     /**
      * Attempt to find a user by it's reset_password_token to reset its
-     * password. If a user is found and token is still valid, reset its password and automatically
-     * try saving the record. If not user is found, returns a new user
-     * containing an error in reset_password_token attribute.
+     * password and automatically try saving the record.
      *
      * @param string $reset_password_token
      * @param string $new_password
      *
-     * @return \Warden\Model_User|null Returns a user if found, null otherwise
+     * @return \Warden\Model_User|null Returns a user if is found and token is still valid,
+     *                                 or null if no user is found.
      *
      * @throws \Orm\ValidationFailed If the token has expired
      */
@@ -317,6 +316,19 @@ class Model_User extends \Orm\Model
         }
 
         return $recoverable;
+    }
+
+    /**
+     * Generates a new random token for reset password and save the record
+     *
+     * @return bool
+     */
+    public function generate_reset_password_token()
+    {
+        $this->reset_password_token = Warden::generate_token();
+        $this->reset_password_sent_at = \DB::expr('CURRENT_TIMESTAMP');
+
+        return $this->save(false);
     }
 
     /**
@@ -370,19 +382,6 @@ class Model_User extends \Orm\Model
     public function _event_after_save()
     {
         unset($this->password);
-    }
-
-    /**
-     * Generates a new random token for reset password
-     *
-     * @return string The reset password token
-     */
-    protected function generate_reset_password_token()
-    {
-        $this->reset_password_token = Warden::generate_token();
-        $this->reset_password_sent_at = \DB::expr('CURRENT_TIMESTAMP');
-        
-        return $this->reset_password_token;
     }
 
     /**
