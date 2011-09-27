@@ -23,3 +23,5 @@ Autoloader::add_classes(array(
     'Warden\\Model_Role'          => __DIR__.'/classes/warden/model/role.php',
     'Warden\\Observer_Timestamps' => __DIR__.'/classes/warden/observer/timestamps.php',
 ));
+
+Config::load('warden', true);

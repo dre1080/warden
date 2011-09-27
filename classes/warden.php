@@ -37,7 +37,6 @@ class Warden
      */
     public static function _init()
     {
-        \Config::load('warden', true);
         static::check();
     }
 
