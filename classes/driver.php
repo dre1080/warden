@@ -227,7 +227,7 @@ class Warden_Driver
         if (\Config::get('warden.trackable')) {
             $user->update_tracked_fields();
         } else {
-            $user->save();
+            $user->save(false);
         }
 
         \Session::set('warden.authenticity_token', $user->authentication_token);
