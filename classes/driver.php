@@ -220,6 +220,13 @@ class Warden_Driver
         // Delete the session identifier for the user
         \Session::delete('authenticity_token');
 
+        // Delete http server variables
+        if ($this->config['http_authenticatable']['in_use']) {
+            unset($_SERVER['PHP_AUTH_USER'],
+                  $_SERVER['PHP_AUTH_PW'],
+                  $_SERVER['PHP_AUTH_DIGEST']);
+        }
+
         if (\Cookie::get('remember_token')) {
             // Delete the remember-me cookie to prevent re-login
             \Cookie::delete('remember_token');
