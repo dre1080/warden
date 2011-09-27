@@ -3,7 +3,15 @@
 A user database authorization package for FuelPHP.
 Handles user login and logout, as well as secure password hashing.
 
-This package requires the FuelPHP ORM package.
+## Why use BCrypt?
+
+http://yorickpeterse.com/articles/use-bcrypt-fool
+
+## Requirements
+
+Packages:
+
++ Orm (https://github.com/fuel/orm)
 
 ## Installation
 
