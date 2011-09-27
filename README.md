@@ -26,7 +26,7 @@ It relies on the following table structures:
      PRIMARY KEY (`id`),
      UNIQUE KEY `index_users_on_email` (`email`),
      UNIQUE KEY `index_users_on_username` (`username`)
-    ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COMMENT='User account details';
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User account details';
 
 The following fields: `sign_in_count`, `current_sign_in_at`, `last_sign_in_at`, `current_sign_in_ip`, `last_sign_in_ip` are optional, view config file in `config/warden.php` for more details on these columns.
 
