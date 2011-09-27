@@ -374,11 +374,15 @@ class Model_User extends \Orm\Model
 
     /**
      * Generates a new random token for reset password
+     *
+     * @return string The reset password token
      */
     protected function generate_reset_password_token()
     {
         $this->reset_password_token = Warden::generate_token();
         $this->reset_password_sent_at = \DB::expr('CURRENT_TIMESTAMP');
+        
+        return $this->reset_password_token;
     }
 
     /**

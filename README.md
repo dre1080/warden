@@ -117,5 +117,5 @@ More examples are in the doc comments for each method.
 + Caching support (APC, Memcached)
 + User and Session Controllers + Views
 + User account confirmation
-+ User password resetting
++ ~~User password resetting~~
 + Http auth support
