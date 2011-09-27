@@ -21,6 +21,8 @@ return array(
     /**
      * Set the remember-me cookie lifetime, in seconds. The default
      * lifetime is two weeks.
+     *
+     * (integer)
      */
     'lifetime' => 1209600,
 
@@ -33,6 +35,17 @@ return array(
      *   - last_sign_in_at    - Holds the timestamp of the previous sign in
      *   - current_sign_in_ip - The remote ip updated when the user sign in
      *   - last_sign_in_at    - Holds the remote ip of the previous sign in
+     *
+     * (bool)
      */
-    'trackable' => true
+    'trackable' => true,
+
+    /**
+     * Set the default role a newly created user has, it must already exist,
+     * Set to `null` to disable. This role is also used by Warden's driver as
+     * a default when checking if a user is logged in.
+     *
+     * (string|null)
+     */
+    'default_role' => null
 );

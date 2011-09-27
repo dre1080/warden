@@ -20,9 +20,18 @@ namespace Warden;
  */
 class Warden_Driver
 {
-    // Configuration
+    /**
+     * Configuration
+     *
+     * @var array
+     */
     protected $config;
 
+    /**
+     * Current logged in user
+     *
+     * @var \Warden\Model_User
+     */
     protected $user;
 
     /**
@@ -63,7 +72,7 @@ class Warden_Driver
             }
         }
 
-        return $this->has_access($role ? $role : 'user', $this->user);
+        return $this->has_access($role ? $role : $this->config['default_role'], $this->user);
     }
 
     /**
@@ -224,7 +233,7 @@ class Warden_Driver
         // Create and set new authentication token
         $user->authentication_token = Warden::generate_token();
 
-        if (\Config::get('warden.trackable')) {
+        if ($this->config['trackable'] === true) {
             $user->update_tracked_fields();
         } else {
             $user->save(false);

@@ -321,6 +321,8 @@ class Model_User extends \Orm\Model
      * Also downcases and trims username and email.
      *
      * @return void
+     * 
+     * @todo FIX ME! REFACTOR THIS CODE
      */
     public function _event_before_save()
     {
@@ -352,8 +354,20 @@ class Model_User extends \Orm\Model
             throw $ex;
         }
 
+        // Make sure no roles exist already
         if (empty($this->roles) || !static::query()->related('roles')->get_one()) {
-            $this->roles[] = Model_Role::find(1);
+            // Check for default role
+            if (($default_role = \Config::get('warden.default_role'))) {
+                $role = Model_Role::find('first', array(
+                    'where' => array(
+                        'name' => $default_role
+                    )
+                ));
+
+                if (!is_null($role)) {
+                    $this->roles[] = $role;
+                }
+            }
         }
     }
 
