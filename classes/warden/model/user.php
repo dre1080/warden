@@ -321,54 +321,19 @@ class Model_User extends \Orm\Model
      * Also downcases and trims username and email.
      *
      * @return void
-     * 
-     * @todo FIX ME! REFACTOR THIS CODE
      */
     public function _event_before_save()
     {
-        if (!empty($this->password)) {
-            if (\Str::length($this->password) < 6) {
-                throw new \Orm\ValidationFailed('Password is too short (minimum is 6 characters)');
-            } elseif (\Str::length($this->password) > 128) {
-                throw new \Orm\ValidationFailed('Password is too long (maximum is 128 characters)');
-            }
-
-            $this->encrypted_password = Warden::instance()->encrypt_password($this->password);
-        }
-
-        if (empty($this->encrypted_password)) {
-            throw new \Orm\ValidationFailed('Password is required');
-        }
-
-        // Let's not do unnecessary database queries
-        // Validation will take care of required fields
-        if (!$this->is_changed('username') && !$this->is_changed('email')) {
-            return;
-        }
-
         $this->_strip_and_downcase_username_and_email();
 
         try {
+            $this->_ensure_and_validate_password();
             $this->_username_or_email_exists();
         } catch(\Orm\ValidationFailed $ex) {
             throw $ex;
         }
 
-        // Make sure no roles exist already
-        if (empty($this->roles) || !static::query()->related('roles')->get_one()) {
-            // Check for default role
-            if (($default_role = \Config::get('warden.default_role'))) {
-                $role = Model_Role::find('first', array(
-                    'where' => array(
-                        'name' => $default_role
-                    )
-                ));
-
-                if (!is_null($role)) {
-                    $this->roles[] = $role;
-                }
-            }
-        }
+        $this->_add_default_role();
     }
 
     /**
@@ -408,12 +373,19 @@ class Model_User extends \Orm\Model
     /**
      * Tests if a username or email exists in the database.
      *
+     * @return void
+     *
      * @see \Warden\Model_User::_event_before_save()
      *
      * @throws \Orm\ValidationFailed If the user is found in the database
      */
     private function _username_or_email_exists()
     {
+        // Let's not do unnecessary database queries
+        if (!$this->is_changed('username') && !$this->is_changed('email')) {
+            return;
+        }
+
         $user = \DB::select('email')
                 ->from(static::table())
                 ->where('email', '=', $this->email)
@@ -445,6 +417,52 @@ class Model_User extends \Orm\Model
 
         if (!empty($this->email)) {
             $this->email = \Str::lower(trim($this->email));
+        }
+    }
+
+    /**
+     * Validates a user password & ensures an encrypted password is set
+     *
+     * @see \Warden\Model_User::_event_before_save()
+     */
+    private function _ensure_and_validate_password()
+    {
+        if (!empty($this->password)) {
+            if (\Str::length($this->password) < 6) {
+                throw new \Orm\ValidationFailed('Password is too short (minimum is 6 characters)');
+            } elseif (\Str::length($this->password) > 128) {
+                throw new \Orm\ValidationFailed('Password is too long (maximum is 128 characters)');
+            }
+
+            $this->encrypted_password = Warden::instance()->encrypt_password($this->password);
+        }
+
+        if (empty($this->encrypted_password)) {
+            throw new \Orm\ValidationFailed('Password is required');
+        }
+    }
+
+    /**
+     * Adds default role to a new user if enabled in config
+     *
+     * @see \Warden\Model_User::_event_before_save()
+     */
+    private function _add_default_role()
+    {
+        // Make sure no roles exist already
+        if (empty($this->roles) || !static::query()->related('roles')->get_one()) {
+            // Check for default role
+            if (($default_role = \Config::get('warden.default_role'))) {
+                $role = Model_Role::find('first', array(
+                    'where' => array(
+                        'name' => $default_role
+                    )
+                ));
+
+                if (!is_null($role)) {
+                    $this->roles[] = $role;
+                }
+            }
         }
     }
 }
