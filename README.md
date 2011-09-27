@@ -24,7 +24,22 @@ Packages:
 
 ## Installation
 
-It relies on the following table structures:
+This package follows standard installation rules, which can be found within the [FuelPHP Documentation for Packages] (http://fuelphp.com/docs/general/packages.html)
+
+You have two options you can autoload the package in your `app/config.php`:
+
+    'always_load'	=> array(
+        'packages'	=> array(
+            array('warden')
+        ),
+    ) //...
+
+or load it manually like so
+
+    Fuel::add_package('warden');
+
+
+In addition it relies on the following table structures:
 
     CREATE TABLE `users` (
      `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique user ID',
