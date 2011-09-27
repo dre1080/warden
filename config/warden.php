@@ -84,5 +84,41 @@ return array(
          * (string)
          */
         'reset_password_within' => '+1 week'
+    ),
+
+    /**
+     * Http authenticatable provides basic and digest authentication
+     * based on the HTTP protocol.
+     */
+    'http_authenticatable' => array(
+        /**
+         * Set to false, to disable
+         *
+         * (bool)
+         */
+        'in_use'   => true,
+
+        /**
+         * The type of Http method to use for authentication.
+         * Default is digest.
+         * To use Basic authentication, set to basic.
+         *
+         * (string)
+         */
+        'method' => 'digest',
+
+        /**
+         * Default is 'Protected by Warden'
+         */
+        'realm'  => 'Protected by Warden',
+
+        /**
+         * The users to permit.
+         *
+         * (array) key => value pair of username => password
+         */
+        'users' => array(
+            'warden' => 'warden'
+        )
     )
 );

@@ -140,6 +140,21 @@ class Warden_Driver
     }
 
     /**
+     * Logs a user in using Http based authentication
+     *
+     * @return  bool
+     */
+    public function http_authenticate_user()
+    {
+        if (!$this->config['http_authenticatable']['in_use']) {
+            return false;
+        }
+
+        $method = "_http_{$this->config['http_authenticatable']['method']}";
+        return $this->{$method}(\Response::forge(null, 401));
+    }
+
+    /**
      * Gets the currently logged in user from the session.
      * Returns FALSE if no user is currently logged in.
      *
@@ -246,5 +261,68 @@ class Warden_Driver
         $this->user = $user;
 
         return true;
+    }
+
+    /**
+    * Handler for HTTP Basic Authentication
+    *
+    * @return void
+    */
+    private function _http_basic(\Response $response)
+    {
+        $users = $this->config['http_authenticatable']['users'];
+        $username = \Input::server('PHP_AUTH_USER');
+        $password = \Input::server('PHP_AUTH_PW');
+
+        if (!isset($users[$username]) || $users[$username] !== $password) {
+            $response->set_header('WWW-Authenticate', "Basic realm=\"{$this->config['http_authenticatable']['realm']}\"");
+            $response->send_headers();
+            exit('You must enter a valid username and password');
+        }
+
+        return array('username' => $username, 'password' => $password);
+    }
+
+    /**
+    * Handler for HTTP Digest Authentication
+    *
+    * @return void
+    */
+    private function _http_digest(\Response $response)
+    {
+        $realm = $this->config['http_authenticatable']['realm'];
+
+        $data = array(
+            'username' => null, 'nonce' => null, 'nc' => null,
+            'cnonce'   => null, 'qop'  => null, 'uri' => null,
+            'response' => null
+        );
+
+        foreach (explode(',', \Input::server('PHP_AUTH_DIGEST')) as $string) {
+            $parts = explode('=', trim($string), 2) + array('', '');
+            $data[$parts[0]] = trim($parts[1], '"');
+        }
+
+        $users = $this->config['http_authenticatable']['users'];
+        $password = !empty($users[$data['username']]) ? $users[$data['username']] : null;
+
+        $user = md5("{$data['username']}:{$realm}:{$password}");
+        $nonce = "{$data['nonce']}:{$data['nc']}:{$data['cnonce']}:{$data['qop']}";
+        $req = md5(\Input::server('REQUEST_METHOD').':'.$data['uri']);
+        $hash = md5("{$user}:{$nonce}:{$req}");
+
+        if (!$data['username'] || $hash !== $data['response']) {
+            \Session::set('http_authenticated', true);
+
+            $nonce = uniqid();
+            $opaque = md5($realm);
+
+            $header_value = "Digest realm=\"{$realm}\",qop=\"auth\", nonce=\"{$nonce}\",opaque=\"{$opaque}\"";
+            $response->set_header('WWW-Authenticate', $header_value);
+            $response->send_headers();
+            exit('You must enter a valid username and password');
+        }
+
+        return array('username' => $data['username'], 'password' => $password);
     }
 }

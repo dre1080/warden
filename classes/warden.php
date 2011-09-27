@@ -23,7 +23,7 @@ class Warden
     /**
      * Warden driver
      *
-     * @var Warden\Warden_Driver
+     * @var \Warden\Warden_Driver
      */
     public $driver;
 
@@ -109,9 +109,9 @@ class Warden
      * }
      * </code>
      *
-     * @param   string   role name
+     * @param string $role The role name (optional)
      *
-     * @return  bool Returns true on success or false on failure
+     * @return bool Returns true on success or false on failure
      */
     public static function logged_in($role = null)
     {
@@ -181,9 +181,9 @@ class Warden
      * }
      * </code>
      *
-     * @param   string  $username_or_email The username or email to log in
-     * @param   string  $password          The password to check against
-     * @param   bool    $remember          Whether to set remember-me cookie
+     * @param  string $username_or_email The username or email to log in
+     * @param  string $password          The password to check against
+     * @param  bool   $remember          Whether to set remember-me cookie
      *
      * @return  bool Returns true on success or false on failure
      */
@@ -194,6 +194,24 @@ class Warden
         }
 
         return static::instance()->driver->authenticate_user($username_or_email, $password, $remember);
+    }
+
+    /**
+     * Attempt to log in a user by using an http based authentication method.
+     *
+     * <code>
+     * if (Warden::http_authenticate_user()) {
+     *      Session::set_flash('success', 'Logged in successfully');
+     * } else {
+     *      Session::set_flash('error', 'Invalid user');
+     * }
+     * </code>
+     *
+     * @return bool Returns true on success or false on failure
+     */
+    public static function http_authenticate_user()
+    {
+        return static::instance()->driver->http_authenticate_user();
     }
 
     /**
@@ -223,7 +241,7 @@ class Warden
      * }
      * </code>
      *
-     * @param  mixed   $username username
+     * @param mixed $username The user's username
      *
      * @return bool
      */
@@ -241,7 +259,7 @@ class Warden
      * }
      * </code>
      *
-     * @param  bool $destroy completely destroy the session
+     * @param bool $destroy completely destroy the session
      *
      * @return bool
      */
@@ -253,7 +271,7 @@ class Warden
     /**
      * Encrypts a user password using the Blowfish algo
      *
-     * @param  string $password The plaintext password
+     * @param string $password The plaintext password
      *
      * @return string The hashed password string
      */
@@ -267,8 +285,8 @@ class Warden
     /**
      * Checks that a submitted password matches the users password
      *
-     * @param  \Warden\Model_User $user
-     * @param  string             $submitted_password
+     * @param \Warden\Model_User $user
+     * @param string             $submitted_password
      *
      * @return bool
      */
