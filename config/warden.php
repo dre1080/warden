@@ -118,7 +118,7 @@ return array(
          * (array) key => value pair of username => password
          */
         'users' => array(
-            'warden' => 'warden'
+            //'warden' => 'warden'
         ),
 
         /**
