@@ -60,6 +60,8 @@ return array(
 
     /**
      * Recoverable takes care of resetting the user password.
+     *
+     * It requires the following column: `reset_password_token`
      */
     'recoverable' => array(
         /**
@@ -75,12 +77,13 @@ return array(
 
         /**
          * The limit time within which the reset password token is valid.
+         * Default is null, which means no limit
          *
          * It requires the following column: `reset_password_sent_at`
          *
          * @uses strtotime()
          * @see  http://php.net/manual/en/function.strtotime.php
          */
-        'reset_password_within' => 'now'
+        'reset_password_within' => null
     )
 );

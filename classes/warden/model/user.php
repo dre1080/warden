@@ -111,6 +111,18 @@ class Model_User extends \Orm\Model
                 'last_sign_in_ip'    => array('default' => 0),
             ));
         }
+
+        if (\Config::get('warden.recoverable.in_use', false)) {
+            static::$_properties = array_merge(static::$_properties, array(
+                'reset_password_token' => array('default' => null)
+            ));
+
+            if (\Config::get('warden.recoverable.reset_password_within', false)) {
+                static::$_properties = array_merge(static::$_properties, array(
+                    'reset_password_sent_at' => array('default' => '0000-00-00 00:00:00')
+                ));
+            }
+        }
     }
 
     /**
@@ -180,10 +192,10 @@ class Model_User extends \Orm\Model
 
     /**
      * Creates an anonymous user. An anonymous user is basically an auto-generated
-     * {@link Model_User} account that is created behind the scenes and its
+     * {@link \Warden\Model_User} account that is created behind the scenes and its
      * completely transparent.
      *
-     * All "guests" must have a {@link Model_User} so this is necessary
+     * All "guests" must have a {@link \Warden\Model_User} so this is necessary
      * (eg. when adding to the "cart" and before the customer has a chance to
      * provide an email or to register).
      *
@@ -224,57 +236,6 @@ class Model_User extends \Orm\Model
     }
 
     /**
-     * Fetch the login form for a user
-     *
-     * @return string
-     */
-    public static function login_form()
-    {
-        static $user = null;
-
-        $user || $user = new static();
-
-        $fieldset = Fieldset::forge('user');
-
-        // Add the fields
-        $fieldset->add('session[username]', 'Username', array('type' => 'text'));
-        $fieldset->add('session[password]', 'Password', array('type' => 'password'));
-        $fieldset->add('commit', '', array('value' => 'Login', 'type' => 'submit'));
-
-        // Populate with your $user instance and second param is true to use POST
-        // to overwrite those values when available
-        $fieldset->populate($user, true);
-
-        return $fieldset;
-    }
-
-    /**
-     * Fetch the signup form for a user
-     *
-     * @return string
-     */
-    public static function signup_form()
-    {
-        static $user = null;
-
-        $user || $user = new static();
-
-        $fieldset = Fieldset::forge('user');
-
-        // Add the fields
-        $fieldset->add('user[username]', 'Username', array('type' => 'text'));
-        $fieldset->add('user[email]', 'Email', array('type' => 'text'));
-        $fieldset->add('user[password]', 'Password', array('type' => 'password'));
-        $fieldset->add('commit', '', array('value' => 'Sign up', 'type' => 'submit'));
-
-        // Populate with your $user instance and second param is true to use POST
-        // to overwrite those values when available
-        $fieldset->populate($user, true);
-
-        return $fieldset;
-    }
-
-    /**
      * Track information about user sign ins. It tracks the following columns:
      *
      * - sign_in_count      - Increased every time a sign in is made (by form, openid, oauth)
@@ -312,6 +273,21 @@ class Model_User extends \Orm\Model
         $this->current_sign_in_ip = $new_current;
 
         $this->sign_in_count += 1;
+
+        return $this->save(false);
+    }
+
+    /**
+     * Update password saving the record and clearing token.
+     *
+     * @param string $new_password The new plaintext password to set
+     *
+     * @return bool
+     */
+    public function reset_password($new_password)
+    {
+        $this->password = $new_password;
+        $this->reset_password_token = null;
 
         return $this->save(false);
     }
