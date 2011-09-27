@@ -1,7 +1,16 @@
 # Warden
 
 A user database authorization package for FuelPHP.
-Handles user login and logout, as well as secure password hashing.
+
+Features:
+
++ Secure BCrypt password hashing
++ User login
++ User logout
++ User ACL
++ Remember-me functionality
++ Reset-password functionality
+and many more to come
 
 ## Why use BCrypt?
 
