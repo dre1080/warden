@@ -477,8 +477,6 @@ class Model_User extends \Orm\Model
         if (!empty($this->password)) {
             if (\Str::length($this->password) < 6) {
                 throw new \Orm\ValidationFailed('Password is too short (minimum is 6 characters)');
-            } elseif (\Str::length($this->password) > 128) {
-                throw new \Orm\ValidationFailed('Password is too long (maximum is 128 characters)');
             }
 
             $this->encrypted_password = Warden::instance()->encrypt_password($this->password);
