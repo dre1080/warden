@@ -325,6 +325,10 @@ class Model_User extends \Orm\Model
      */
     public function generate_reset_password_token()
     {
+        if (!is_null($this->reset_password_token) && $this->is_reset_password_period_valid()) {
+            return true;
+        }
+
         $this->reset_password_token = Warden::generate_token();
         $this->reset_password_sent_at = \DB::expr('CURRENT_TIMESTAMP');
 
