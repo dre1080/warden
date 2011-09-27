@@ -61,29 +61,36 @@ return array(
     /**
      * Recoverable takes care of resetting the user password.
      *
-     * It requires the following column: `reset_password_token`
+     * It requires the following columns:
+     * 
+     *   - `reset_password_token`
+     *   - `reset_password_sent_at`
      */
     'recoverable' => array(
         /**
          * Set to false, to disable
+         *
+         * (bool)
          */
         'in_use'   => true,
 
         /**
          * The keys you want to use when recovering the password for an account.
          * Eg. array('email', 'username')
+         *
+         * (array of strings)
          */
-        'reset_password_keys'   => array(),
+        'reset_password_keys'   => array(
+            'email'
+        ),
 
         /**
          * The limit time within which the reset password token is valid.
-         * Default is null, which means no limit
+         * Must always be an integer value.
+         * Default is '0', which means no limit (always valid).
          *
-         * It requires the following column: `reset_password_sent_at`
-         *
-         * @uses strtotime()
-         * @see  http://php.net/manual/en/function.strtotime.php
+         * (integer)
          */
-        'reset_password_within' => null
+        'reset_password_within' => 0
     )
 );

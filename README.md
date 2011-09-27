@@ -16,6 +16,8 @@ It relies on the following table structures:
      `encrypted_password` varbinary(60) NOT NULL COMMENT 'Encryption of the user password',
      `authentication_token` varbinary(60) DEFAULT NULL COMMENT 'Session authentication token',
      `remember_token` varbinary(60) DEFAULT NULL COMMENT 'Cookie remember token',
+     `reset_password_token` varbinary(60) DEFAULT NULL COMMENT 'Reset password token',
+     `reset_password_sent_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'When the reset password token was sent',
      `sign_in_count` int(11) unsigned NOT NULL COMMENT 'Increased every time a sign in is made',
      `current_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'A timestamp updated when the user signs in',
      `last_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Holds the timestamp of the previous sign in',
@@ -28,7 +30,7 @@ It relies on the following table structures:
      UNIQUE KEY `index_users_on_username` (`username`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User account details';
 
-The following fields: `sign_in_count`, `current_sign_in_at`, `last_sign_in_at`, `current_sign_in_ip`, `last_sign_in_ip` are optional, view config file in `config/warden.php` for more details on these columns.
+The following fields: `reset_password_sent_at`, `reset_password_token`, `sign_in_count`, `current_sign_in_at`, `last_sign_in_at`, `current_sign_in_ip`, `last_sign_in_ip` are optional, view config file in `config/warden.php` for more details on these columns.
 
 
     CREATE TABLE `roles` (

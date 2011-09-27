@@ -114,14 +114,9 @@ class Model_User extends \Orm\Model
 
         if (\Config::get('warden.recoverable.in_use', false)) {
             static::$_properties = array_merge(static::$_properties, array(
-                'reset_password_token' => array('default' => null)
+                'reset_password_token' => array('default' => null),
+                'reset_password_sent_at' => array('default' => '0000-00-00 00:00:00')
             ));
-
-            if (\Config::get('warden.recoverable.reset_password_within', false)) {
-                static::$_properties = array_merge(static::$_properties, array(
-                    'reset_password_sent_at' => array('default' => '0000-00-00 00:00:00')
-                ));
-            }
         }
     }
 
@@ -287,9 +282,62 @@ class Model_User extends \Orm\Model
     public function reset_password($new_password)
     {
         $this->password = $new_password;
-        $this->reset_password_token = null;
+        $this->clear_reset_password_token();
 
         return $this->save(false);
+    }
+
+    /**
+     * Attempt to find a user by it's reset_password_token to reset its
+     * password. If a user is found and token is still valid, reset its password and automatically
+     * try saving the record. If not user is found, returns a new user
+     * containing an error in reset_password_token attribute.
+     *
+     * @param string $reset_password_token
+     * @param string $new_password
+     *
+     * @return \Warden\Model_User|null Returns a user if found, null otherwise
+     *
+     * @throws \Orm\ValidationFailed If the token has expired
+     */
+    public static function reset_password_by_token($reset_password_token, $new_password)
+    {
+        $recoverable = static::find('first', array(
+            'where' => array(
+               'reset_password_token' => $reset_password_token
+            )
+        ));
+
+        if (!is_null($recoverable)) {
+            if ($recoverable->is_reset_password_period_valid()) {
+                $recoverable->reset_password($new_password);
+            } else {
+                throw new \Orm\ValidationFailed('Reset password token has expired, please request a new one.');
+            }
+        }
+
+        return $recoverable;
+    }
+
+    /**
+     * Checks if the reset password token sent is within the limit time.
+     *
+     * <code>
+     * \Config::set('warden.reset_password_within', 86400);
+     * $user->reset_password_sent_at = \Date::time()->format('mysql');
+     * $user->is_reset_password_period_valid(); // returns true
+     * </code>
+     *
+     * @return bool Returns true if the user is not responding to reset_password_sent_at at all.
+     */
+    public function is_reset_password_period_valid()
+    {
+        if (!isset(static::$_properties['reset_password_sent_at'])) {
+            return true;
+        }
+
+        return (($this->reset_password_sent_at != static::$_properties['reset_password_sent_at']['default']) &&
+                (strtotime($this->reset_password_sent_at) >= \Config::get('warden.recoverable.reset_password_within')));
     }
 
     /**
@@ -297,6 +345,8 @@ class Model_User extends \Orm\Model
      * Also downcases and trims username and email.
      *
      * @return void
+     *
+     * @throws \Orm\ValidationFailed
      */
     public function _event_before_save()
     {
@@ -320,6 +370,24 @@ class Model_User extends \Orm\Model
     public function _event_after_save()
     {
         unset($this->password);
+    }
+
+    /**
+     * Generates a new random token for reset password
+     */
+    protected function generate_reset_password_token()
+    {
+        $this->reset_password_token = Warden::generate_token();
+        $this->reset_password_sent_at = \DB::expr('CURRENT_TIMESTAMP');
+    }
+
+    /**
+     * Removes reset password token
+     */
+    protected function clear_reset_password_token()
+    {
+        $this->reset_password_token = null;
+        $this->reset_password_sent_at = static::$_properties['reset_password_sent_at']['default'];
     }
 
     /**
