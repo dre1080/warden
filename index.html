@@ -34,95 +34,94 @@
 
         <div id="description">
             <p class="lead">
-                Warden is a user database authorization package for FuelPHP. Handles user login and logout, as well as secure password hashing.<br />
-                It uses the Blowfish algorithm for password storage. Requires the FuelPHP ORM package. <br /><br />
+                Warden is a user database authorization package for FuelPHP.<br /><br />
                 <a href="https://github.com/dre1080/warden" class="btn danger large">Warden on GitHub</a>
             </p>
         </div>
 
         <div class="container">
 
-            <!-- Examples
+            <!-- Introduction
+            ================================================== -->
+            <section id="introduction">
+                <div class="page-header">
+                    <h1>Introduction</h1>
+                </div>
+
+                <div class="row">
+                    <div class="span16">
+                        <h3>Features</h3>
+                        <ul>
+                            <li>Secure BCrypt password hashing</li>
+                            <li>User login</li>
+                            <li>User logout</li>
+                            <li>User ACL</li>
+                            <li>Remember-me functionality</li>
+                            <li>Reset-password functionality and many more to come</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="span16">
+                        <h3>Why use BCrypt?</h3>
+                        <p>
+                            <a href="http://yorickpeterse.com/articles/use-bcrypt-fool">http://yorickpeterse.com/articles/use-bcrypt-fool</a>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Requirements
+            ================================================== -->
+            <section id="requirements">
+                <div class="page-header">
+                    <h1>Requirements <small>Wait! Before you start...</small></h1>
+                </div>
+
+                <div class="row">
+                    <div class="span16">
+                        <h3>Packages</h3>
+                        <ul>
+                            <li><a href="https://github.com/fuel/orm">Orm</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Installation
             ================================================== -->
             <section id="installation">
                 <div class="page-header">
-                    <h1>Installation <small>It relies on the following table structures</small></h1>
+                    <h1>Installation <small>Setting it up</small></h1>
                 </div>
 
                 <div class="row">
                     <div class="span16">
-                        <h3>Users table <small>User account details</small></h3>
                         <p>
-                            The following fields: <em>sign_in_count</em>, <em>current_sign_in_at</em>,
-                            <em>last_sign_in_at</em>, <em>current_sign_in_ip</em>, <em>last_sign_in_ip</em>
-                            are optional, view config file in <em>config/warden.php</em> for more details on these columns.
+                            This package follows standard installation rules, which can be found within the
+                            <a href="http://fuelphp.com/docs/general/packages.html">FuelPHP Documentation for Packages</a>
+                            You have two options you can autoload the package in your app/config.php:
                         </p>
-                        <pre class="prettyprint lang-sql">
-CREATE TABLE `users` (
- `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique user ID',
- `username` varchar(32) NOT NULL COMMENT 'User username',
- `email` varchar(255) NOT NULL COMMENT 'User email',
- `encrypted_password` varbinary(60) NOT NULL COMMENT 'Encryption of the user password',
- `authentication_token` varbinary(60) DEFAULT NULL COMMENT 'Session authentication token',
- `remember_token` varbinary(60) DEFAULT NULL COMMENT 'Cookie remember token',
- `sign_in_count` int(11) unsigned NOT NULL COMMENT 'Increased every time a sign in is made',
- `current_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'A timestamp updated when the user signs in',
- `last_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Holds the timestamp of the previous sign in',
- `current_sign_in_ip` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'The remote IP updated when the user sign in',
- `last_sign_in_ip` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Holds the remote IP of the previous sign in',
- `created_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'When the user account was created',
- `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'When the user account was last updated',
- PRIMARY KEY (`id`),
- UNIQUE KEY `index_users_on_email` (`email`),
- UNIQUE KEY `index_users_on_username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COMMENT='User account details';
+                        <pre class="prettyprint lang-php">
+'always_load' => array(
+    'packages'  => array(
+        array('warden')
+    ),
+) //...
                         </pre>
-                    </div>
-                </div><!-- /row -->
 
-                <div class="row">
-                    <div class="span16">
-                        <h3>Roles table <small>Allowed user roles</small></h3>
-                        <pre class="prettyprint lang-sql">
-CREATE TABLE `roles` (
- `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique role ID',
- `name` varchar(40) NOT NULL COMMENT 'The name of the role',
- `description` varchar(255) NOT NULL COMMENT 'The description of the role',
- PRIMARY KEY (`id`),
- UNIQUE KEY `index_roles_on_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT 'Allowed user roles';
-
-INSERT INTO `roles` (`id`, `name`, `description`) VALUES(1, 'user', 'Default login privileges, granted after account confirmation');
-INSERT INTO `roles` (`id`, `name`, `description`) VALUES(2, 'admin', 'Administrative user, has access to everything.');
+                        <p>or load it manually like so:</p>
+                        <pre class="prettyprint lang-php">
+Fuel::add_package('warden');
                         </pre>
-                    </div>
-                </div><!-- /row -->
 
-                <div class="row">
-                    <div class="span16">
-                        <h3>User-roles mapping table <small>User-role mapping</small></h3>
-                        <pre class="prettyprint lang-sql">
-CREATE TABLE `roles_users` (
- `role_id` int(11) unsigned NOT NULL COMMENT 'Unique role ID',
- `user_id` int(11) unsigned NOT NULL COMMENT 'Unique user ID',
- PRIMARY KEY (`role_id`,`user_id`),
- KEY `index_roles_users_on_user_id` (`user_id`),
- CONSTRAINT `fk_index_roles_users_on_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
- CONSTRAINT `fk_index_roles_users_on_role_id` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT 'User to role mapping';
-                        </pre>
-                    </div>
-                </div><!-- /row -->
-
-
-                <div class="row">
-                    <div class="span16">
                         <p>
-                            To change the table names all you have to do is extend any of the Warden models and add your custom table name and/or properties.
-                            All you have to do is create your roles in the roles table and assign roles to users. For more info see the FuelPHP ORM docs.
+                            View <em>config/install.sql</em> for table structures.
+                            Create your roles in the <em>roles</em> table to assign roles to users.
                         </p>
                     </div>
-                </div>
+                </div><!-- /row -->
             </section>
 
             <section id="configuration">
@@ -137,6 +136,13 @@ CREATE TABLE `roles_users` (
                             <ul>
                                 <li>(int) lifetime: The remember-me cookie lifetime, in seconds</li>
                                 <li>(bool) trackable: Set to track information about user sign ins</li>
+                                <li>
+                                    recoverable: Takes care of resetting the user password.
+                                    <ul>
+                                        <li>(bool) in_use: Set to false, to disable (default: true)</li>
+                                        <li>(string) reset_password_within: The limit time within which the reset password token is valid.</li>
+                                    </ul>
+                                </li>
                             </ul>
                         </p>
                     </div>
@@ -159,7 +165,7 @@ if (Warden::check()) {
 }
                         </pre>
                     </div>
-                </div>
+                </div><!-- /row -->
 
                 <div class="row">
                     <div class="span16">
@@ -171,7 +177,7 @@ if (Warden::check()) {
 }
                         </pre>
                     </div>
-                </div>
+                </div><!-- /row -->
 
                 <div class="row">
                     <div class="span16">
@@ -189,7 +195,7 @@ if (Warden::has_access(array('editor', 'moderator'), $user)) {
 }
                         </pre>
                     </div>
-                </div>
+                </div><!-- /row -->
 
                 <div class="row">
                     <div class="span16">
@@ -205,7 +211,7 @@ if (Input::method() === 'POST') {
 }
                         </pre>
                     </div>
-                </div>
+                </div><!-- /row -->
 
                 <div class="row">
                     <div class="span16">
@@ -216,29 +222,46 @@ if (Warden::logout()) {
 }
                         </pre>
                     </div>
-                </div>
-            </section>
+                </div><!-- /row -->
 
-            <section id="roadmap">
-                <div class="page-header">
-                    <h1>Roadmap <small>Where we're headed</small></h1>
-                </div>
-                <ul>
-                    <li>Bundle install task/method for migrations</li>
-                    <li>Caching support (APC, Memcached)</li>
-                    <li>User and Session Controllers + Views</li>
-                    <li>User account confirmation</li>
-                    <li>User password resetting</li>
-                    <li>Http auth support</li>
-                </ul>
-            </section>
+                <div class="row">
+                    <div class="span16">
+                        <h3>Resetting a user's password</h3>
+                        <pre class="prettyprint lang-php">
+// Sending the password token
+$user = Model_User::find('first', array('where' => array('email' => 'myemail@warden.net')));
+if (!is_null($user)) {
+    if ($user->generate_reset_password_token()) {
+        $token = $user->reset_password_token;
+        // mail it to the user with a link
+        // ...
+    }
+}
 
+// Resetting the password
+try {
+    $user = Model_User::reset_password_by_token(\Input::get('reset_password_token'), 'new_password');
+
+    if (!is_null($user)) {
+        echo 'Success!';
+    } else {
+        echo 'Not a valid user';
+    }
+} catch (\Orm\ValidationFailed $ex) {
+    // reset password token has expired
+    echo $ex->getMessage();
+}
+                        </pre>
+                    </div>
+                </div><!-- /row -->
+            </section>
 
         </div><!-- /container -->
 
         <footer class="footer">
             <div class="container">
                 <p class="pull-right"><a href="#">Back to top</a></p>
+                <p><a href="https://github.com/dre1080/warden">Warden on GitHub</a></p>
                 <p>
                     By <a href="http://twitter.com/heyinspire" target="_blank">@heyinspire</a>.<br />
                     Licensed under the <a href="http://www.opensource.org/licenses/mit-license.php" target="_blank">MIT License</a>.
