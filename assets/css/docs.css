@@ -25,6 +25,17 @@ section > .row {
     padding: 20px;
 }
 
+.upper-bar {
+  background-color: #049CD9;
+  background-repeat: no-repeat;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#004D9F), to(#049CD9));
+  background-image: -webkit-linear-gradient(#004D9F, #049CD9);
+  background-image: -moz-linear-gradient(#004D9F, #049CD9);
+  background-image: -o-linear-gradient(top, #004D9F, #049CD9);
+  background-image: -khtml-gradient(linear, left top, left bottom, from(#004D9F), to(#049CD9));
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#004D9F', endColorstr='#049CD9', GradientType=0);
+}
+
 /* Jumbotrons
 -------------------------------------------------- */
 .jumbotron {

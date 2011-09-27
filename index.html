@@ -22,6 +22,8 @@
 
     <body>
 
+        <div class="upper-bar">&nbsp;</div>
+
         <header class="jumbotron masthead">
             <div class="inner">
                 <div class="container">
@@ -58,9 +60,11 @@
                         <pre class="prettyprint lang-sql">
 CREATE TABLE `users` (
  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique user ID',
- `username` varchar(32) COLLATE utf8_unicode_ci NOT NULL COMMENT 'User username',
- `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'User email',
- `encrypted_password` varbinary(60) NOT NULL COMMENT 'Blowfish encryption of the user password',
+ `username` varchar(32) NOT NULL COMMENT 'User username',
+ `email` varchar(255) NOT NULL COMMENT 'User email',
+ `encrypted_password` varbinary(60) NOT NULL COMMENT 'Encryption of the user password',
+ `authentication_token` varbinary(60) DEFAULT NULL COMMENT 'Session authentication token',
+ `remember_token` varbinary(60) DEFAULT NULL COMMENT 'Cookie remember token',
  `sign_in_count` int(11) unsigned NOT NULL COMMENT 'Increased every time a sign in is made',
  `current_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'A timestamp updated when the user signs in',
  `last_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Holds the timestamp of the previous sign in',
@@ -71,27 +75,7 @@ CREATE TABLE `users` (
  PRIMARY KEY (`id`),
  UNIQUE KEY `index_users_on_email` (`email`),
  UNIQUE KEY `index_users_on_username` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'User account details';
-                        </pre>
-                    </div>
-                </div><!-- /row -->
-
-                <div class="row">
-                    <div class="span16">
-                        <h3>Users tokens table <small>User authentication tokens</small></h3>
-                        <pre class="prettyprint lang-sql">
-CREATE TABLE `user_tokens` (
- `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique token ID',
- `user_id` int(11) unsigned NOT NULL COMMENT 'Unique user ID the token belongs to',
- `token` varchar(32) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Unique token value',
- `user_agent` varbinary(40) NOT NULL COMMENT 'Hash of the user agent where the token was created',
- `expires` int(10) unsigned NOT NULL COMMENT 'Expiration time of the token',
- `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When the token was created',
- PRIMARY KEY (`id`),
- UNIQUE KEY `index_user_tokens_on_token` (`token`),
- KEY `index_user_tokens_on_user_id` (`user_id`),
- CONSTRAINT `fk_index_user_tokens_on_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'User authentication tokens';
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COMMENT='User account details';
                         </pre>
                     </div>
                 </div><!-- /row -->
@@ -102,9 +86,14 @@ CREATE TABLE `user_tokens` (
                         <pre class="prettyprint lang-sql">
 CREATE TABLE `roles` (
  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique role ID',
- `name` varchar(255) NOT NULL COMMENT 'The name of the role',
- PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'Allowed user roles';
+ `name` varchar(40) NOT NULL COMMENT 'The name of the role',
+ `description` varchar(255) NOT NULL COMMENT 'The description of the role',
+ PRIMARY KEY (`id`),
+ UNIQUE KEY `index_roles_on_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT 'Allowed user roles';
+
+INSERT INTO `roles` (`id`, `name`, `description`) VALUES(1, 'user', 'Default login privileges, granted after account confirmation');
+INSERT INTO `roles` (`id`, `name`, `description`) VALUES(2, 'admin', 'Administrative user, has access to everything.');
                         </pre>
                     </div>
                 </div><!-- /row -->
@@ -120,7 +109,7 @@ CREATE TABLE `roles_users` (
  KEY `index_roles_users_on_user_id` (`user_id`),
  CONSTRAINT `fk_index_roles_users_on_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
  CONSTRAINT `fk_index_roles_users_on_role_id` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT 'User to role mapping';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT 'User to role mapping';
                         </pre>
                     </div>
                 </div><!-- /row -->
