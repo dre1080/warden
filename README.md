@@ -110,6 +110,33 @@ Log out a user by removing the related session variables:
          echo "I'm logged out";
     }
 
+Resetting a user's password
+
+    // Sending the password token
+    $user = Model_User::find('first', array('where' => array('email' => 'myemail@warden.net')));
+    if (!is_null($user)) {
+        if ($user->generate_reset_password_token()) {
+            $token = $user->reset_password_token;
+            // mail it to the user with a link
+            // ...
+        }
+    }
+
+    // Resetting the password
+    try {
+        $user = Model_User::reset_password_by_token(\Input::get('reset_password_token'), 'new_password');
+
+        if (!is_null($user)) {
+            echo 'Success!';
+        } else {
+            echo 'Not a valid user';
+        }
+    } catch (\Orm\ValidationFailed $ex) {
+        // reset password token has expired
+        echo $ex->getMessage();
+    }
+
+
 More examples are in the doc comments for each method.
 
 ### ROADMAP
