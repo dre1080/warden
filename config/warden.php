@@ -56,7 +56,7 @@ return array(
      *
      * (bool)
      */
-    'trackable' => true,
+    'trackable' => false,
 
     /**
      * Recoverable takes care of resetting the user password.
@@ -72,7 +72,7 @@ return array(
          *
          * (bool)
          */
-        'in_use'   => true,
+        'in_use'   => false,
 
         /**
          * The limit time within which the reset password token is valid.
@@ -96,7 +96,7 @@ return array(
          *
          * (bool)
          */
-        'in_use'   => true,
+        'in_use'   => false,
 
         /**
          * The type of Http method to use for authentication.
@@ -128,26 +128,4 @@ return array(
          */
         'failure_text' => '<h1>401 Unauthorized</h1>'
     ),
-
-    /**
-     * Adds OAuth support
-     */
-    'omniauthable' => array(
-        /**
-         * Set to false, to disable
-         *
-         * (bool)
-         */
-        'in_use'   => false,
-
-        /**
-         * The providers that are available.
-         *
-         * (array)
-         */
-        'omniauth_providers' => array(
-            'facebook',
-            'twitter',
-        )
-    )
 );
