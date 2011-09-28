@@ -66,7 +66,15 @@
                     <div class="span16">
                         <h3>Why use BCrypt?</h3>
                         <p>
-                            <a href="http://yorickpeterse.com/articles/use-bcrypt-fool">http://yorickpeterse.com/articles/use-bcrypt-fool</a>
+                            If you store user passwords in the clear, then an attacker who steals a copy of your database has a giant list of emails and passwords.
+                            Some of your users will only have one password &mdash; for their email account, for their banking account, for your application.
+                            A simple hack could escalate into massive identity theft.
+                            It's your responsibility as a web developer to make your web application secure &mdash; blaming your users for not being security experts is not a professional response to risk.
+                            <em>BCrypt</em> allows you to easily harden your application against these kinds of attacks.
+                        </p>
+                        <p>
+                            <a href="http://codahale.com/how-to-safely-store-a-password" target="_blank">http://codahale.com/how-to-safely-store-a-password</a>
+                            <a href="http://yorickpeterse.com/articles/use-bcrypt-fool" target="_blank">http://yorickpeterse.com/articles/use-bcrypt-fool</a>
                         </p>
                     </div>
                 </div>
@@ -136,13 +144,25 @@ Fuel::add_package('warden');
                         <p>
                             For now, only config options are:
                             <ul>
-                                <li>(int) lifetime: The remember-me cookie lifetime, in seconds</li>
-                                <li>(bool) trackable: Set to track information about user sign ins</li>
+                                <li>(int) lifetime: The remember-me cookie lifetime, in seconds. (default: 1209600)</li>
+                                <li>(string) default_role: The default role to assign a newly created user, it must already exist. (default: null)</li>
+                                <li>(bool) trackable: Set to track information about user sign ins. (default: true)</li>
                                 <li>
                                     recoverable: Takes care of resetting the user password.
                                     <ul>
-                                        <li>(bool) in_use: Set to false, to disable (default: true)</li>
-                                        <li>(string) reset_password_within: The limit time within which the reset password token is valid.</li>
+                                        <li>(bool) in_use: Set to false, to disable. (default: true)</li>
+                                        <li>(string) reset_password_within: The limit time within which the reset password token is valid. (default: '+1 week')</li>
+                                    </ul>
+                                </li>
+
+                                <li>
+                                    http_authenticatable: provides basic and digest authentication.
+                                    <ul>
+                                        <li>(bool) in_use: Set to false, to disable. (default: true)</li>
+                                        <li>(string) method: The type of Http method to use for authentication. (default: 'digest')</li>
+                                        <li>(string) realm: (default: 'Protected by Warden')</li>
+                                        <li>(array) users: The users to permit.</li>
+                                        <li>(string) failure_text: The message to display on failure.</li>
                                     </ul>
                                 </li>
                             </ul>
@@ -210,6 +230,17 @@ if (Input::method() === 'POST') {
         Session::set_flash('error', 'Username or password invalid');
     }
     Response::redirect();
+}
+                        </pre>
+                    </div>
+                </div><!-- /row -->
+
+                <div class="row">
+                    <div class="span16">
+                        <h3>Log in a user using a http based authentication method</h3>
+                        <pre class="prettyprint lang-php">
+if (($user_array = Warden::http_authenticate_user())) {
+    echo "Welcome {$user_array['username']}";
 }
                         </pre>
                     </div>
