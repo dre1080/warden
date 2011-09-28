@@ -15,8 +15,8 @@ and many more to come
 
 ## Why use BCrypt?
 
-http://codahale.com/how-to-safely-store-a-password
-http://yorickpeterse.com/articles/use-bcrypt-fool
+[How To Safely Store A Password] (http://codahale.com/how-to-safely-store-a-password)
+[Use BCrypt Fool!] (http://yorickpeterse.com/articles/use-bcrypt-fool)
 
 ## Requirements
 
