@@ -11,6 +11,7 @@ Features:
 + Remember-me functionality
 + Reset-password functionality
 + Http authentication
++ oAuth support
 and many more to come
 
 ## Why use BCrypt?
