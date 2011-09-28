@@ -124,10 +124,8 @@ return array(
         /**
          * The message to display on failure
          *
-         * @todo move to lang file
-         *
          * (string)
          */
-        'failure_text' => 'You must enter a valid username and password'
+        'failure_text' => '<h1>401 Unauthorized</h1>'
     )
 );

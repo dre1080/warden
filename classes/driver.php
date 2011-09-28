@@ -151,7 +151,21 @@ class Warden_Driver
         }
 
         $method = "_http_{$this->config['http_authenticatable']['method']}";
-        return $this->{$method}(new \Response(null, 401));
+
+        $body = <<<BODY
+    <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+     "http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd">
+    <html>
+        <head>
+            <title>Error</title>
+            <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+        </head>
+        <body>
+            {$this->config['http_authenticatable']['failure_text']}
+        </body>
+    </html>
+BODY;
+        return $this->{$method}(new \Response($body, 401));
     }
 
     /**
@@ -283,8 +297,8 @@ class Warden_Driver
 
         if (!isset($users[$username]) || $users[$username] !== $password) {
             $response->set_header('WWW-Authenticate', "Basic realm=\"{$this->config['http_authenticatable']['realm']}\"");
-            $response->send_headers();
-            exit($this->config['http_authenticatable']['failure_text']);
+            $response->send();
+            exit;
         }
 
         return array('username' => $username, 'password' => $password);
@@ -326,8 +340,8 @@ class Warden_Driver
 
             $header_value = "Digest realm=\"{$realm}\",qop=\"auth\", nonce=\"{$nonce}\",opaque=\"{$opaque}\"";
             $response->set_header('WWW-Authenticate', $header_value);
-            $response->send_headers();
-            exit($this->config['http_authenticatable']['failure_text']);
+            $response->send();
+            exit;
         }
 
         return array('username' => $data['username'], 'password' => $password);
