@@ -47,7 +47,9 @@ class OmniAuth_Strategy_OAuth extends OmniAuth_Strategy
         $token = $provider->request_token($consumer);
 
         // Store the token
-        \Cookie::set('oauth_token', base64_encode(serialize($token)));
+        \Cookie::set('oauth_token',
+                     base64_encode(serialize($token)),
+                     null, null, null, null, true);
 
         // Redirect to the login page
         \Response::redirect($provider->authorize_url($token, array(

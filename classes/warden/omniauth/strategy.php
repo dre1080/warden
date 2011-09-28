@@ -87,13 +87,13 @@ abstract class OmniAuth_Strategy
 
                 // Attach this account to the logged in user
                 $service = new Model_Service(array(
+                    'user_id'       => $user_id,
                     'uid'           => $user_hash['credentials']['uid'],
                     'provider'      => $user_hash['credentials']['provider'],
                     'access_token'  => $user_hash['credentials']['token'],
                     'access_secret' => $user_hash['credentials']['secret']
                 ));
 
-                $service->user = Warden::current_user();
                 $service->save();
 
                 // Attachment went ok so we'll redirect
