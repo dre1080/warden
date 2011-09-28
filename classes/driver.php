@@ -112,7 +112,7 @@ class Warden_Driver
      * @param string $password
      * @param bool   $remember
      *
-     * @return  bool
+     * @return bool
      */
     public function authenticate_user($username_or_email, $password, $remember)
     {
@@ -142,7 +142,10 @@ class Warden_Driver
     /**
      * Logs a user in using Http based authentication
      *
-     * @return  bool
+     * @see \Warden\Warden_Driver::_http_basic()
+     * @see \Warden\Warden_Driver::_http_digest()
+     *
+     * @return array
      */
     public function http_authenticate_user()
     {
@@ -170,9 +173,9 @@ BODY;
 
     /**
      * Gets the currently logged in user from the session.
-     * Returns FALSE if no user is currently logged in.
      *
-     * @return  mixed
+     * @return mixed Returns FALSE if no user is currently logged in, otherwise
+     *               returns a \Warden\Model_User object.
      */
     public function current_user()
     {

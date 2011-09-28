@@ -181,11 +181,11 @@ class Warden
      * }
      * </code>
      *
-     * @param  string $username_or_email The username or email to log in
-     * @param  string $password          The password to check against
-     * @param  bool   $remember          Whether to set remember-me cookie
+     * @param string $username_or_email The username or email to log in
+     * @param string $password          The password to check against
+     * @param bool   $remember          Whether to set remember-me cookie
      *
-     * @return  bool Returns true on success or false on failure
+     * @return bool Returns true on success or false on failure
      */
     public static function authenticate_user($username_or_email, $password, $remember = false)
     {
@@ -200,14 +200,14 @@ class Warden
      * Attempt to log in a user by using an http based authentication method.
      *
      * <code>
-     * if (Warden::http_authenticate_user()) {
-     *      Session::set_flash('success', 'Logged in successfully');
-     * } else {
-     *      Session::set_flash('error', 'Invalid user');
+     * if (($user = Warden::http_authenticate_user())) {
+     *      Session::set_flash('success', "Logged in as {$user['username']}");
      * }
      * </code>
      *
-     * @return bool Returns true on success or false on failure
+     * @see \Warden\Warden_Driver::http_authenticate_user()
+     *
+     * @return array A key/value array of the username => value and password => value
      */
     public static function http_authenticate_user()
     {
