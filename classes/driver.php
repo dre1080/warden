@@ -297,7 +297,7 @@ BODY;
 
         if (!isset($users[$username]) || $users[$username] !== $password) {
             $response->set_header('WWW-Authenticate', "Basic realm=\"{$this->config['http_authenticatable']['realm']}\"");
-            $response->send();
+            $response->send(true);
             exit;
         }
 
@@ -333,14 +333,12 @@ BODY;
         $hash = md5("{$user}:{$nonce}:{$req}");
 
         if (!$data['username'] || $hash !== $data['response']) {
-            \Session::set('http_authenticated', true);
-
             $nonce = uniqid();
             $opaque = md5($realm);
-
             $header_value = "Digest realm=\"{$realm}\",qop=\"auth\", nonce=\"{$nonce}\",opaque=\"{$opaque}\"";
+
             $response->set_header('WWW-Authenticate', $header_value);
-            $response->send();
+            $response->send(true);
             exit;
         }
 
