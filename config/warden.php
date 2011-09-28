@@ -138,16 +138,72 @@ return array(
          *
          * (bool)
          */
-        'in_use'   => false,
+        'in_use'   => true,
+
+        /**
+         * The urls for omniauth
+         *
+         * (array)
+         */
+        'urls' => array(
+            'registration' => 'auth/register',
+            'login'        => 'auth/login',
+            'callback'     => 'auth/callback',
+            'registered'   => 'auth/account',
+            'logged_in'    => 'auth/account',
+        ),
 
         /**
          * The providers that are available.
          *
+         * Providers such as Facebook, Twitter, etc all use different Strategies such as oAuth, oAuth2, etc.
+         * oAuth takes a key and a secret, oAuth2 takes a (client) id and a secret, optionally a scope.
+         *
          * (array)
          */
-        'omniauth_providers' => array(
-            'facebook',
-            'twitter',
-        )
+        'providers' => array(
+            'facebook' => array(
+                'id' => '',
+                'secret' => '',
+                'scope' => 'email, offline_access',
+            ),
+
+            'twitter' => array(
+                'key' => 'VDX6hqBq0Dstgi2hooCeg',
+                'secret' => 'oRUvV7qY0GCUQMnWH41OJPDYKTSioab8z0Qt0FJg',
+                'client_options' => array(
+                    'ssl' => array(
+                        'verify' => false
+                    )
+                )
+            ),
+
+            'dropbox' => array(
+                'key' => '',
+                'secret' => '',
+            ),
+
+            'linkedin' => array(
+                'key' => '',
+                'secret' => '',
+            ),
+
+            'flickr' => array(
+                'key' => '',
+                'secret' => '',
+            ),
+
+            'youtube' => array(
+                'key' => '',
+                'scope' => 'http://gdata.youtube.com',
+            ),
+        ),
+
+        /**
+         * Whether multiple providers can be attached to one user account
+         *
+         * (bool)
+         */
+        'link_multiple' => true,
     )
 );

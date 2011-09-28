@@ -40,19 +40,28 @@ class Model_User extends \Orm\Model
     public $password;
 
     /**
+     * We need these to avoid an error in the \Warden\Model_User::_init() method:
+     * "Access to undeclared static property"
+     *
+     * @var array
+     */
+    protected static $_has_one = array();
+    protected static $_has_many = array();
+
+    /**
      * Many Many; relationship properties
      *
      * @var array
      */
     protected static $_many_many = array(
         'roles' => array(
-            'key_from' => 'id',
+            'key_from'         => 'id',
             'key_through_from' => 'user_id',
             'key_through_to'   => 'role_id',
-            'table_through' => 'roles_users',
-            'model_to' => '\Warden\Model_Role',
-            'key_to' => 'id',
-            'cascade_delete' => true,
+            'table_through'    => 'roles_users',
+            'model_to'         => '\Warden\Model_Role',
+            'key_to'           => 'id',
+            'cascade_delete'   => true,
         )
     );
 
@@ -102,7 +111,7 @@ class Model_User extends \Orm\Model
      */
     public static function _init()
     {
-        if (\Config::get('warden.trackable', false)) {
+        if (\Config::get('warden.trackable') === true) {
             static::$_properties = array_merge(static::$_properties, array(
                 'sign_in_count'      => array('default' => 0),
                 'current_sign_in_at' => array('default' => '0000-00-00 00:00:00'),
@@ -112,11 +121,27 @@ class Model_User extends \Orm\Model
             ));
         }
 
-        if (\Config::get('warden.recoverable.in_use', false)) {
+        if (\Config::get('warden.recoverable.in_use') === true) {
             static::$_properties = array_merge(static::$_properties, array(
                 'reset_password_token' => array('default' => null),
                 'reset_password_sent_at' => array('default' => '0000-00-00 00:00:00')
             ));
+        }
+
+        if (\Config::get('warden.omniauthable.in_use') === true) {
+            $relation = (\Config::get('warden.omniauthable.link_multiple', false)
+                      ? array('_has_many', 'services')
+                      : array('_has_one', 'service'));
+
+            static::${$relation[0]} = array(
+                $relation[1] => array(
+                    'key_from'       => 'id',
+                    'model_to'       => '\Warden\Model_Service',
+                    'key_to'         => 'user_id',
+                    'cascade_save'   => true,
+                    'cascade_delete' => true,
+                )
+            );
         }
     }
 
@@ -195,6 +220,7 @@ SQL;
                   ->execute()
                   ->current();
 
+
         return $record ? $record : null;
     }
 
@@ -256,7 +282,7 @@ SQL;
      */
     public function update_tracked_fields()
     {
-        if (!\Config::get('warden.trackable', false)) {
+        if (!\Config::get('warden.trackable') === true) {
             return true;
         }
 
@@ -376,24 +402,19 @@ SQL;
     }
 
     /**
-     * Event that tests if a username or email exists in the database.
-     * Also downcases and trims username and email.
+     * Event that does the following:
      *
-     * @return void
-     *
-     * @throws \Orm\ValidationFailed
+     * - tests if a username or email exists in the database.
+     * - downcases and trims username and email.
+     * - validates and ensures an encrypted password exists if the password has changed.
+     * - checks for unique fields.
+     * - adds a default role, if one was specified in the config file
      */
     public function _event_before_save()
     {
         $this->_strip_and_downcase_username_and_email();
-
-        try {
-            $this->_ensure_and_validate_password();
-            $this->_username_or_email_exists();
-        } catch(\Orm\ValidationFailed $ex) {
-            throw $ex;
-        }
-
+        $this->_ensure_and_validate_password();
+        $this->_username_or_email_exists();
         $this->_add_default_role();
     }
 
@@ -471,10 +492,11 @@ SQL;
    LIMIT 1
 SQL;
 
-        $user = \DB::query($sql)
+        $user = \DB::query($sql, \DB::SELECT)
+                ->as_assoc()
                 ->execute()
                 ->current();
-
+        
         if ($user != false) {
             if ($user['email'] === $this->email) {
                 throw new \Orm\ValidationFailed('Email address already exists');
