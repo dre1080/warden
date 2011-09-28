@@ -151,7 +151,7 @@ class Warden_Driver
         }
 
         $method = "_http_{$this->config['http_authenticatable']['method']}";
-        return $this->{$method}(\Response::forge(null, 401));
+        return $this->{$method}(new \Response(null, 401));
     }
 
     /**
