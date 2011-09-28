@@ -285,10 +285,10 @@ BODY;
     }
 
     /**
-    * Handler for HTTP Basic Authentication
-    *
-    * @return void
-    */
+     * Handler for HTTP Basic Authentication
+     *
+     * @return array A key/value array of the username => value and password => value
+     */
     private function _http_basic(\Response $response)
     {
         $users = $this->config['http_authenticatable']['users'];
@@ -305,10 +305,10 @@ BODY;
     }
 
     /**
-    * Handler for HTTP Digest Authentication
-    *
-    * @return void
-    */
+     * Handler for HTTP Digest Authentication
+     *
+     * @return array A key/value array of the username => value and password => value
+     */
     private function _http_digest(\Response $response)
     {
         $realm = $this->config['http_authenticatable']['realm'];
