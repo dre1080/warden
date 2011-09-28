@@ -127,5 +127,27 @@ return array(
          * (string)
          */
         'failure_text' => '<h1>401 Unauthorized</h1>'
+    ),
+
+    /**
+     * Adds OAuth support
+     */
+    'omniauthable' => array(
+        /**
+         * Set to false, to disable
+         *
+         * (bool)
+         */
+        'in_use'   => false,
+
+        /**
+         * The providers that are available.
+         *
+         * (array)
+         */
+        'omniauth_providers' => array(
+            'facebook',
+            'twitter',
+        )
     )
 );

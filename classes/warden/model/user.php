@@ -173,16 +173,29 @@ class Model_User extends \Orm\Model
             return null;
         }
 
-        $username_or_email = \Str::lower($username_or_email);
+        $username_or_email = \DB::escape(\Str::lower($username_or_email));
 
-        $user = static::find('first', array(
-            'where' => array(
-                'email' => $username_or_email,
-                array('username', '=', $username_or_email),
-            ),
-        ));
+        $table = static::table();
+        $properties = implode('`, `', array_keys(static::properties()));
 
-        return $user;
+        // Indices lose their speed advantage when using them in OR-situations
+        // so this is much faster than
+        // SELECT ... FROM ... WHERE email = 'foo' OR username = 'bar';
+        $sql = <<<SQL
+   (SELECT `$properties` FROM `$table`
+       WHERE `email` = $username_or_email)
+   UNION
+      (SELECT `$properties` FROM `$table`
+          WHERE `username` = $username_or_email)
+   LIMIT 1
+SQL;
+
+        $record = \DB::query($sql, \DB::SELECT)
+                  ->as_object('\Warden\Model_User')
+                  ->execute()
+                  ->current();
+
+        return $record ? $record : null;
     }
 
     /**
@@ -443,11 +456,22 @@ class Model_User extends \Orm\Model
             return;
         }
 
-        $user = \DB::select('email')
-                ->from(static::table())
-                ->where('email', '=', $this->email)
-                ->or_where('username', '=', $this->username)
-                ->limit(1)
+        $email    = \DB::escape(\Str::lower($this->email));
+        $username = \DB::escape(\Str::lower($this->username));
+
+        $table      = static::table();
+        $properties = implode('`, `', array_keys(static::properties()));
+
+        $sql = <<<SQL
+   (SELECT `email` FROM `$table`
+       WHERE `email` = $email)
+   UNION
+      (SELECT `email` FROM `$table`
+          WHERE `username` = $username)
+   LIMIT 1
+SQL;
+
+        $user = \DB::query($sql)
                 ->execute()
                 ->current();
 

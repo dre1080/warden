@@ -47,8 +47,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   -- `sign_in_count` int(11) unsigned NOT NULL COMMENT 'Increased every time a sign in is made',
   -- `current_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'A timestamp updated when the user signs in',
   -- `last_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Holds the timestamp of the previous sign in',
-  -- `current_sign_in_ip` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'The remote IP updated when the user sign in',
-  -- `last_sign_in_ip` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Holds the remote IP of the previous sign in',
+  -- `current_sign_in_ip` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'The remote IP updated when the user sign in',
+  -- `last_sign_in_ip` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Holds the remote IP of the previous sign in',
 
   `created_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'When the user account was created',
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'When the user account was last updated',
