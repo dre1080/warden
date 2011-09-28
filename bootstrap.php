@@ -16,6 +16,7 @@ require_once __DIR__.'/vendor/cryptlib/bootstrap.php';
 Autoloader::add_core_namespace('Warden');
 
 Autoloader::add_classes(array(
+    // Base Warden classes
     'Warden\\Warden'        => __DIR__.'/classes/warden.php',
     'Warden\\Warden_Driver' => __DIR__.'/classes/driver.php',
 
@@ -29,6 +30,7 @@ Autoloader::add_classes(array(
     // Controllers
     'Warden\\Controller_OmniAuth' => __DIR__.'/classes/warden/controller/omniauth.php',
 
+    // OmniAuth Support
     'Warden\\OmniAuth_Exception'       => __DIR__.'/classes/warden/omniauth/exception.php',
     'Warden\\OmniAuth_Strategy'  				  => __DIR__.'/classes/warden/omniauth/strategy.php',
     'Warden\\OmniAuth_Strategy_OAuth'  => __DIR__.'/classes/warden/omniauth/strategy/oauth.php',
