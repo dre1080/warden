@@ -11,6 +11,7 @@ Features:
 + Remember-me functionality
 + Reset-password functionality
 + Http authentication
++ oAuth support
 and many more to come
 
 ## Why use BCrypt?
@@ -23,7 +24,16 @@ and many more to come
 
 Packages:
 
-+ Orm (https://github.com/fuel/orm)
++ [Orm] (https://github.com/fuel/orm)
+
+If you're planning to use the `omniauthable` feature (OAuth), then the additional
+packages are needed:
+
++ [Fuel OAuth]  (https://github.com/fuel-packages/fuel-oauth)
++ [Fuel OAuth2] (https://github.com/fuel-packages/fuel-oauth2)
+
+The `omniauthable` feature uses [Fuel NinjAuth] (https://github.com/philsturgeon/fuel-ninjauth) internally, so you won't need to
+include it.
 
 ## Installation
 
@@ -59,6 +69,11 @@ For now, only config options are:
     + (string) `realm`: (default: 'Protected by Warden')
     + (array) `users`: The users to permit.
     + (string) `failure_text`: The message to display on failure.
++ `omniauthable`: provides OAuth support.
+    + (bool) `in_use`: Set to false, to disable (default: true)
+    + (array) `urls`: The urls to use for omniauth authentication.
+    + (array) `providers`: The providers that are available.
+    + (bool) `link_multiple`: Whether multiple providers can be attached to one user account.
 
 ## Usage
 
