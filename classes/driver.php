@@ -330,14 +330,14 @@ BODY;
         $users = $this->config['http_authenticatable']['users'];
         $password = !empty($users[$data['username']]) ? $users[$data['username']] : null;
 
-        $user = md5("{$data['username']}:{$realm}:{$password}");
+        $user  = md5("{$data['username']}:{$realm}:{$password}");
         $nonce = "{$data['nonce']}:{$data['nc']}:{$data['cnonce']}:{$data['qop']}";
-        $req = md5(\Input::server('REQUEST_METHOD').':'.$data['uri']);
-        $hash = md5("{$user}:{$nonce}:{$req}");
+        $req   = md5(\Input::server('REQUEST_METHOD').':'.$data['uri']);
+        $hash  = md5("{$user}:{$nonce}:{$req}");
 
         if (!$data['username'] || $hash !== $data['response']) {
-            $nonce = uniqid();
-            $opaque = md5($realm);
+            $nonce        = uniqid();
+            $opaque       = md5($realm);
             $header_value = "Digest realm=\"{$realm}\",qop=\"auth\", nonce=\"{$nonce}\",opaque=\"{$opaque}\"";
 
             $response->set_header('WWW-Authenticate', $header_value);
