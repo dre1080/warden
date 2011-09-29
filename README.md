@@ -114,7 +114,7 @@ Checking for a specific role:
 Log in a user by using a username or email and plain-text password:
 
     if (Input::method() === 'POST') {
-        if (Warden::authenticate_user(Input::post('username_or_email'), Input::post('password'))) {
+        if (Warden::authenticate(Input::post('username_or_email'), Input::post('password'))) {
             Session::set_flash('success', 'Logged in successfully');
         } else {
             Session::set_flash('error', 'Username or password invalid');
@@ -124,7 +124,7 @@ Log in a user by using a username or email and plain-text password:
 
 Log in a user using a http based authentication method:
 
-    if (($user_array = Warden::http_authenticate_user())) {
+    if (($user_array = Warden::http_authenticate())) {
         echo "Welcome {$user_array['username']}";
     }
 
