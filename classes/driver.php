@@ -213,9 +213,11 @@ BODY;
     /**
      * Logs a user in, based on stored credentials, typically cookies.
      *
+     * @param string $role The role name (optional)
+     *
      * @return bool
      */
-    public function auto_login()
+    public function auto_login($role = null)
     {
         if (($token = \Cookie::get('remember_token'))) {
             $user = Model_User::find('first', array(
@@ -223,11 +225,13 @@ BODY;
             ));
 
             if (!is_null($user)) {
-                // Complete the login with the found data
-                $this->complete_login($user);
+                if ($this->has_access($role, $user)) {
+                    // Complete the login with the found data
+                    $this->complete_login($user);
 
-                // Automatic login was successful
-                return true;
+                    // Automatic login was successful
+                    return true;
+                }
             }
         }
 

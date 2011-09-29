@@ -84,15 +84,17 @@ class Warden
      * }
      * </code>
      *
+     * @param string $role The role name (optional)
+     *
      * @return bool Returns true on success or false on failure
      */
-    public static function authenticated()
+    public static function authenticated($role = null)
     {
-        if (static::logged_in()) {
+        if (static::logged_in($role)) {
             return true;
         }
 
-        return static::auto_login();
+        return static::auto_login($role);
     }
 
     /**
@@ -240,11 +242,13 @@ class Warden
      * }
      * </code>
      *
+     * @param string $role The role name (optional)
+     * 
      * @return bool
      */
-    public static function auto_login()
+    public static function auto_login($role = null)
     {
-        return static::instance()->driver->auto_login();
+        return static::instance()->driver->auto_login($role);
     }
 
     /**
