@@ -49,12 +49,12 @@ For now, only config options are:
 
 + (int) `lifetime`: The remember-me cookie lifetime, in seconds. (default: 1209600)
 + (string) `default_role`: The default role to assign a newly created user, it must already exist. (default: null)
-+ (bool) `trackable`: Set to track information about user sign ins. (default: true)
++ (bool) `trackable`: Set to track information about user sign ins. (default: false)
 + `recoverable`: Takes care of resetting the user password.
-    + (bool) `in_use`: Set to false, to disable (default: true)
+    + (bool) `in_use`: Set to true, to enable (default: false)
     + (string) `reset_password_within`: The limit time within which the reset password token is valid. (default: '+1 week')
 + `http_authenticatable`: provides basic and digest authentication.
-    + (bool) `in_use`: Set to false, to disable (default: true)
+    + (bool) `in_use`: Set to true, to enable (default: false)
     + (string) `method`: The type of Http method to use for authentication. (default: 'digest')
     + (string) `realm`: (default: 'Protected by Warden')
     + (array) `users`: The users to permit.

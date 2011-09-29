@@ -367,20 +367,12 @@ class Model_User extends \Orm\Model
      * Also downcases and trims username and email.
      *
      * @return void
-     *
-     * @throws \Orm\ValidationFailed
      */
     public function _event_before_save()
     {
         $this->_strip_and_downcase_username_and_email();
-
-        try {
-            $this->_ensure_and_validate_password();
-            $this->_username_or_email_exists();
-        } catch(\Orm\ValidationFailed $ex) {
-            throw $ex;
-        }
-
+        $this->_ensure_and_validate_password();
+        $this->_username_or_email_exists();
         $this->_add_default_role();
     }
 

@@ -56,7 +56,7 @@ return array(
      *
      * (bool)
      */
-    'trackable' => true,
+    'trackable' => false,
 
     /**
      * Recoverable takes care of resetting the user password.
@@ -68,11 +68,11 @@ return array(
      */
     'recoverable' => array(
         /**
-         * Set to false, to disable
+         * Set to true, to enable
          *
          * (bool)
          */
-        'in_use'   => true,
+        'in_use'   => false,
 
         /**
          * The limit time within which the reset password token is valid.
@@ -92,11 +92,11 @@ return array(
      */
     'http_authenticatable' => array(
         /**
-         * Set to false, to disable
+         * Set to true, to enable
          *
          * (bool)
          */
-        'in_use'   => true,
+        'in_use'   => false,
 
         /**
          * The type of Http method to use for authentication.
