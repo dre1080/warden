@@ -37,7 +37,7 @@ class Warden
      */
     public static function _init()
     {
-        static::check();
+        static::authenticated();
     }
 
     /**
@@ -77,7 +77,7 @@ class Warden
      * Whereas {@link Warden::logged_in()} only checks the current session login.
      *
      * <code>
-     * if (Warden::check()) {
+     * if (Warden::authenticated()) {
      *     echo "I'm logged in :D";
      * } else {
      *     echo "Failed, I'm NOT logged in :(";
@@ -86,7 +86,7 @@ class Warden
      *
      * @return bool Returns true on success or false on failure
      */
-    public static function check()
+    public static function authenticated()
     {
         if (static::logged_in()) {
             return true;
@@ -150,10 +150,26 @@ class Warden
     }
 
     /**
+     * Explicitly set the current user.
+     *
+     * <code>
+     * if (($user = Model_User:find(1))) {
+     *      Warden::set_user($user);
+     * }
+     * </code>
+     *
+     * @param \Warden\Model_User The user to set
+     */
+    public static function set_user(Model_User $user)
+    {
+        static::instance()->driver->set_user($user);
+    }
+
+    /**
      * Returns the currently logged in user, or null.
      *
      * <code>
-     * if (Warden::check()) {
+     * if (Warden::authenticated()) {
      *     $current_user = Warden::current_user();
      *     $current_user->username;
      * }
@@ -171,7 +187,7 @@ class Warden
      *
      * <code>
      * if (Input::method() === 'POST') {
-     *     if (Warden::authenticate_user(Input::post('username_or_email'), Input::post('password'))) {
+     *     if (Warden::authenticate(Input::post('username_or_email'), Input::post('password'))) {
      *         Session::set_flash('success', 'Logged in successfully');
      *     } else {
      *         Session::set_flash('error', 'Username or password invalid');
@@ -187,7 +203,7 @@ class Warden
      *
      * @return bool Returns true on success or false on failure
      */
-    public static function authenticate_user($username_or_email, $password, $remember = false)
+    public static function authenticate($username_or_email, $password, $remember = false)
     {
         if (empty($username_or_email) || empty($password)) {
             return false;
@@ -200,7 +216,7 @@ class Warden
      * Attempt to log in a user by using an http based authentication method.
      *
      * <code>
-     * if (($user = Warden::http_authenticate_user())) {
+     * if (($user = Warden::http_authenticate())) {
      *      Session::set_flash('success', "Logged in as {$user['username']}");
      * }
      * </code>
@@ -209,7 +225,7 @@ class Warden
      *
      * @return array A key/value array of the username => value and password => value
      */
-    public static function http_authenticate_user()
+    public static function http_authenticate()
     {
         return static::instance()->driver->http_authenticate_user();
     }
@@ -266,6 +282,78 @@ class Warden
     public static function logout($destroy = false)
     {
         return static::instance()->driver->logout($destroy);
+    }
+
+    /**
+     * This is called every time the user is set.
+     * The user is set:
+     *
+     *      - when the user is initially authenticated
+     *      - when the user is set via Warden::set_user()
+     *
+     * <code>
+     * Warden::after_set_user(function($user) {
+     *      if (!$user->is_active) {
+     *          Warden::logout();
+     *      }
+     * });
+     *
+     * // OR
+     *
+     * Warden::after_set_user('Myclass::method');
+     * </code>
+     *
+     * @param mixed $callback The callable function to execute
+     *
+     * @uses \Fuel\Core\Event::register()
+     */
+    public static function after_set_user($callback)
+    {
+        \Event::register('warden_after_set_user', $callback);
+    }
+
+    /**
+     * Executed every time the user is authenticated.
+     *
+     * <code>
+     * Warden::after_authentication(function($user) {
+     *      $user->last_login = time();
+     * });
+     *
+     * // OR
+     *
+     * Warden::after_authentication('Myclass::method');
+     * </code>
+     *
+     * @param mixed $callback The callable function to execute
+     *
+     * @uses \Fuel\Core\Event::register()
+     */
+    public static function after_authentication($callback)
+    {
+        \Event::register('warden_after_authentication', $callback);
+    }
+
+    /**
+     * Executed before each user is logged out.
+     *
+     * <code>
+     * Warden::before_logout(function($user) {
+     *      logger(\Fuel::L_INFO, 'User '.$user->id.' logging out', 'Warden::before_logout');
+     * });
+     *
+     * // OR
+     *
+     * Warden::before_logout('Myclass::method');
+     * </code>
+     *
+     * @param mixed $callback The callable function to execute
+     *
+     * @uses \Fuel\Core\Event::register()
+     */
+    public static function before_logout($callback)
+    {
+        \Event::register('warden_before_logout', $callback);
     }
 
     /**

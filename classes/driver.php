@@ -68,7 +68,7 @@ class Warden_Driver
             ));
 
             if (!is_null($user)) {
-                $this->user = $user;
+                $this->set_user($user);
             }
         }
 
@@ -172,6 +172,17 @@ BODY;
     }
 
     /**
+     * Sets the currently logged in user.
+     *
+     * @param \Warden\Model_User The user to set
+     */
+    public function set_user(Model_User $user)
+    {
+        $this->user = $user;
+        $this->_run_event('after_set_user');
+    }
+
+    /**
      * Gets the currently logged in user from the session.
      *
      * @return mixed Returns FALSE if no user is currently logged in, otherwise
@@ -232,6 +243,8 @@ BODY;
      */
     public function logout($destroy)
     {
+        $this->_run_event('before_logout');
+
         $this->user = null;
 
         // Delete the session identifier for the user
@@ -282,7 +295,9 @@ BODY;
         \Session::set('authenticity_token', $user->authentication_token);
         \Session::instance()->rotate();
 
-        $this->user = $user;
+        $this->set_user($user);
+
+        $this->_run_event('after_authentication');
 
         return true;
     }
@@ -303,6 +318,8 @@ BODY;
             $response->send(true);
             exit;
         }
+
+        $this->_run_event('after_authentication');
 
         return array('username' => $username, 'password' => $password);
     }
@@ -345,6 +362,22 @@ BODY;
             exit;
         }
 
+        $this->_run_event('after_authentication');
+
         return array('username' => $data['username'], 'password' => $password);
+    }
+
+    /**
+     * Runs a Warden callback event if its been registered
+     *
+     * @param string $name The event to run
+     */
+    private function _run_event($name)
+    {
+        $event = "warden_{$name}";
+
+        if (\Event::has_events($event)) {
+            \Event::trigger($event, $this->user);
+        }
     }
 }
