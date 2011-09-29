@@ -180,12 +180,13 @@ This is called every time the user is set. The user is set:
 + when the user is initially authenticated.
 + when the user is set via `Warden::set_user()`.
 
-
-    Warden::after_set_user(function($user) {
-        if (!$user->is_confirmed()) {
-            Warden::logout();
-        }
-    });
+```php
+Warden::after_set_user(function($user) {
+    if (!$user->is_confirmed()) {
+        Warden::logout();
+    }
+});
+```
 
 ### after_authentication
 
