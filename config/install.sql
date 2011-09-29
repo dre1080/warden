@@ -6,8 +6,8 @@
 
 CREATE TABLE IF NOT EXISTS `roles` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique role ID',
-  `name` varchar(40) NOT NULL COMMENT 'The name of the role',
-  `description` varchar(255) NOT NULL COMMENT 'The description of the role',
+  `name` varchar(20) NOT NULL COMMENT 'The name of the role',
+  `description` varchar(100) NOT NULL COMMENT 'The description of the role',
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_roles_on_name` (`name`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Allowed user roles';

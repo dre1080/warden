@@ -38,14 +38,14 @@ class Model_Role extends \Orm\Model
         'name' => array(
             'validation' => array(
                 'required',
-                'min_length' => array(4),
-                'max_length' => array(40)
+                'max_length' => array(20)
             )
         ),
 
         'description' => array(
             'validation' => array(
-                'required'
+                'required',
+                'max_length' => array(100)
             )
         ),
     );
