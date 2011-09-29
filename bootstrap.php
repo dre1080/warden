@@ -22,7 +22,7 @@ Autoloader::add_classes(array(
 
     // Models
     'Warden\\Model_User'          => __DIR__.'/classes/warden/model/user.php',
-    'Warden\\Model_UserToken'     => __DIR__.'/classes/warden/model/usertoken.php',
+    'Warden\\Model_Profile'       => __DIR__.'/classes/warden/model/profile.php',
     'Warden\\Model_Role'          => __DIR__.'/classes/warden/model/role.php',
     'Warden\\Model_Service'       => __DIR__.'/classes/warden/model/service.php',
     'Warden\\Observer_Timestamps' => __DIR__.'/classes/warden/observer/timestamps.php',
