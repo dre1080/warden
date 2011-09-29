@@ -45,6 +45,13 @@ return array(
     'default_role' => null,
 
     /**
+     * Adds user profile support
+     *
+     * Requires at least, a `profiles` table with an `id` and `user_id` column
+     */
+    'profilable' => false,
+
+    /**
      * Set to track information about user sign ins.
      * It tracks and requires the following columns:
      *

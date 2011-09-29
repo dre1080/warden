@@ -26,7 +26,7 @@ class Model_Service extends \Orm\Model
      * @var array
      */
     protected static $_belongs_to = array(
-        'users' => array(
+        'user' => array(
             'key_from'       => 'user_id',
             'model_to'       => '\Warden\Model_User',
             'key_to'         => 'id',
@@ -42,7 +42,6 @@ class Model_Service extends \Orm\Model
      */
     protected static $_properties = array(
         'id',
-        'user_id',
         'uid',
         'provider',
         'access_token',

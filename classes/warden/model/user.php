@@ -108,6 +108,8 @@ class Model_User extends \Orm\Model
 
     /**
      * Loads configuration options.
+     *
+     * @todo REFACTOR THIS CODE, too ugly
      */
     public static function _init()
     {
@@ -128,12 +130,24 @@ class Model_User extends \Orm\Model
             ));
         }
 
+        if (\Config::get('warden.profilable') === true) {
+            static::$_has_one = array_merge(static::$_has_one, array(
+                'profile' => array(
+                    'key_from'       => 'id',
+                    'model_to'       => '\Warden\Model_Profile',
+                    'key_to'         => 'user_id',
+                    'cascade_save'   => true,
+                    'cascade_delete' => true,
+                )
+            ));
+        }
+
         if (\Config::get('warden.omniauthable.in_use') === true) {
             $relation = (\Config::get('warden.omniauthable.link_multiple', false)
                       ? array('_has_many', 'services')
                       : array('_has_one', 'service'));
 
-            static::${$relation[0]} = array(
+            static::${$relation[0]} = array_merge(static::${$relation[0]}, array(
                 $relation[1] => array(
                     'key_from'       => 'id',
                     'model_to'       => '\Warden\Model_Service',
@@ -141,7 +155,7 @@ class Model_User extends \Orm\Model
                     'cascade_save'   => true,
                     'cascade_delete' => true,
                 )
-            );
+            ));
         }
     }
 
@@ -496,7 +510,7 @@ SQL;
                 ->as_assoc()
                 ->execute()
                 ->current();
-        
+
         if ($user != false) {
             if ($user['email'] === $this->email) {
                 throw new \Orm\ValidationFailed('Email address already exists');

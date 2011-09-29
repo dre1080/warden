@@ -59,6 +59,7 @@ For now, only config options are:
 
 + (int) `lifetime`: The remember-me cookie lifetime, in seconds. (default: 1209600)
 + (string) `default_role`: The default role to assign a newly created user, it must already exist. (default: null)
++ (bool) `profilable`: Set to add support for user profiles. (default: false)
 + (bool) `trackable`: Set to track information about user sign ins. (default: false)
 + `recoverable`: Takes care of resetting the user password.
     + (bool) `in_use`: Set to false, to disable (default: false)
