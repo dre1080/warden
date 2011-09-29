@@ -165,8 +165,7 @@ More examples are in the doc comments for each method.
 
 ## Callbacks
 
-There are 3 callbacks at various points in the authentication cycle available.
-Namely:
+There are 3 callbacks at various points in the authentication cycle available. Namely:
 
 + `after_set_user`
 + `after_authentication`
@@ -179,7 +178,8 @@ For each callback Warden will send the current user object as an argument.
 This is called every time the user is set. The user is set:
 
 + when the user is initially authenticated
-+ when the user is set via `Warden::set_user()`
++ when the user is set via `Warden::set_user()
+
 
     Warden::after_set_user(function($user) {
         if (!$user->is_confirmed()) {
@@ -199,6 +199,6 @@ This is called every time the user is authenticated.
 
 This is called before each user is logged out.
 
-Warden::before_logout(function($user) {
-    logger(\Fuel::L_INFO, 'User '.$user->id.' logging out', 'Warden::before_logout');
-});
+    Warden::before_logout(function($user) {
+        logger(\Fuel::L_INFO, 'User '.$user->id.' logging out', 'Warden::before_logout');
+    });
