@@ -72,6 +72,20 @@ class Warden
     }
 
     /**
+     * This method is deprecated...use authenticated() instead.
+     *
+     * @deprecated since version 0.6, will be removed in version 1.0
+     */
+    public static function check($role = null)
+    {
+        logger(\Fuel::L_WARNING,
+               'This method is deprecated.  Please use authenticated() instead.',
+                __METHOD__);
+
+        return static::authenticated($role);
+    }
+
+    /**
      * Checks for validated login. This checks for current session as well as
      * a remember me cookie.
      * Whereas {@link Warden::logged_in()} only checks the current session login.
@@ -185,6 +199,20 @@ class Warden
     }
 
     /**
+     * This method is deprecated...use authenticate() instead.
+     *
+     * @deprecated since version 0.6, will be removed in version 1.0
+     */
+    public static function authenticate_user($username_or_email, $password, $remember = false)
+    {
+        logger(\Fuel::L_WARNING,
+               'This method is deprecated.  Please use authenticate() instead.',
+                __METHOD__);
+
+        return static::authenticate($username_or_email, $password, $remember);
+    }
+
+    /**
      * Attempt to log in a user by using a username or email and plain-text password.
      *
      * <code>
@@ -215,6 +243,20 @@ class Warden
     }
 
     /**
+     * This method is deprecated...use http_authenticate() instead.
+     *
+     * @deprecated since version 0.6, will be removed in version 1.0
+     */
+    public static function http_authenticate_user()
+    {
+        logger(\Fuel::L_WARNING,
+               'This method is deprecated.  Please use http_authenticate() instead.',
+                __METHOD__);
+
+        return static::http_authenticate();
+    }
+
+    /**
      * Attempt to log in a user by using an http based authentication method.
      *
      * <code>
@@ -224,6 +266,7 @@ class Warden
      * </code>
      *
      * @see \Warden\Warden_Driver::http_authenticate_user()
+     * @since version 0.6
      *
      * @return array A key/value array of the username => value and password => value
      */
@@ -243,7 +286,7 @@ class Warden
      * </code>
      *
      * @param string $role The role name (optional)
-     * 
+     *
      * @return bool
      */
     public static function auto_login($role = null)
@@ -397,7 +440,7 @@ class Warden
      *
      * @return string
      */
-    public static function generate_token()
+    public function generate_token()
     {
         $token = \Str::random('unique').'_'.time();
         return str_replace(array('+', '/', '='), array('x', 'y', 'z'), base64_encode($token));

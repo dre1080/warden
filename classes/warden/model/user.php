@@ -234,7 +234,6 @@ SQL;
                   ->execute()
                   ->current();
 
-
         return $record ? $record : null;
     }
 
@@ -382,7 +381,7 @@ SQL;
             return true;
         }
 
-        $this->reset_password_token = Warden::generate_token();
+        $this->reset_password_token = Warden::instance()->generate_token();
         $this->reset_password_sent_at = \DB::expr('CURRENT_TIMESTAMP');
 
         return $this->save(false);

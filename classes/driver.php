@@ -121,7 +121,7 @@ class Warden_Driver
         {
             if ($remember === true) {
                 // Set token data
-                $user->remember_token = Warden::generate_token();
+                $user->remember_token = Warden::instance()->generate_token();
 
                 // Set the remember-me cookie
                 \Cookie::set('remember_token',
@@ -288,7 +288,7 @@ BODY;
     protected function complete_login(Model_User $user)
     {
         // Create and set new authentication token
-        $user->authentication_token = Warden::generate_token();
+        $user->authentication_token = Warden::instance()->generate_token();
 
         if ($this->config['trackable'] === true) {
             $user->update_tracked_fields();
@@ -322,8 +322,6 @@ BODY;
             $response->send(true);
             exit;
         }
-
-        $this->_run_event('after_authentication');
 
         return array('username' => $username, 'password' => $password);
     }
@@ -365,8 +363,6 @@ BODY;
             $response->send(true);
             exit;
         }
-
-        $this->_run_event('after_authentication');
 
         return array('username' => $data['username'], 'password' => $password);
     }

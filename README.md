@@ -80,7 +80,7 @@ For now, only config options are:
 
 Check for validated login:
 
-    if (Warden::check()) {
+    if (Warden::authenticated()) {
         echo "I'm logged in :D";
     } else {
         echo "Failed, I'm NOT logged in :(";
