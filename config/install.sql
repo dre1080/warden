@@ -25,6 +25,13 @@ CREATE TABLE IF NOT EXISTS `roles_users` (
   KEY `index_roles_users_on_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User to role mapping';
 
+--
+-- Constraints for table `roles_users`
+--
+ALTER TABLE `roles_users`
+  ADD CONSTRAINT `fk_index_roles_users_on_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_index_roles_users_on_role_id` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
+
 -- --------------------------------------------------------
 
 --
@@ -42,6 +49,11 @@ CREATE TABLE IF NOT EXISTS `users` (
   -- IF USING recoverable uncomment the following lines
   -- `reset_password_token` varbinary(60) DEFAULT NULL COMMENT 'Reset password token',
   -- `reset_password_sent_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'When the reset password token was sent',
+
+  -- IF USING confirmable uncomment the following lines
+  -- `is_confirmed` tinyint(1) DEFAULT 0 COMMENT 'Flag whether the user account has been confirmed',
+  -- `confirmation_token` varbinary(60) DEFAULT NULL COMMENT 'Confirmation token',
+  -- `confirmation_sent_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'When the confirmation token was sent',
 
   -- IF USING trackable uncomment the following lines
   -- `sign_in_count` int(11) unsigned NOT NULL COMMENT 'Increased every time a sign in is made',
@@ -77,11 +89,3 @@ CREATE TABLE IF NOT EXISTS `services` (
   KEY `index_services_on_access_token` (`access_token`),
   KEY `index_services_on_user_id` (`user_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
-
-
---
--- Constraints for table `roles_users`
---
-ALTER TABLE `roles_users`
-  ADD CONSTRAINT `fk_index_roles_users_on_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_index_roles_users_on_role_id` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;

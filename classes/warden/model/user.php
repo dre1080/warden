@@ -113,6 +113,7 @@ class Model_User extends \Orm\Model
     {
         static::_init_trackable();
         static::_init_recoverable();
+        static::_init_confirmable();
         static::_init_profilable();
         static::_init_omniauthable();
     }
@@ -163,6 +164,8 @@ class Model_User extends \Orm\Model
      *
      * @return \Warden\Model_User|null The user that matches the tokens or
      *                                 null if no user matches that condition.
+     *
+     * @throws \Orm\ValidationFailed If the user needs to be confirmed
      */
     public static function authenticate($username_or_email)
     {
@@ -192,7 +195,17 @@ SQL;
                   ->execute()
                   ->current();
 
-        return $record ? $record : null;
+        if (!empty($record)) {
+            if ($record->is_confirmation_required()) {
+                throw new \Orm\ValidationFailed(
+                        'You have to confirm your account before continuing.'
+                );
+            }
+
+            return $record;
+        }
+
+        return null;
     }
 
     /**
@@ -373,6 +386,116 @@ SQL;
     }
 
     /**
+     * Attempt to find a user by it's confirmation token and try to confirm it.
+     *
+     * @param string $confirmation_token
+     *
+     * @return \Warden\Model_User|null Returns a user if is found and token is still valid,
+     *                                 or null if no user is found.
+     *
+     * @throws \Orm\ValidationFailed If the token has expired or the user is already confirmed
+     */
+    public static function confirm_by_token($confirmation_token)
+    {
+        $confirmable = static::find('first', array(
+            'where' => array(
+               'confirmation_token' => $confirmation_token
+            )
+        ));
+
+        if (!is_null($confirmable)) {
+            if ($confirmable->is_confirmation_period_valid()) {
+                $confirmable->confirm();
+            } else {
+                throw new \Orm\ValidationFailed('Confirmation token has expired, please request a new one.');
+            }
+        }
+
+        return $confirmable;
+    }
+
+    /**
+     * Confirm a user.
+     *
+     * @return bool
+     *
+     * @throws \Orm\ValidationFailed If the user is already confirmed
+     */
+    public function confirm()
+    {
+        if ($this->is_confirmation_required()) {
+            $this->is_confirmed = true;
+            $this->confirmation_token = null;
+            return $this->save(false);
+        }
+
+        throw new \Orm\ValidationFailed(sprintf(
+                '%s was already confirmed, please try signing in',
+                $this->email
+        ));
+    }
+
+    /**
+     * Verifies whether a user is confirmed or not
+     *
+     * @return bool
+     */
+    public function is_confirmed()
+    {
+        return ((\Config::get('warden.confirmable.in_use') === true) && ($this->is_confirmed));
+    }
+
+    /**
+     * Checks if confirmation is required or not
+     *
+     * @return bool
+     */
+    public function is_confirmation_required()
+    {
+        return !$this->is_confirmed();
+    }
+
+    /**
+     * Checks if the confirmation for the user is within the limit time.
+     *
+     * @return bool Returns true if the user is not responding to reset_password_sent_at at all.
+     */
+    public function is_confirmation_period_valid()
+    {
+        if (!isset(static::$_properties['confirmation_sent_at'])) {
+            return true;
+        }
+
+        if ($this->confirmation_sent_at == static::$_properties['confirmation_sent_at']['default']) {
+            return false;
+        }
+
+        $lifetime = \Config::get('warden.confirmable.confirm_within');
+        $expires  = strtotime($lifetime, strtotime($this->confirmation_sent_at));
+
+        return (bool)($expires >= time());
+    }
+
+    /**
+     * Generates a new random token for confirmation, and stores the time
+     * this token is being generated.
+     *
+     * @return bool
+     */
+    public function generate_confirmation_token()
+    {
+        if (!is_null($this->confirmation_token) && $this->is_confirmation_period_valid()) {
+            return true;
+        }
+
+        $this->is_confirmed = false;
+        $this->confirmation_token = Warden::instance()->generate_token();
+        $this->confirmation_sent_at = \Date::time('UTC')->format('mysql');
+
+        return $this->save(false);
+    }
+
+    /**
      * Event that does the following:
      *
      * - tests if a username or email exists in the database.
@@ -387,6 +510,18 @@ SQL;
         $this->_ensure_and_validate_password();
         $this->_username_or_email_exists();
         $this->_add_default_role();
+    }
+
+    /**
+     * Event that makes sure confirmation token is set if enabled.
+     *
+     * @return void
+     */
+    public function _event_before_insert()
+    {
+        if ($this->is_confirmation_required()) {
+            $this->generate_confirmation_token();
+        }
     }
 
     /**
@@ -467,7 +602,7 @@ SQL;
                 ->execute()
                 ->current();
 
-        if ($user != false) {
+        if (!empty($user)) {
             if ($user['email'] === $this->email) {
                 throw new \Orm\ValidationFailed('Email address already exists');
             } else {
@@ -568,6 +703,23 @@ SQL;
             static::$_properties = array_merge(static::$_properties, array(
                 'reset_password_token'   => array('default' => null),
                 'reset_password_sent_at' => array('default' => '0000-00-00 00:00:00')
+            ));
+        }
+    }
+
+    /**
+     * Checks that the confirmable feature is enabled and adds its required
+     * fields to the properties
+     *
+     * @see \Warden\Model_User::_init()
+     */
+    private static function _init_confirmable()
+    {
+        if (\Config::get('warden.confirmable.in_use') === true) {
+            static::$_properties = array_merge(static::$_properties, array(
+                'is_confirmed'         => array('default' => false),
+                'confirmation_token'   => array('default' => null),
+                'confirmation_sent_at' => array('default' => '0000-00-00 00:00:00')
             ));
         }
     }

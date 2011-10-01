@@ -94,6 +94,30 @@ return array(
     ),
 
     /**
+     * Confirmable is responsible to verify if an account is already confirmed to
+     * sign in
+     */
+    'confirmable' => array(
+        /**
+         * Set to false, to disable
+         *
+         * (bool)
+         */
+        'in_use'   => false,
+
+        /**
+         * The limit time within which the confirmation token is valid.
+         * Must always be a valid php date/time value.
+         * Default is '+1 week'.
+         *
+         * @see http://www.php.net/manual/en/datetime.formats.php
+         *
+         * (string)
+         */
+        'confirm_within' => '+1 week'
+    ),
+
+    /**
      * Http authenticatable provides basic and digest authentication
      * based on the HTTP protocol.
      */
