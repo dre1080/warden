@@ -10,6 +10,7 @@ Features:
 + User ACL
 + Remember-me functionality
 + Reset-password functionality
++ User confirmation functionality
 + Http authentication
 + oAuth support
 and many more to come
@@ -62,16 +63,19 @@ For now, only config options are:
 + (bool) `profilable`: Set to add support for user profiles. (default: false)
 + (bool) `trackable`: Set to track information about user sign ins. (default: false)
 + `recoverable`: Takes care of resetting the user password.
-    + (bool) `in_use`: Set to false, to disable (default: false)
+    + (bool) `in_use`: Set to true, to enable (default: false)
     + (string) `reset_password_within`: The limit time within which the reset password token is valid. (default: '+1 week')
++ `confirmable`: verify if an account is already confirmed to sign in.
+    + (bool) `in_use`: Set to true, to enable (default: false)
+    + (string) `confirm_within`: The limit time within which the confirmation token is valid. (default: '+1 week')
 + `http_authenticatable`: provides basic and digest authentication.
-    + (bool) `in_use`: Set to false, to disable (default: false)
+    + (bool) `in_use`: Set to true, to enable (default: false)
     + (string) `method`: The type of Http method to use for authentication. (default: 'digest')
     + (string) `realm`: (default: 'Protected by Warden')
     + (array) `users`: The users to permit.
     + (string) `failure_text`: The message to display on failure.
 + `omniauthable`: provides OAuth support.
-    + (bool) `in_use`: Set to false, to disable (default: true)
+    + (bool) `in_use`: Set to true, to enable (default: false)
     + (array) `urls`: The urls to use for omniauth authentication.
     + (array) `providers`: The providers that are available.
     + (bool) `link_multiple`: Whether multiple providers can be attached to one user account.
