@@ -437,12 +437,18 @@ class Warden
 
     /**
      * Generate a unique friendly string to be used as a token.
+     * We don't use the built in \Str::random('unique') because it is based on using
+     * uniqid() prefixed with mt_rand() which is a very weak source in random
+     * string generation.
      *
      * @return string
      */
     public function generate_token()
     {
-        $token = \Str::random('unique').'_'.time();
+        static $crypt = null;
+        $crypt || $crypt = new \CryptLib\CryptLib();
+
+        $token = $crypt->getRandomToken(32).':'.time();
         return str_replace(array('+', '/', '='), array('x', 'y', 'z'), base64_encode($token));
     }
 }
