@@ -493,8 +493,7 @@ SQL;
         $email    = \DB::escape(\Str::lower($this->email));
         $username = \DB::escape(\Str::lower($this->username));
 
-        $table      = static::table();
-        $properties = implode('`, `', array_keys(static::properties()));
+        $table = static::table();
 
         $sql = <<<SQL
    (SELECT `email` FROM `$table`
