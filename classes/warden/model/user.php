@@ -59,7 +59,7 @@ class Model_User extends \Orm\Model
             'key_through_from' => 'user_id',
             'key_through_to'   => 'role_id',
             'table_through'    => 'roles_users',
-            'model_to'         => '\Warden\Model_Role',
+            'model_to'         => 'Model_Role',
             'key_to'           => 'id',
             'cascade_delete'   => true,
         )
@@ -583,7 +583,7 @@ SQL;
             static::$_has_one = array_merge(static::$_has_one, array(
                 'profile' => array(
                     'key_from'       => 'id',
-                    'model_to'       => '\Warden\Model_Profile',
+                    'model_to'       => 'Model_Profile',
                     'key_to'         => 'user_id',
                     'cascade_save'   => true,
                     'cascade_delete' => true,
@@ -607,7 +607,7 @@ SQL;
             static::${$relation[0]} = array_merge(static::${$relation[0]}, array(
                 $relation[1] => array(
                     'key_from'       => 'id',
-                    'model_to'       => '\Warden\Model_Service',
+                    'model_to'       => 'Model_Service',
                     'key_to'         => 'user_id',
                     'cascade_save'   => true,
                     'cascade_delete' => true,

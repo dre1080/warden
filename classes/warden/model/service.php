@@ -28,7 +28,7 @@ class Model_Service extends \Orm\Model
     protected static $_belongs_to = array(
         'user' => array(
             'key_from'       => 'user_id',
-            'model_to'       => '\Warden\Model_User',
+            'model_to'       => 'Model_User',
             'key_to'         => 'id',
             'cascade_save'   => true,
             'cascade_delete' => true,

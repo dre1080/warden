@@ -63,7 +63,7 @@ class Warden_Driver
         {
             $this->user = null;
 
-            $user = Model_User::find('first', array(
+            $user = \Model_User::find('first', array(
                 'where' => array('authentication_token' => $auth_token)
             ));
 
@@ -116,7 +116,7 @@ class Warden_Driver
      */
     public function authenticate_user($username_or_email, $password, $remember)
     {
-        if (($user = Model_User::authenticate($username_or_email)) &&
+        if (($user = \Model_User::authenticate($username_or_email)) &&
             Warden::instance()->has_password($user, $password))
         {
             if ($remember === true) {
@@ -206,7 +206,7 @@ BODY;
      */
     public function force_login($username_or_email)
     {
-        $user = Model_User::authenticate($username_or_email);
+        $user = \Model_User::authenticate($username_or_email);
         return $user && $this->complete_login($user);
     }
 
@@ -220,7 +220,7 @@ BODY;
     public function auto_login($role = null)
     {
         if (($token = \Cookie::get('remember_token'))) {
-            $user = Model_User::find('first', array(
+            $user = \Model_User::find('first', array(
                 'where' => array('remember_token' => $token)
             ));
 

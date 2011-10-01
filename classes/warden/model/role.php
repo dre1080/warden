@@ -26,7 +26,7 @@ class Model_Role extends \Orm\Model
             'key_through_from' => 'role_id',
             'key_through_to'   => 'user_id',
             'table_through' => 'roles_users',
-            'model_to' => '\Warden\Model_User',
+            'model_to' => 'Model_User',
             'key_to' => 'id',
             'cascade_delete' => true,
         )
