@@ -490,7 +490,7 @@ SQL;
 
         $this->is_confirmed = false;
         $this->confirmation_token = Warden::instance()->generate_token();
-        $this->confirmation_sent_at = \Date::time('UTC')->format('mysql');
+        $this->confirmation_sent_at = \DB::expr('CURRENT_TIMESTAMP');
 
         return $this->save(false);
     }
