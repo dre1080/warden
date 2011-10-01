@@ -107,56 +107,14 @@ class Model_User extends \Orm\Model
     );
 
     /**
-     * Loads configuration options.
-     *
-     * @todo REFACTOR THIS CODE, too ugly
+     * Loads configuration options and sets up class properties.
      */
     public static function _init()
     {
-        if (\Config::get('warden.trackable') === true) {
-            static::$_properties = array_merge(static::$_properties, array(
-                'sign_in_count'      => array('default' => 0),
-                'current_sign_in_at' => array('default' => '0000-00-00 00:00:00'),
-                'last_sign_in_at'    => array('default' => '0000-00-00 00:00:00'),
-                'current_sign_in_ip' => array('default' => 0),
-                'last_sign_in_ip'    => array('default' => 0),
-            ));
-        }
-
-        if (\Config::get('warden.recoverable.in_use') === true) {
-            static::$_properties = array_merge(static::$_properties, array(
-                'reset_password_token' => array('default' => null),
-                'reset_password_sent_at' => array('default' => '0000-00-00 00:00:00')
-            ));
-        }
-
-        if (\Config::get('warden.profilable') === true) {
-            static::$_has_one = array_merge(static::$_has_one, array(
-                'profile' => array(
-                    'key_from'       => 'id',
-                    'model_to'       => '\Warden\Model_Profile',
-                    'key_to'         => 'user_id',
-                    'cascade_save'   => true,
-                    'cascade_delete' => true,
-                )
-            ));
-        }
-
-        if (\Config::get('warden.omniauthable.in_use') === true) {
-            $relation = (\Config::get('warden.omniauthable.link_multiple', false)
-                      ? array('_has_many', 'services')
-                      : array('_has_one', 'service'));
-
-            static::${$relation[0]} = array_merge(static::${$relation[0]}, array(
-                $relation[1] => array(
-                    'key_from'       => 'id',
-                    'model_to'       => '\Warden\Model_Service',
-                    'key_to'         => 'user_id',
-                    'cascade_save'   => true,
-                    'cascade_delete' => true,
-                )
-            ));
-        }
+        static::_init_trackable();
+        static::_init_recoverable();
+        static::_init_profilable();
+        static::_init_omniauthable();
     }
 
     /**
@@ -576,6 +534,85 @@ SQL;
                     $this->roles[] = $role;
                 }
             }
+        }
+    }
+
+    /**
+     * Checks that the trackable feature is enabled and adds its required
+     * fields to the properties
+     *
+     * @see \Warden\Model_User::_init()
+     */
+    private static function _init_trackable()
+    {
+        if (\Config::get('warden.trackable') === true) {
+            static::$_properties = array_merge(static::$_properties, array(
+                'sign_in_count'      => array('default' => 0),
+                'current_sign_in_at' => array('default' => '0000-00-00 00:00:00'),
+                'last_sign_in_at'    => array('default' => '0000-00-00 00:00:00'),
+                'current_sign_in_ip' => array('default' => 0),
+                'last_sign_in_ip'    => array('default' => 0),
+            ));
+        }
+    }
+
+    /**
+     * Checks that the recoverable feature is enabled and adds its required
+     * fields to the properties
+     *
+     * @see \Warden\Model_User::_init()
+     */
+    private static function _init_recoverable()
+    {
+        if (\Config::get('warden.recoverable.in_use') === true) {
+            static::$_properties = array_merge(static::$_properties, array(
+                'reset_password_token'   => array('default' => null),
+                'reset_password_sent_at' => array('default' => '0000-00-00 00:00:00')
+            ));
+        }
+    }
+
+    /**
+     * Checks that the profilable feature is enabled and sets up its relation.
+     *
+     * @see \Warden\Model_User::_init()
+     */
+    private static function _init_profilable()
+    {
+        if (\Config::get('warden.profilable') === true) {
+            static::$_has_one = array_merge(static::$_has_one, array(
+                'profile' => array(
+                    'key_from'       => 'id',
+                    'model_to'       => '\Warden\Model_Profile',
+                    'key_to'         => 'user_id',
+                    'cascade_save'   => true,
+                    'cascade_delete' => true,
+                )
+            ));
+        }
+    }
+
+    /**
+     * Checks that the omniauthable feature is enabled and sets up its relation.
+     *
+     * @see \Warden\Model_User::_init()
+     */
+    private static function _init_omniauthable()
+    {
+        if (\Config::get('warden.omniauthable.in_use') === true) {
+            $relation = (\Config::get('warden.omniauthable.link_multiple', false)
+                      ? array('_has_many', 'services')
+                      : array('_has_one', 'service'));
+
+            static::${$relation[0]} = array_merge(static::${$relation[0]}, array(
+                $relation[1] => array(
+                    'key_from'       => 'id',
+                    'model_to'       => '\Warden\Model_Service',
+                    'key_to'         => 'user_id',
+                    'cascade_save'   => true,
+                    'cascade_delete' => true,
+                )
+            ));
         }
     }
 }
