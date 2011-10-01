@@ -176,7 +176,7 @@ class Model_User extends \Orm\Model
         $properties = implode('`, `', array_keys(static::properties()));
 
         // Indices lose their speed advantage when using them in OR-situations
-        // so this is much faster than
+        // so this UNION is much faster than
         // SELECT ... FROM ... WHERE email = 'foo' OR username = 'bar';
         $sql = <<<SQL
    (SELECT `$properties` FROM `$table`
@@ -253,8 +253,8 @@ SQL;
      */
     public function update_tracked_fields()
     {
-        if (!\Config::get('warden.trackable') === true) {
-            return true;
+        if (\Config::get('warden.trackable') !== true) {
+            return false;
         }
 
         $old_current = $this->current_sign_in_at;
