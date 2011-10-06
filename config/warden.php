@@ -117,6 +117,56 @@ return array(
     ),
 
     /**
+     * Lockable handles blocking a user access after a certain number of attempts.
+     * It accepts two different strategies to unlock a user after it's
+     * blocked: email and time. The former will send an email to the user when
+     * the lock happens, containing a link to unlock it's account. The second
+     * will unlock the user automatically after some configured time (eg. +2 hours).
+     * It's also possible to setup lockable to use both email and time strategies.
+     *
+     * This uses `trackable`
+     */
+    'lockable' => array(
+        /**
+         * Set to false, to disable
+         *
+         * (bool)
+         */
+        'in_use'   => false,
+
+        /**
+         * How many attempts should be accepted before blocking the user.
+         *
+         * (integer)
+         */
+        'maximum_attempts' => 10,
+
+        /**
+         * Lock the user account by sign_in_count or none.
+         *
+         * (string)
+         */
+        'lock_strategy' => 'sign_in_count',
+
+        /**
+         * Unlock the user account by time, email, both or none.
+         *
+         * (string)
+         */
+        'unlock_strategy' => 'both',
+
+        /**
+         * The time you want to lock the user after to lock happens.
+         * Only available when unlock_strategy is time or both.
+         *
+         * @see http://www.php.net/manual/en/datetime.formats.php
+         *
+         * (string)
+         */
+        'unlock_in' => '+1 week',
+    ),
+
+    /**
      * Http authenticatable provides basic and digest authentication
      * based on the HTTP protocol.
      */
