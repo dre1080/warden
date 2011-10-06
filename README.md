@@ -1,6 +1,6 @@
 # Warden
 
-A user database authorization package for FuelPHP.
+A user database authorization & authentication package for FuelPHP.
 
 Features:
 
@@ -84,7 +84,7 @@ For now, only config options are:
 
 Check for validated login:
 
-    if (Warden::authenticated()) {
+    if (Warden::check()) {
         echo "I'm logged in :D";
     } else {
         echo "Failed, I'm NOT logged in :(";
@@ -92,7 +92,7 @@ Check for validated login:
 
 Getting the currently logged in user:
 
-    if (Warden::authenticated()) {
+    if (Warden::check()) {
         $current_user = Warden::current_user();
         echo $current_user->username;
     }

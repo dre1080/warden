@@ -1,7 +1,6 @@
 <?php
 /**
- * The Warden: User authorization library for FuelPHP.
- * Handles user login and logout, as well as secure password hashing.
+ * Warden: User authorization & authentication library for FuelPHP.
  *
  * @package    Warden
  * @subpackage Warden
@@ -37,7 +36,7 @@ class Warden
      */
     public static function _init()
     {
-        static::authenticated();
+        static::check();
     }
 
     /**
@@ -72,43 +71,46 @@ class Warden
     }
 
     /**
-     * This method is deprecated...use authenticated() instead.
-     *
-     * @deprecated since version 0.6, will be removed in version 1.0
-     */
-    public static function check($role = null)
-    {
-        logger(\Fuel::L_WARNING,
-               'This method is deprecated.  Please use authenticated() instead.',
-                __METHOD__);
-
-        return static::authenticated($role);
-    }
-
-    /**
      * Checks for validated login. This checks for current session as well as
      * a remember me cookie.
      * Whereas {@link Warden::logged_in()} only checks the current session login.
      *
      * <code>
-     * if (Warden::authenticated()) {
+     * if (Warden::check()) {
      *     echo "I'm logged in :D";
      * } else {
      *     echo "Failed, I'm NOT logged in :(";
      * }
      * </code>
      *
-     * @param string $role The role name (optional)
+     * Checking a role has permission:
+     * <code>
+     * if (Warden::check('admin', 'delete', 'User')) {
+     *     echo "User is an admin and has permission to delete other users";
+     * } else {
+     *     throw new Warden_AccessDenied();
+     * }
+     * </code>
+     *
+     * @param mixed $role     The role name (optional)
+     * @param mixed $action   The action permission for the role (optional)
+     * @param mixed $resource The resource permission for the role (optional)
      *
      * @return bool Returns true on success or false on failure
      */
-    public static function authenticated($role = null)
+    public static function check($role = null, $action = null, $resource = null)
     {
-        if (static::logged_in($role)) {
-            return true;
+        $status = false;
+
+        if (static::logged_in($role) || static::auto_login($role)) {
+            $status = true;
         }
 
-        return static::auto_login($role);
+        if (!is_null($action) && !is_null($resource)) {
+            return $status && static::can($action, $resource);
+        }
+
+        return $status;
     }
 
     /**
@@ -125,7 +127,7 @@ class Warden
      * }
      * </code>
      *
-     * @param string $role The role name (optional)
+     * @param mixed $role The role name (optional)
      *
      * @return bool Returns true on success or false on failure
      */
@@ -135,7 +137,7 @@ class Warden
     }
 
     /**
-     * Verify Acl access
+     * Verify user-role access
      *
      * <code>
      * if (Warden::has_access('admin')) {
@@ -151,6 +153,13 @@ class Warden
      *     echo "Hey, editor - moderator";
      * } else {
      *     echo "Fail!";
+     * }
+     *
+     * // Checking a user has a role permission
+     * if (Warden::has_access('admin', 'delete', $user)) {
+     *     echo "User is an admin and has deleting rights";
+     * } else {
+     *     echo "Failed, you're not an admin with deleting rights";
      * }
      * </code>
      *
@@ -185,7 +194,7 @@ class Warden
      * Returns the currently logged in user, or null.
      *
      * <code>
-     * if (Warden::authenticated()) {
+     * if (Warden::check()) {
      *     $current_user = Warden::current_user();
      *     $current_user->username;
      * }
@@ -285,7 +294,7 @@ class Warden
      * }
      * </code>
      *
-     * @param string $role The role name (optional)
+     * @param mixed $role The role name (optional)
      *
      * @return bool
      */
@@ -329,6 +338,98 @@ class Warden
     public static function logout($destroy = false)
     {
         return static::instance()->driver->logout($destroy);
+    }
+
+    /**
+     * Check if the user has permission to perform a given action on a resource.
+     *
+     * <code>
+     * if (Warden::can('destroy', $project)) {
+     *      echo 'User can destroy';
+     * }
+     * </code>
+     *
+     * You can also pass the class instead of an instance (if you don't have one handy).
+     * <code>
+     * if (Warden::can('destroy', 'Project')) {
+     *      echo 'User can destroy';
+     * }
+     * </code>
+     *
+     * Multiple actions/resources can be passed through an array. It will return
+     * true if one of the supplied actions/resources are found.
+     * <code>
+     * if (Warden::can('destroy', array('Project', 'Task'))) {
+     *      echo 'User can destroy a project/task';
+     * }
+     *
+     * if (Warden::can(array('destroy', 'create'), array('Project', 'Task'))) {
+     *      echo 'User can create/destroy a project/task';
+     * }
+     * </code>
+     *
+     * You can pass 'all' to match any resource and 'manage' to match any action.
+     * <code>
+     * if (Warden::can('manage', 'all')) {
+     *      echo 'User can do something on one of the resources';
+     * }
+     *
+     * if (Warden::can('manage', 'Project')) {
+     *      echo 'User can do something on a Project';
+     * }
+     * </code>
+     *
+     * @param mixed $action   The action for the permission.
+     * @param mixed $resource The resource for the permission.
+     *
+     * @return bool
+     */
+    public static function can($action, $resource)
+    {
+        return static::instance()->driver->can_user($action, $resource);
+    }
+
+    /**
+     * Convenience method which works the same as {@link Warden::can()}
+     * but returns the opposite value.
+     *
+     * <code>
+     * if (Warden::cannot('create', 'Project') {
+     *      die('Unauthorized user');
+     * }
+     * </code>
+     */
+    public static function cannot($action, $resource)
+    {
+        return !static::can($action, $resource);
+    }
+
+    /**
+     * An alias for Warden::can except throws an exception on failure and allows
+     * extra options.
+     *
+     * A 'message' option can be passed to specify a different message.
+     * <code>
+     * Warden::authorize('read', $article, array('message' => "Not authorized to read {$article->name}"));
+     * </code>
+     *
+     * @param mixed $action   The action for the permission.
+     * @param mixed $resource The resource for the permission.
+     * @param array $options
+     *
+     * @throws \Warden\Warden_AccessDenied If the current user cannot perform the given action
+     */
+    public static function authorize($action, $resource, array $options = array())
+    {
+        $message = null;
+        if (isset($options['message'])) {
+            $message = $options['message'];
+        }
+
+        if (static::cannot($action, $resource)) {
+            $message || $message = __("warden.unauthorized.{$resource}.{$action}");
+            throw new Warden_AccessDenied($message, $action, $resource);
+        }
     }
 
     /**
@@ -431,8 +532,8 @@ class Warden
             return false;
         }
 
-        $hasher = \CryptLib\Password\Implementation\Blowfish::loadFromHash($user->encrypted_password);
-        return $hasher->verify($submitted_password, $user->encrypted_password);
+        $cryptlib = new \CryptLib\CryptLib();
+        return $cryptlib->verifyPasswordHash($submitted_password, $user->encrypted_password);
     }
 
     /**
@@ -445,10 +546,10 @@ class Warden
      */
     public function generate_token()
     {
-        static $crypt = null;
-        $crypt || $crypt = new \CryptLib\CryptLib();
+        static $cryptlib = null;
+        $cryptlib || $cryptlib = new \CryptLib\CryptLib();
 
-        $token = $crypt->getRandomToken(32).':'.time();
+        $token = $cryptlib->getRandomToken(32).':'.time();
         return str_replace(array('+', '/', '='), array('x', 'y', 'z'), base64_encode($token));
     }
 }

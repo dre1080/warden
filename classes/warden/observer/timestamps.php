@@ -1,7 +1,6 @@
 <?php
 /**
- * The Warden: User authorization library for FuelPHP.
- * Handles user login and logout, as well as secure password hashing.
+ * Warden: User authorization & authentication library for FuelPHP.
  *
  * @package    Warden
  * @subpackage Warden

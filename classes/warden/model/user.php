@@ -1,7 +1,6 @@
 <?php
 /**
- * The Warden: User authorization library for FuelPHP.
- * Handles user login and logout, as well as secure password hashing.
+ * Warden: User authorization & authentication library for FuelPHP.
  *
  * @package    Warden
  * @subpackage Warden
@@ -129,6 +128,21 @@ class Model_User extends \Orm\Model
         if (isset($data['password'])) {
             $this->password = $data['password'];
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __call($method, $args)
+    {
+        $convenience = substr($method, 0, 2);
+        $role        = substr($method, 3);
+
+        if ($convenience == 'is') {
+            return Warden::has_access($role, $this);
+        }
+
+        return parent::__call($method, $args);
     }
 
     /**
@@ -353,7 +367,7 @@ SQL;
         }
 
         $this->reset_password_token = Warden::instance()->generate_token();
-        $this->reset_password_sent_at = \DB::expr('CURRENT_TIMESTAMP');
+        $this->reset_password_sent_at = \Date::time('UTC')->format('mysql');
 
         return $this->save(false);
     }
@@ -490,7 +504,7 @@ SQL;
 
         $this->is_confirmed = false;
         $this->confirmation_token = Warden::instance()->generate_token();
-        $this->confirmation_sent_at = \DB::expr('CURRENT_TIMESTAMP');
+        $this->confirmation_sent_at = \Date::time('UTC')->format('mysql');
 
         return $this->save(false);
     }

@@ -1,7 +1,6 @@
 <?php
 /**
- * The Warden: User authorization library for fuelphp.
- * Handles user login and logout, as well as secure password hashing.
+ * Warden: User authorization & authentication library for FuelPHP.
  *
  * @package    Warden
  * @subpackage Warden
@@ -106,6 +105,40 @@ class Warden_Driver
     }
 
     /**
+     * Check if the user has permission to perform a given action on an object.
+     *
+     * @param mixed $action   The action for the permission.
+     * @param mixed $resource The resource for the permission.
+     *
+     * @return bool
+     */
+    public function can_user($action, $resource)
+    {
+        $user   = $this->current_user();
+        $status = !!$user;
+
+        if ($status) {
+            $status   = false;
+            $action   = (is_array($action)    ? $action : array($action));
+            $resource = (is_object($resource) ? get_class($resource) : $resource);
+            $resource = (is_array($resource)  ? $resource : array($resource));
+
+            foreach ($user->roles as $role) {
+                foreach ($role->permissions as $permission) {
+                    if ((in_array($permission->action, $action) || in_array('manage', $action)) &&
+                        (in_array($permission->resource, $resource) || in_array('all', $resource)))
+                    {
+                        $status = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $status;
+    }
+
+    /**
      * Logs a user in.
      *
      * @param string $username_or_email
@@ -149,10 +182,6 @@ class Warden_Driver
      */
     public function http_authenticate_user()
     {
-        if (!$this->config['http_authenticatable']['in_use']) {
-            return false;
-        }
-
         $method = "_http_{$this->config['http_authenticatable']['method']}";
 
         $body = <<<BODY

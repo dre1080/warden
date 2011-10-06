@@ -1,7 +1,6 @@
 <?php
 /**
- * The Warden: User authorization library for FuelPHP.
- * Handles user login and logout, as well as secure password hashing.
+ * Warden: User authorization & authentication library for FuelPHP.
  *
  * @package    Warden
  * @subpackage Warden
@@ -17,13 +16,16 @@ Autoloader::add_core_namespace('Warden');
 
 Autoloader::add_classes(array(
     // Base Warden classes
-    'Warden\\Warden'        => __DIR__.'/classes/warden.php',
-    'Warden\\Warden_Driver' => __DIR__.'/classes/driver.php',
+    'Warden\\Warden'              => __DIR__.'/classes/warden.php',
+    'Warden\\Warden_Driver'       => __DIR__.'/classes/warden/driver.php',
+    'Warden\\Warden_Failure'      => __DIR__.'/classes/warden/exceptions.php',
+    'Warden\\Warden_AccessDenied' => __DIR__.'/classes/warden/exceptions.php',
 
     // Models
     'Warden\\Model_User'          => __DIR__.'/classes/warden/model/user.php',
     'Warden\\Model_Profile'       => __DIR__.'/classes/warden/model/profile.php',
     'Warden\\Model_Role'          => __DIR__.'/classes/warden/model/role.php',
+    'Warden\\Model_Permission'    => __DIR__.'/classes/warden/model/permission.php',
     'Warden\\Model_Service'       => __DIR__.'/classes/warden/model/service.php',
     'Warden\\Observer_Timestamps' => __DIR__.'/classes/warden/observer/timestamps.php',
 
