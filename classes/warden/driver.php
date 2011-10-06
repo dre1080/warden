@@ -75,7 +75,7 @@ class Warden_Driver
     }
 
     /**
-     * Verify Acl access
+     * Verify role access
      *
      * @param mixed              $role The role name to check
      * @param \Warden\Model_User $user The user to check against, if no user is given (null)

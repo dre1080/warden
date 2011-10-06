@@ -11,6 +11,9 @@
  */
 namespace Warden;
 
+use CryptLib\CryptLib;
+use CryptLib\Password\Implementation\Blowfish as BCrypt;
+
 /**
  * Warden
  *
@@ -91,6 +94,16 @@ class Warden
      *     throw new Warden_AccessDenied();
      * }
      * </code>
+     * 
+     * If an action is given and no resource is given, it will assume that the
+     * resource has the same name as the role.
+     * <code>
+     * if (Warden::check('admin', 'delete')) {
+     *     echo "User is an admin and has permission to delete other "admin"";
+     * } else {
+     *     throw new Warden_AccessDenied();
+     * }
+     * </code>
      *
      * @param mixed $role     The role name (optional)
      * @param mixed $action   The action permission for the role (optional)
@@ -106,7 +119,8 @@ class Warden
             $status = true;
         }
 
-        if (!is_null($action) && !is_null($resource)) {
+        if (!is_null($action)) {
+            $resource = (is_null($resource) ? $role : $resource);
             return $status && static::can($action, $resource);
         }
 
@@ -417,7 +431,7 @@ class Warden
      * @param mixed $action   The action for the permission.
      * @param mixed $resource The resource for the permission.
      * @param array $options
-     * 
+     *
      * @see {@link \Warden\Warden_AccessDenied}
      *
      * @throws \Warden\Warden_AccessDenied If the current user cannot perform the given action
@@ -517,7 +531,7 @@ class Warden
     public function encrypt_password($password)
     {
         static $hasher = null;
-        $hasher || $hasher = new \CryptLib\Password\Implementation\Blowfish();
+        $hasher || $hasher = new BCrypt;
         return $hasher->create($password);
     }
 
@@ -535,7 +549,7 @@ class Warden
             return false;
         }
 
-        $cryptlib = new \CryptLib\CryptLib();
+        $cryptlib = new CryptLib;
         return $cryptlib->verifyPasswordHash($submitted_password, $user->encrypted_password);
     }
 
@@ -550,7 +564,7 @@ class Warden
     public function generate_token()
     {
         static $cryptlib = null;
-        $cryptlib || $cryptlib = new \CryptLib\CryptLib();
+        $cryptlib || $cryptlib = new CryptLib;
 
         $token = $cryptlib->getRandomToken(32).':'.time();
         return str_replace(array('+', '/', '='), array('x', 'y', 'z'), base64_encode($token));
