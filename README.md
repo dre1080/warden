@@ -160,7 +160,7 @@ Resetting a user's password
         } else {
             echo 'Not a valid user';
         }
-    } catch (\Orm\ValidationFailed $ex) {
+    } catch (Warden_Failure $ex) {
         // reset password token has expired
         echo $ex->getMessage();
     }

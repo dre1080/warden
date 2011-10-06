@@ -179,7 +179,7 @@ class Model_User extends \Orm\Model
      * @return \Warden\Model_User|null The user that matches the tokens or
      *                                 null if no user matches that condition.
      *
-     * @throws \Orm\ValidationFailed If the user needs to be confirmed
+     * @throws \Warden\Warden_Failure If the user needs to be confirmed
      */
     public static function authenticate($username_or_email)
     {
@@ -211,9 +211,7 @@ SQL;
 
         if (!empty($record)) {
             if ($record->is_confirmation_required()) {
-                throw new \Orm\ValidationFailed(
-                        'You have to confirm your account before continuing.'
-                );
+                throw new Warden_Failure('unconfirmed');
             }
 
             return $record;
@@ -334,7 +332,7 @@ SQL;
      * @return \Warden\Model_User|null Returns a user if is found and token is still valid,
      *                                 or null if no user is found.
      *
-     * @throws \Orm\ValidationFailed If the token has expired
+     * @throws \Warden\Warden_Failure If the token has expired
      */
     public static function reset_password_by_token($reset_password_token, $new_password)
     {
@@ -348,7 +346,7 @@ SQL;
             if ($recoverable->is_reset_password_period_valid()) {
                 $recoverable->reset_password($new_password);
             } else {
-                throw new \Orm\ValidationFailed('Reset password token has expired, please request a new one.');
+                throw new Warden_Failure('expired_token', array('name' => 'Reset password'));
             }
         }
 
@@ -407,7 +405,7 @@ SQL;
      * @return \Warden\Model_User|null Returns a user if is found and token is still valid,
      *                                 or null if no user is found.
      *
-     * @throws \Orm\ValidationFailed If the token has expired or the user is already confirmed
+     * @throws \Warden\Warden_Failure If the token has expired or the user is already confirmed
      */
     public static function confirm_by_token($confirmation_token)
     {
@@ -421,7 +419,7 @@ SQL;
             if ($confirmable->is_confirmation_period_valid()) {
                 $confirmable->confirm();
             } else {
-                throw new \Orm\ValidationFailed('Confirmation token has expired, please request a new one.');
+                throw new Warden_Failure('expired_token', array('name' => 'Confirmation'));
             }
         }
 
@@ -433,7 +431,7 @@ SQL;
      *
      * @return bool
      *
-     * @throws \Orm\ValidationFailed If the user is already confirmed
+     * @throws \Warden\Warden_Failure If the user is already confirmed
      */
     public function confirm()
     {
@@ -443,10 +441,7 @@ SQL;
             return $this->save(false);
         }
 
-        throw new \Orm\ValidationFailed(sprintf(
-                '%s was already confirmed, please try signing in',
-                $this->email
-        ));
+        throw new Warden_Failure('already_confirmed', array('email' => $this->email));
     }
 
     /**

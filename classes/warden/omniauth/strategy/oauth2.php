@@ -50,8 +50,12 @@ class OmniAuth_Strategy_OAuth2 extends Strategy
                 'token'  => $params['access_token'],
                 'secret' => null,
             );
-        } catch (\OAuth2\Exception $e) {
-            exit('That didnt work: ' . $e);
+        } catch (\OAuth2\Exception $ex) {
+            exit(__('warden.omniauth_callbacks.failure', array(
+                    'provider' => $this->provider->name,
+                    'reason'   => $ex->getMessage()
+                )
+            ));
         }
     }
 

@@ -40,3 +40,4 @@ Autoloader::add_classes(array(
 ));
 
 Config::load('warden', true);
+Lang::load('warden', true);

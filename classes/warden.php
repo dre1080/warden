@@ -405,10 +405,11 @@ class Warden
     }
 
     /**
-     * An alias for Warden::can except throws an exception on failure and allows
+     * An alias for {@link Warden::can()} except throws an exception on failure and allows
      * extra options.
      *
-     * A 'message' option can be passed to specify a different message.
+     * A 'message' option can be passed to specify a different message. By default it will look
+     * for a lang line 'warden.unauthorized.[resource].[action]' first.
      * <code>
      * Warden::authorize('read', $article, array('message' => "Not authorized to read {$article->name}"));
      * </code>
@@ -416,6 +417,8 @@ class Warden
      * @param mixed $action   The action for the permission.
      * @param mixed $resource The resource for the permission.
      * @param array $options
+     * 
+     * @see {@link \Warden\Warden_AccessDenied}
      *
      * @throws \Warden\Warden_AccessDenied If the current user cannot perform the given action
      */

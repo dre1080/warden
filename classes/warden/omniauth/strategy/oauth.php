@@ -74,7 +74,11 @@ class OmniAuth_Strategy_OAuth extends OmniAuth_Strategy
             \Cookie::delete('oauth_token');
 
             // Send the user back to the beginning
-            exit('Invalid token after coming back to site');
+            exit(__('warden.omniauth_callbacks.failure', array(
+                    'provider' => $this->provider->name,
+                    'reason'   => 'Invalid token after coming back to site'
+                )
+            ));
         }
 
         // Get the verifier

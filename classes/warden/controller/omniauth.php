@@ -77,7 +77,7 @@ class Controller_OmniAuth extends \Controller
 
                 $user->save();
 
-            } catch (\Orm\ValidationFailed $ex) {
+            } catch (\Exception $ex) {
                 \Session::set_flash('warden.omniauthable.error', $ex->getMessage());
                 goto display;
             }

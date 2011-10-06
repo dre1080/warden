@@ -105,7 +105,7 @@ class Warden_Driver
     }
 
     /**
-     * Check if the user has permission to perform a given action on an object.
+     * Check if the user has permission to perform a given action on a resource.
      *
      * @param mixed $action   The action for the permission.
      * @param mixed $resource The resource for the permission.
@@ -125,8 +125,8 @@ class Warden_Driver
 
             foreach ($user->roles as $role) {
                 foreach ($role->permissions as $permission) {
-                    if ((in_array($permission->action, $action) || in_array('manage', $action)) &&
-                        (in_array($permission->resource, $resource) || in_array('all', $resource)))
+                    if ((in_array('manage', $action) || in_array($permission->action, $action)) &&
+                        (in_array('all', $resource) || in_array($permission->resource, $resource)))
                     {
                         $status = true;
                         break;

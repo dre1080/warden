@@ -19,10 +19,9 @@ namespace Warden;
  */
 class Warden_Failure extends \Fuel_Exception
 {
-    public function __construct($lang_key)
+    public function __construct($lang_key, array $params = array())
     {
-        \Lang::load('warden', true);
-        parent::__construct(__("warden.{$lang_key}"));
+        parent::__construct(__("warden.failure.{$lang_key}", $params));
     }
 }
 
@@ -44,10 +43,10 @@ class Warden_AccessDenied extends \Fuel_Exception
 
     public function __construct($message = null, $action = null, $resource = null)
     {
-        \Lang::load('warden', true);
-
         $this->action = $action;
         $this->resource = $resource;
+
+        $message || $message = __('warden.unauthorized.default');
 
         if (empty($message)) {
             $message = 'You are not authorized to access this page.';
