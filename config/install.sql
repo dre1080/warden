@@ -17,16 +17,21 @@ CREATE TABLE IF NOT EXISTS `users` (
   -- `reset_password_sent_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'When the reset password token was sent',
 
   -- IF USING confirmable uncomment the following lines
-  -- `is_confirmed` tinyint(1) DEFAULT 0 COMMENT 'Flag whether the user account has been confirmed',
+  -- `is_confirmed` tinyint(1) unsigned DEFAULT '0' COMMENT 'Flag whether the user account has been confirmed',
   -- `confirmation_token` varbinary(60) DEFAULT NULL COMMENT 'Confirmation token',
   -- `confirmation_sent_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'When the confirmation token was sent',
 
   -- IF USING trackable uncomment the following lines
-  -- `sign_in_count` int(11) unsigned NOT NULL COMMENT 'Increased every time a sign in is made',
+  -- `sign_in_count` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Increased every time a sign in is made',
   -- `current_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'A timestamp updated when the user signs in',
   -- `last_sign_in_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Holds the timestamp of the previous sign in',
   -- `current_sign_in_ip` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'The remote IP updated when the user sign in',
   -- `last_sign_in_ip` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Holds the remote IP of the previous sign in',
+
+  -- IF USING lockable uncomment the following lines, depending on ur lock_strategy
+  -- `failed_attempts` int(11) unsigned DEFAULT '0' COMMENT 'The number of current failed sign in attempts',
+  -- `unlock_token` varbinary(60) DEFAULT NULL COMMENT 'Unlock token',
+  -- `locked_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'When the account was locked',
 
   `created_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'When the user account was created',
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'When the user account was last updated',

@@ -123,8 +123,6 @@ return array(
      * the lock happens, containing a link to unlock it's account. The second
      * will unlock the user automatically after some configured time (eg. +2 hours).
      * It's also possible to setup lockable to use both email and time strategies.
-     *
-     * This uses `trackable`
      */
     'lockable' => array(
         /**
@@ -142,7 +140,8 @@ return array(
         'maximum_attempts' => 10,
 
         /**
-         * Lock the user account by sign_in_count or none.
+         * Lock the user account by (eg. failed_attempts, `trackable's` sign_in_count)
+         * or null for none. This can be any integer column name in the users table.
          *
          * (string)
          */

@@ -113,6 +113,7 @@ class Model_User extends \Orm\Model
         static::_init_trackable();
         static::_init_recoverable();
         static::_init_confirmable();
+        static::_init_lockable();
         static::_init_profilable();
         static::_init_omniauthable();
     }
@@ -212,6 +213,14 @@ SQL;
         if (!empty($record)) {
             if ($record->is_confirmation_required()) {
                 throw new Warden_Failure('unconfirmed');
+            } elseif ($record->is_access_locked()) {
+                throw new Warden_Failure('locked');
+            }
+            
+            // Unlock the user if the lock is expired, no matter
+            // if the user can login or not (wrong password, etc)
+            if ($record->is_lock_expired()) {
+                $record->unlock_access();
             }
 
             return $record;
@@ -302,7 +311,14 @@ SQL;
 
         $this->current_sign_in_ip = $new_current;
 
-        $this->sign_in_count += 1;
+        if (\Config::get('warden.lockable.in_use') === true &&
+            \Config::get('warden.lockable.lock_strategy') == 'sign_in_count')
+        {
+            $this->sign_in_count = 0;
+        } else {
+            $this->sign_in_count += 1;
+        }
+
 
         return $this->save(false);
     }
@@ -502,6 +518,153 @@ SQL;
         $this->confirmation_sent_at = \Date::time('UTC')->format('mysql');
 
         return $this->save(false);
+    }
+
+    /**
+     * Finds a user by it's unlock token and try to unlock it.
+     *
+     * @param type $unlock_token
+     *
+     * @return \Warden\Model_User|null Returns a user if is found and token is still valid,
+     *                                 or null if no user is found.
+     *
+     * @throws \Warden\Warden_Failure If the token has expired or the user is not locked
+     */
+    public static function unlock_access_by_token($unlock_token)
+    {
+        $lockable = static::find('first', array(
+            'where' => array(
+               'unlock_token' => $unlock_token
+            )
+        ));
+
+        if (!is_null($lockable)) {
+            if ($lockable->is_access_locked()) {
+                $lockable->unlock_access();
+            } else {
+                throw new Warden_Failure('expired_token', array('name' => 'Unlock'));
+            }
+        }
+
+        return $lockable;
+    }
+
+    /**
+     * Lock a user setting it's locked_at to actual time.
+     *
+     * @return bool
+     */
+    public function lock_access()
+    {
+        $this->locked_at = \Date::time('UTC')->format('mysql');
+
+        if ($this->is_unlock_strategy_enabled('email')) {
+            $this->generate_unlock_token();
+        }
+
+        return $this->save(false);
+    }
+
+    /**
+     * Unlock a user by cleaning locket_at and lock strategy field.
+     *
+     * @return bool
+     */
+    public function unlock_access()
+    {
+        $this->locked_at = null;
+
+        $strategy = \Config::get('warden.lockable.lock_strategy');
+        $this->{$strategy} = 0;
+
+        $this->unlock_token = null;
+
+        return $this->save(false);
+    }
+
+    /**
+     * Increments the user's attempts.
+     *
+     * @param int $attempts The attempts to increment by
+     *
+     * @throws \Warden\Warden_Failure If attempts exceeded
+     */
+    public function update_attempts($attempts)
+    {
+        $strategy = \Config::get('warden.lockable.lock_strategy');
+        $this->{$strategy} += (int)$attempts;
+
+        if ($this->is_attempts_exceeded()) {
+            $this->lock_access();
+            throw new Warden_Failure('locked');
+        } else {
+            $this->save(false);
+        }
+    }
+
+    /**
+     * Checks whether the attempts have exceeded maximum number of attempts.
+     *
+     * @return bool
+     */
+    public function is_attempts_exceeded()
+    {
+        $strategy = \Config::get('warden.lockable.lock_strategy');
+        return $this->{$strategy} > \Config::get('warden.lockable.maximum_attempts');
+    }
+
+    /**
+     * Is the unlock enabled for the given unlock strategy.
+     *
+     * @param string $strategy The strategy to check for
+     *
+     * @return bool
+     */
+    public function is_unlock_strategy_enabled($strategy)
+    {
+        return in_array(\Config::get('warden.lockable.unlock_strategy'), array($strategy, 'both'));
+    }
+
+    /**
+     * Tells if the lock is expired if 'time' unlock strategy is active.
+     *
+     * @return bool
+     */
+    public function is_lock_expired()
+    {
+        if (\Config::get('warden.lockable.in_use') === true &&
+            $this->is_unlock_strategy_enabled('time'))
+        {
+            $lifetime = \Config::get('warden.lockable.unlock_in');
+            $expires  = strtotime($lifetime, strtotime($this->locked_at));
+            return (bool)(($this->locked_at != static::$_properties['locked_at']['default']) &&
+                          ($expires >= time()));
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether the record is locked or not.
+     */
+    public function is_access_locked()
+    {
+        return !$this->is_lock_expired();
+    }
+
+    /**
+     * Generates a new random token for unlocking, and stores the time
+     * this token is being generated.
+     *
+     * @return bool
+     */
+    public function generate_unlock_token()
+    {
+        if (!is_null($this->unlock_token)) {
+            return true;
+        }
+
+        $this->unlock_token = Warden::instance()->generate_token();
     }
 
     /**
@@ -729,6 +892,27 @@ SQL;
                 'is_confirmed'         => array('default' => false),
                 'confirmation_token'   => array('default' => null),
                 'confirmation_sent_at' => array('default' => '0000-00-00 00:00:00')
+            ));
+        }
+    }
+
+    /**
+     * Checks that the lockable feature is enabled and adds its required
+     * fields to the properties
+     *
+     * @see \Warden\Model_User::_init()
+     */
+    private static function _init_lockable()
+    {
+        if (\Config::get('warden.lockable.in_use') === true) {
+            $strategy = \Config::get('warden.lockable.lock_strategy');
+            if ($strategy !== null) {
+                static::$_properties[$strategy] = array('default' => 0);
+            }
+
+            static::$_properties = array_merge(static::$_properties, array(
+                'unlock_token'    => array('default' => null),
+                'locked_at'       => array('default' => '0000-00-00 00:00:00')
             ));
         }
     }

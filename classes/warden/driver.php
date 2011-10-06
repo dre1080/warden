@@ -146,11 +146,13 @@ class Warden_Driver
      * @param bool   $remember
      *
      * @return bool
+     *
+     * @throws \Warden\Warden_Failure If lockable enabled & attempts exceeded
      */
     public function authenticate_user($username_or_email, $password, $remember)
     {
         if (($user = \Model_User::authenticate($username_or_email)) &&
-            Warden::instance()->has_password($user, $password))
+             Warden::instance()->has_password($user, $password))
         {
             if ($remember === true) {
                 // Set token data
@@ -166,6 +168,10 @@ class Warden_Driver
             $this->complete_login($user);
 
             return true;
+        }
+
+        if ($this->config['lockable']['in_use'] === true) {
+            $user->update_attempts(1);
         }
 
         // Login failed
@@ -322,6 +328,11 @@ BODY;
         if ($this->config['trackable'] === true) {
             $user->update_tracked_fields();
         } else {
+            if ($this->config['lockable']['in_use'] === true) {
+                $strategy = \Config::get('warden.lockable.lock_strategy');
+                $user->{$strategy} = 0;
+            }
+
             $user->save(false);
         }
 
