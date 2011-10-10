@@ -87,6 +87,7 @@ CREATE TABLE IF NOT EXISTS `permissions` (
  `action` varchar(30) NOT NULL COMMENT 'The action the permission corresponds to (eg. ''read'')',
  `description` varchar(100) NOT NULL COMMENT 'The description of the permission',
  PRIMARY KEY (`id`),
+ UNIQUE KEY `index_permissions_on_name` (`name`),
  UNIQUE KEY `index_permissions_on_resource_and_action` (`resource`,`action`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User permissions';
 
@@ -100,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `roles_permissions` (
   `role_id` int(11) unsigned NOT NULL COMMENT 'Unique role ID',
   `permission_id` int(11) unsigned NOT NULL COMMENT 'Unique permission ID',
   PRIMARY KEY (`role_id`,`permission_id`),
-  KEY `index_roles_permissions_on_role_id` (`role_id`)
+  KEY `index_roles_permissions_on_permission_id` (`permission_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Role to permission mapping';
 
 --
@@ -129,10 +130,30 @@ CREATE TABLE IF NOT EXISTS `services` (
   PRIMARY KEY (`id`),
   KEY `index_services_on_access_token` (`access_token`),
   KEY `index_services_on_user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User services for OAuth';
 
 --
 -- Constraints for table `services`
 --
 ALTER TABLE `services`
   ADD CONSTRAINT `fk_index_services_on_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+-- --------------------------------------------------------
+
+-- IF USING profilable the following table is required
+--
+-- Minimum table structure for table `profiles`
+--
+
+CREATE TABLE IF NOT EXISTS `profiles` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique profile id',
+  `user_id` int(11) unsigned NOT NULL COMMENT 'Unique user id',
+  PRIMARY KEY (`id`),
+  KEY `index_profiles_on_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User profiles';
+
+--
+-- Constraints for table `services`
+--
+ALTER TABLE `profiles`
+  ADD CONSTRAINT `fk_index_profiles_on_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
