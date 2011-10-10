@@ -52,8 +52,17 @@ or load it manually like so
 
     Fuel::add_package('warden');
 
-View `config/install.sql` for table structures.
-Create your roles in the `roles` table to assign roles to users.
+There are two ways to install Warden:
+
+### SQL File
+
+View `config/install.sql` for table structures or simply import into your database.
+
+### Command Line
+
+    php oil r warden
+
+**Don't forget to create your roles in the `roles` table to be able to assign roles to users.**
 
 ## Configuration
 For now, only config options are:
@@ -68,6 +77,12 @@ For now, only config options are:
 + `confirmable`: verify if an account is already confirmed to sign in.
     + (bool) `in_use`: Set to true, to enable (default: false)
     + (string) `confirm_within`: The limit time within which the confirmation token is valid. (default: '+1 week')
++ `lockable`: handles blocking a user access after a certain number of attempts.
+    + (bool) `in_use`: Set to true, to enable (default: false)
+    + (integer) `maximum_attempts`: How many attempts should be accepted before blocking the user. (default: 10)
+    + (string) `lock_strategy`: This can be any integer column name in the users table.
+    + (string) `unlock_strategy`: Unlock the user account by time, email, both or none. (default: 'both')
+    + (string) `unlock_in`: The time you want to lock the user after to lock happens. (default: '+1 week')
 + `http_authenticatable`: provides basic and digest authentication.
     + (bool) `in_use`: Set to true, to enable (default: false)
     + (string) `method`: The type of Http method to use for authentication. (default: 'digest')
@@ -114,6 +129,16 @@ Checking for a specific role:
         echo "Hey, editor - moderator";
     } else {
         echo "Fail!";
+    }
+
+Checking the current user has permission for a resource:
+
+    try {
+        // Can the user create an article?
+        Warden::authorize('create', 'Article');
+    } catch (Warden_AccessDenied $ex) {
+        // Nope, get out
+        die($ex->getMessage());
     }
 
 Log in a user by using a username or email and plain-text password:
