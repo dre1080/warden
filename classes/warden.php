@@ -64,7 +64,7 @@ class Warden
         static $instance = null;
 
         // Load the Warden instance
-        if (!$instance) {
+        if ($instance === null) {
             $config = array_merge(\Config::get('warden', array()), $config);
             $instance = new static;
             $instance->driver = new Warden_Driver($config);
@@ -147,7 +147,7 @@ class Warden
      */
     public static function logged_in($role = null)
     {
-        return static::instance()->driver->logged_in($role);
+        return static::driver()->logged_in($role);
     }
 
     /**
@@ -185,7 +185,7 @@ class Warden
      */
     public static function has_access($role, Model_User $user = null)
     {
-        return static::instance()->driver->has_access($role, $user);
+        return static::driver()->has_access($role, $user);
     }
 
     /**
@@ -201,7 +201,7 @@ class Warden
      */
     public static function set_user(Model_User $user)
     {
-        static::instance()->driver->set_user($user);
+        static::driver()->set_user($user);
     }
 
     /**
@@ -218,7 +218,7 @@ class Warden
      */
     public static function current_user()
     {
-        return static::instance()->driver->current_user();
+        return static::driver()->current_user();
     }
 
     /**
@@ -264,7 +264,7 @@ class Warden
             return false;
         }
 
-        return static::instance()->driver->authenticate_user($username_or_email, $password, $remember);
+        return static::driver()->authenticate_user($username_or_email, $password, $remember);
     }
 
     /**
@@ -297,7 +297,7 @@ class Warden
      */
     public static function http_authenticate()
     {
-        return static::instance()->driver->http_authenticate_user();
+        return static::driver()->http_authenticate_user();
     }
 
     /**
@@ -316,7 +316,7 @@ class Warden
      */
     public static function auto_login($role = null)
     {
-        return static::instance()->driver->auto_login($role);
+        return static::driver()->auto_login($role);
     }
 
     /**
@@ -335,7 +335,7 @@ class Warden
      */
     public static function force_login($username)
     {
-        return static::instance()->driver->force_login($username);
+        return static::driver()->force_login($username);
     }
 
     /**
@@ -353,7 +353,7 @@ class Warden
      */
     public static function logout($destroy = false)
     {
-        return static::instance()->driver->logout($destroy);
+        return static::driver()->logout($destroy);
     }
 
     /**
@@ -402,7 +402,7 @@ class Warden
      */
     public static function can($action, $resource)
     {
-        return static::instance()->driver->can_user($action, $resource);
+        return static::driver()->can_user($action, $resource);
     }
 
     /**
@@ -570,5 +570,15 @@ class Warden
 
         $token = $cryptlib->getRandomToken(32).':'.time();
         return str_replace(array('+', '/', '='), array('x', 'y', 'z'), base64_encode($token));
+    }
+
+    /**
+     * Fetches the warden driver instance
+     *
+     * @return \Warden\Warden_Driver
+     */
+    protected static function driver()
+    {
+        return static::instance()->driver;
     }
 }
