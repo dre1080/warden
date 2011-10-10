@@ -255,7 +255,7 @@ class Warden
      * @param bool   $remember          Whether to set remember-me cookie
      *
      * @return bool Returns true on success or false on failure
-     * 
+     *
      * @throws \Warden\Warden_Failure If lockable enabled & attempts exceeded
      */
     public static function authenticate($username_or_email, $password, $remember = false)

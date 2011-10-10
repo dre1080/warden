@@ -330,7 +330,10 @@ BODY;
         } else {
             if ($this->config['lockable']['in_use'] === true) {
                 $strategy = \Config::get('warden.lockable.lock_strategy');
-                $user->{$strategy} = 0;
+
+                if (!is_null($strategy) && $strategy != 'none') {
+                    $user->{$strategy} = 0;
+                }
             }
 
             $user->save(false);

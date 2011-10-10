@@ -216,7 +216,7 @@ SQL;
             } elseif ($record->is_access_locked()) {
                 throw new Warden_Failure('locked');
             }
-            
+
             // Unlock the user if the lock is expired, no matter
             // if the user can login or not (wrong password, etc)
             if ($record->is_lock_expired()) {
@@ -575,7 +575,10 @@ SQL;
         $this->locked_at = null;
 
         $strategy = \Config::get('warden.lockable.lock_strategy');
-        $this->{$strategy} = 0;
+
+        if (!is_null($strategy) && $strategy != 'none') {
+            $this->{$strategy} = 0;
+        }
 
         $this->unlock_token = null;
 
@@ -592,7 +595,10 @@ SQL;
     public function update_attempts($attempts)
     {
         $strategy = \Config::get('warden.lockable.lock_strategy');
-        $this->{$strategy} += (int)$attempts;
+
+        if (!is_null($strategy) && $strategy != 'none') {
+            $this->{$strategy} += (int)$attempts;
+        }
 
         if ($this->is_attempts_exceeded()) {
             $this->lock_access();
@@ -610,6 +616,11 @@ SQL;
     public function is_attempts_exceeded()
     {
         $strategy = \Config::get('warden.lockable.lock_strategy');
+
+        if (!is_null($strategy) && $strategy != 'none') {
+            return false;
+        }
+        
         return $this->{$strategy} > \Config::get('warden.lockable.maximum_attempts');
     }
 
