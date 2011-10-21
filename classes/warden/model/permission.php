@@ -12,30 +12,20 @@
 namespace Warden;
 
 /**
- * Model_Role
+ * Model_Permission
  *
  * @package    Warden
  * @subpackage Warden
  */
-class Model_Role extends \Orm\Model
+class Model_Permission extends \Orm\Model
 {
     protected static $_many_many = array(
-        'users' => array(
+        'roles' => array(
             'key_from' => 'id',
-            'key_through_from' => 'role_id',
-            'key_through_to'   => 'user_id',
-            'table_through' => 'roles_users',
-            'model_to' => 'Model_User',
-            'key_to' => 'id',
-            'cascade_delete' => true,
-        ),
-
-        'permissions' => array(
-            'key_from' => 'id',
-            'key_through_from' => 'role_id',
-            'key_through_to'   => 'permission_id',
+            'key_through_from' => 'permission_id',
+            'key_through_to'   => 'role_id',
             'table_through' => 'roles_permissions',
-            'model_to' => 'Model_Permission',
+            'model_to' => 'Model_Role',
             'key_to' => 'id',
             'cascade_delete' => true,
         )
@@ -43,6 +33,20 @@ class Model_Role extends \Orm\Model
 
     protected static $_properties = array(
         'id',
+
+        'resource' => array(
+            'validation' => array(
+                'required',
+                'max_length' => array(30)
+            )
+        ),
+
+        'action' => array(
+            'validation' => array(
+                'required',
+                'max_length' => array(30)
+            )
+        ),
 
         'name' => array(
             'validation' => array(
@@ -56,7 +60,7 @@ class Model_Role extends \Orm\Model
                 'required',
                 'max_length' => array(100)
             )
-        ),
+        )
     );
 
     protected static $_observers = array(

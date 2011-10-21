@@ -1,7 +1,6 @@
 <?php
 /**
- * The Warden: User authorization library for FuelPHP.
- * Handles user login and logout, as well as secure password hashing.
+ * Warden: User authorization & authentication library for FuelPHP.
  *
  * @package    Warden
  * @subpackage Warden
@@ -11,6 +10,9 @@
  * @copyright  (c) 2011 Andrew Wayne
  */
 namespace Warden;
+
+use CryptLib\CryptLib;
+use CryptLib\Password\Implementation\Blowfish as BCrypt;
 
 /**
  * Warden
@@ -62,7 +64,7 @@ class Warden
         static $instance = null;
 
         // Load the Warden instance
-        if (!$instance) {
+        if ($instance === null) {
             $config = array_merge(\Config::get('warden', array()), $config);
             $instance = new static;
             $instance->driver = new Warden_Driver($config);
@@ -84,15 +86,45 @@ class Warden
      * }
      * </code>
      *
+     * Checking a role has permission:
+     * <code>
+     * if (Warden::check('admin', 'delete', 'User')) {
+     *     echo "User is an admin and has permission to delete other users";
+     * } else {
+     *     throw new Warden_AccessDenied();
+     * }
+     * </code>
+     *
+     * If an action is given and no resource is given, it will assume that the
+     * resource has the same name as the role.
+     * <code>
+     * if (Warden::check('admin', 'delete')) {
+     *     echo "User is an admin and has permission to delete other "admin"";
+     * } else {
+     *     throw new Warden_AccessDenied();
+     * }
+     * </code>
+     *
+     * @param mixed $role     The role name (optional)
+     * @param mixed $action   The action permission for the role (optional)
+     * @param mixed $resource The resource permission for the role (optional)
+     *
      * @return bool Returns true on success or false on failure
      */
-    public static function check()
+    public static function check($role = null, $action = null, $resource = null)
     {
-        if (static::logged_in()) {
-            return true;
+        $status = false;
+
+        if (static::logged_in($role) || static::auto_login($role)) {
+            $status = true;
         }
 
-        return static::auto_login();
+        if (!is_null($action)) {
+            $resource = (is_null($resource) ? $role : $resource);
+            return $status && static::can($action, $resource);
+        }
+
+        return $status;
     }
 
     /**
@@ -109,17 +141,17 @@ class Warden
      * }
      * </code>
      *
-     * @param string $role The role name (optional)
+     * @param mixed $role The role name (optional)
      *
      * @return bool Returns true on success or false on failure
      */
     public static function logged_in($role = null)
     {
-        return static::instance()->driver->logged_in($role);
+        return static::driver()->logged_in($role);
     }
 
     /**
-     * Verify Acl access
+     * Verify user-role access
      *
      * <code>
      * if (Warden::has_access('admin')) {
@@ -136,6 +168,13 @@ class Warden
      * } else {
      *     echo "Fail!";
      * }
+     *
+     * // Checking a user has a role permission
+     * if (Warden::has_access('admin', 'delete', $user)) {
+     *     echo "User is an admin and has deleting rights";
+     * } else {
+     *     echo "Failed, you're not an admin with deleting rights";
+     * }
      * </code>
      *
      * @param mixed              $role The role name(s) to check
@@ -146,7 +185,23 @@ class Warden
      */
     public static function has_access($role, Model_User $user = null)
     {
-        return static::instance()->driver->has_access($role, $user);
+        return static::driver()->has_access($role, $user);
+    }
+
+    /**
+     * Explicitly set the current user.
+     *
+     * <code>
+     * if (($user = Model_User:find(1))) {
+     *      Warden::set_user($user);
+     * }
+     * </code>
+     *
+     * @param \Warden\Model_User The user to set
+     */
+    public static function set_user(Model_User $user)
+    {
+        static::driver()->set_user($user);
     }
 
     /**
@@ -163,7 +218,21 @@ class Warden
      */
     public static function current_user()
     {
-        return static::instance()->driver->current_user();
+        return static::driver()->current_user();
+    }
+
+    /**
+     * This method is deprecated...use authenticate() instead.
+     *
+     * @deprecated since version 0.6, will be removed in version 1.0
+     */
+    public static function authenticate_user($username_or_email, $password, $remember = false)
+    {
+        logger(\Fuel::L_WARNING,
+               'This method is deprecated.  Please use authenticate() instead.',
+                __METHOD__);
+
+        return static::authenticate($username_or_email, $password, $remember);
     }
 
     /**
@@ -171,7 +240,7 @@ class Warden
      *
      * <code>
      * if (Input::method() === 'POST') {
-     *     if (Warden::authenticate_user(Input::post('username_or_email'), Input::post('password'))) {
+     *     if (Warden::authenticate(Input::post('username_or_email'), Input::post('password'))) {
      *         Session::set_flash('success', 'Logged in successfully');
      *     } else {
      *         Session::set_flash('error', 'Username or password invalid');
@@ -186,32 +255,49 @@ class Warden
      * @param bool   $remember          Whether to set remember-me cookie
      *
      * @return bool Returns true on success or false on failure
+     *
+     * @throws \Warden\Warden_Failure If lockable enabled & attempts exceeded
      */
-    public static function authenticate_user($username_or_email, $password, $remember = false)
+    public static function authenticate($username_or_email, $password, $remember = false)
     {
         if (empty($username_or_email) || empty($password)) {
             return false;
         }
 
-        return static::instance()->driver->authenticate_user($username_or_email, $password, $remember);
+        return static::driver()->authenticate_user($username_or_email, $password, $remember);
+    }
+
+    /**
+     * This method is deprecated...use http_authenticate() instead.
+     *
+     * @deprecated since version 0.6, will be removed in version 1.0
+     */
+    public static function http_authenticate_user()
+    {
+        logger(\Fuel::L_WARNING,
+               'This method is deprecated.  Please use http_authenticate() instead.',
+                __METHOD__);
+
+        return static::http_authenticate();
     }
 
     /**
      * Attempt to log in a user by using an http based authentication method.
      *
      * <code>
-     * if (($user = Warden::http_authenticate_user())) {
+     * if (($user = Warden::http_authenticate())) {
      *      Session::set_flash('success', "Logged in as {$user['username']}");
      * }
      * </code>
      *
      * @see \Warden\Warden_Driver::http_authenticate_user()
+     * @since version 0.6
      *
      * @return array A key/value array of the username => value and password => value
      */
-    public static function http_authenticate_user()
+    public static function http_authenticate()
     {
-        return static::instance()->driver->http_authenticate_user();
+        return static::driver()->http_authenticate_user();
     }
 
     /**
@@ -224,11 +310,13 @@ class Warden
      * }
      * </code>
      *
+     * @param mixed $role The role name (optional)
+     *
      * @return bool
      */
-    public static function auto_login()
+    public static function auto_login($role = null)
     {
-        return static::instance()->driver->auto_login();
+        return static::driver()->auto_login($role);
     }
 
     /**
@@ -247,7 +335,7 @@ class Warden
      */
     public static function force_login($username)
     {
-        return static::instance()->driver->force_login($username);
+        return static::driver()->force_login($username);
     }
 
     /**
@@ -265,7 +353,174 @@ class Warden
      */
     public static function logout($destroy = false)
     {
-        return static::instance()->driver->logout($destroy);
+        return static::driver()->logout($destroy);
+    }
+
+    /**
+     * Check if the user has permission to perform a given action on a resource.
+     *
+     * <code>
+     * if (Warden::can('destroy', $project)) {
+     *      echo 'User can destroy';
+     * }
+     * </code>
+     *
+     * You can also pass the class instead of an instance (if you don't have one handy).
+     * <code>
+     * if (Warden::can('destroy', 'Project')) {
+     *      echo 'User can destroy';
+     * }
+     * </code>
+     *
+     * Multiple actions/resources can be passed through an array. It will return
+     * true if one of the supplied actions/resources are found.
+     * <code>
+     * if (Warden::can('destroy', array('Project', 'Task'))) {
+     *      echo 'User can destroy a project/task';
+     * }
+     *
+     * if (Warden::can(array('destroy', 'create'), array('Project', 'Task'))) {
+     *      echo 'User can create/destroy a project/task';
+     * }
+     * </code>
+     *
+     * You can pass 'all' to match any resource and 'manage' to match any action.
+     * <code>
+     * if (Warden::can('manage', 'all')) {
+     *      echo 'User can do something on one of the resources';
+     * }
+     *
+     * if (Warden::can('manage', 'Project')) {
+     *      echo 'User can do something on a Project';
+     * }
+     * </code>
+     *
+     * @param mixed $action   The action for the permission.
+     * @param mixed $resource The resource for the permission.
+     *
+     * @return bool
+     */
+    public static function can($action, $resource)
+    {
+        return static::driver()->can_user($action, $resource);
+    }
+
+    /**
+     * Convenience method which works the same as {@link Warden::can()}
+     * but returns the opposite value.
+     *
+     * <code>
+     * if (Warden::cannot('create', 'Project') {
+     *      die('Unauthorized user');
+     * }
+     * </code>
+     */
+    public static function cannot($action, $resource)
+    {
+        return !static::can($action, $resource);
+    }
+
+    /**
+     * An alias for {@link Warden::can()} except throws an exception on failure and allows
+     * extra options.
+     *
+     * A 'message' option can be passed to specify a different message. By default it will look
+     * for a lang line 'warden.unauthorized.[resource].[action]' first.
+     * <code>
+     * Warden::authorize('read', $article, array('message' => "Not authorized to read {$article->name}"));
+     * </code>
+     *
+     * @param mixed $action   The action for the permission.
+     * @param mixed $resource The resource for the permission.
+     * @param array $options
+     *
+     * @see {@link \Warden\Warden_AccessDenied}
+     *
+     * @throws \Warden\Warden_AccessDenied If the current user cannot perform the given action
+     */
+    public static function authorize($action, $resource, array $options = array())
+    {
+        $message = null;
+        if (isset($options['message'])) {
+            $message = $options['message'];
+        }
+
+        if (static::cannot($action, $resource)) {
+            $message || $message = __("warden.unauthorized.{$resource}.{$action}");
+            throw new Warden_AccessDenied($message, $action, $resource);
+        }
+    }
+
+    /**
+     * This is called every time the user is set.
+     * The user is set:
+     *
+     *      - when the user is initially authenticated
+     *      - when the user is set via Warden::set_user()
+     *
+     * <code>
+     * Warden::after_set_user(function($user) {
+     *      if (!$user->is_active) {
+     *          Warden::logout();
+     *      }
+     * });
+     *
+     * // OR
+     *
+     * Warden::after_set_user('Myclass::method');
+     * </code>
+     *
+     * @param mixed $callback The callable function to execute
+     *
+     * @uses \Fuel\Core\Event::register()
+     */
+    public static function after_set_user($callback)
+    {
+        \Event::register('warden_after_set_user', $callback);
+    }
+
+    /**
+     * Executed every time the user is authenticated.
+     *
+     * <code>
+     * Warden::after_authentication(function($user) {
+     *      $user->last_login = time();
+     * });
+     *
+     * // OR
+     *
+     * Warden::after_authentication('Myclass::method');
+     * </code>
+     *
+     * @param mixed $callback The callable function to execute
+     *
+     * @uses \Fuel\Core\Event::register()
+     */
+    public static function after_authentication($callback)
+    {
+        \Event::register('warden_after_authentication', $callback);
+    }
+
+    /**
+     * Executed before each user is logged out.
+     *
+     * <code>
+     * Warden::before_logout(function($user) {
+     *      logger(\Fuel::L_INFO, 'User '.$user->id.' logging out', 'Warden::before_logout');
+     * });
+     *
+     * // OR
+     *
+     * Warden::before_logout('Myclass::method');
+     * </code>
+     *
+     * @param mixed $callback The callable function to execute
+     *
+     * @uses \Fuel\Core\Event::register()
+     */
+    public static function before_logout($callback)
+    {
+        \Event::register('warden_before_logout', $callback);
     }
 
     /**
@@ -278,7 +533,7 @@ class Warden
     public function encrypt_password($password)
     {
         static $hasher = null;
-        $hasher || $hasher = new \CryptLib\Password\Implementation\Blowfish();
+        $hasher || $hasher = new BCrypt;
         return $hasher->create($password);
     }
 
@@ -296,18 +551,34 @@ class Warden
             return false;
         }
 
-        $hasher = \CryptLib\Password\Implementation\Blowfish::loadFromHash($user->encrypted_password);
-        return $hasher->verify($submitted_password, $user->encrypted_password);
+        $cryptlib = new CryptLib;
+        return $cryptlib->verifyPasswordHash($submitted_password, $user->encrypted_password);
     }
 
     /**
      * Generate a unique friendly string to be used as a token.
+     * We don't use the built in \Str::random('unique') because it is based on using
+     * uniqid() prefixed with mt_rand() which is a very weak source in random
+     * string generation.
      *
      * @return string
      */
-    public static function generate_token()
+    public function generate_token()
     {
-        $token = \Str::random('unique').'_'.time();
+        static $cryptlib = null;
+        $cryptlib || $cryptlib = new CryptLib;
+
+        $token = $cryptlib->getRandomToken(32).':'.time();
         return str_replace(array('+', '/', '='), array('x', 'y', 'z'), base64_encode($token));
+    }
+
+    /**
+     * Fetches the warden driver instance
+     *
+     * @return \Warden\Warden_Driver
+     */
+    protected static function driver()
+    {
+        return static::instance()->driver;
     }
 }

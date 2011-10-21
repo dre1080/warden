@@ -1,7 +1,6 @@
 <?php
 /**
- * The Warden: User authorization library for fuelphp.
- * Handles user login and logout, as well as secure password hashing.
+ * Warden: User authorization & authentication library for FuelPHP.
  *
  * @package    Warden
  * @subpackage Warden
@@ -63,12 +62,12 @@ class Warden_Driver
         {
             $this->user = null;
 
-            $user = Model_User::find('first', array(
+            $user = \Model_User::find('first', array(
                 'where' => array('authentication_token' => $auth_token)
             ));
 
             if (!is_null($user)) {
-                $this->user = $user;
+                $this->set_user($user);
             }
         }
 
@@ -76,7 +75,7 @@ class Warden_Driver
     }
 
     /**
-     * Verify Acl access
+     * Verify role access
      *
      * @param mixed              $role The role name to check
      * @param \Warden\Model_User $user The user to check against, if no user is given (null)
@@ -106,6 +105,40 @@ class Warden_Driver
     }
 
     /**
+     * Check if the user has permission to perform a given action on a resource.
+     *
+     * @param mixed $action   The action for the permission.
+     * @param mixed $resource The resource for the permission.
+     *
+     * @return bool
+     */
+    public function can_user($action, $resource)
+    {
+        $user   = $this->current_user();
+        $status = !!$user;
+
+        if ($status) {
+            $status   = false;
+            $action   = (is_array($action)    ? $action : array($action));
+            $resource = (is_object($resource) ? get_class($resource) : $resource);
+            $resource = (is_array($resource)  ? $resource : array($resource));
+
+            foreach ($user->roles as $role) {
+                foreach ($role->permissions as $permission) {
+                    if ((in_array('manage', $action) || in_array($permission->action, $action)) &&
+                        (in_array('all', $resource) || in_array($permission->resource, $resource)))
+                    {
+                        $status = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $status;
+    }
+
+    /**
      * Logs a user in.
      *
      * @param string $username_or_email
@@ -113,15 +146,17 @@ class Warden_Driver
      * @param bool   $remember
      *
      * @return bool
+     *
+     * @throws \Warden\Warden_Failure If lockable enabled & attempts exceeded
      */
     public function authenticate_user($username_or_email, $password, $remember)
     {
-        if (($user = Model_User::authenticate($username_or_email)) &&
-            Warden::instance()->has_password($user, $password))
+        if (($user = \Model_User::authenticate($username_or_email)) &&
+             Warden::instance()->has_password($user, $password))
         {
             if ($remember === true) {
                 // Set token data
-                $user->remember_token = Warden::generate_token();
+                $user->remember_token = Warden::instance()->generate_token();
 
                 // Set the remember-me cookie
                 \Cookie::set('remember_token',
@@ -133,6 +168,10 @@ class Warden_Driver
             $this->complete_login($user);
 
             return true;
+        }
+
+        if ($this->config['lockable']['in_use'] === true) {
+            $user->update_attempts(1);
         }
 
         // Login failed
@@ -149,10 +188,6 @@ class Warden_Driver
      */
     public function http_authenticate_user()
     {
-        if (!$this->config['http_authenticatable']['in_use']) {
-            return false;
-        }
-
         $method = "_http_{$this->config['http_authenticatable']['method']}";
 
         $body = <<<BODY
@@ -169,6 +204,17 @@ class Warden_Driver
     </html>
 BODY;
         return $this->{$method}(new \Response($body, 401));
+    }
+
+    /**
+     * Sets the currently logged in user.
+     *
+     * @param \Warden\Model_User The user to set
+     */
+    public function set_user(Model_User $user)
+    {
+        $this->user = $user;
+        $this->_run_event('after_set_user');
     }
 
     /**
@@ -195,28 +241,32 @@ BODY;
      */
     public function force_login($username_or_email)
     {
-        $user = Model_User::authenticate($username_or_email);
+        $user = \Model_User::authenticate($username_or_email);
         return $user && $this->complete_login($user);
     }
 
     /**
      * Logs a user in, based on stored credentials, typically cookies.
      *
+     * @param string $role The role name (optional)
+     *
      * @return bool
      */
-    public function auto_login()
+    public function auto_login($role = null)
     {
         if (($token = \Cookie::get('remember_token'))) {
-            $user = Model_User::find('first', array(
+            $user = \Model_User::find('first', array(
                 'where' => array('remember_token' => $token)
             ));
 
             if (!is_null($user)) {
-                // Complete the login with the found data
-                $this->complete_login($user);
+                if ($this->has_access($role, $user)) {
+                    // Complete the login with the found data
+                    $this->complete_login($user);
 
-                // Automatic login was successful
-                return true;
+                    // Automatic login was successful
+                    return true;
+                }
             }
         }
 
@@ -232,6 +282,8 @@ BODY;
      */
     public function logout($destroy)
     {
+        $this->_run_event('before_logout');
+
         $this->user = null;
 
         // Delete the session identifier for the user
@@ -271,18 +323,28 @@ BODY;
     protected function complete_login(Model_User $user)
     {
         // Create and set new authentication token
-        $user->authentication_token = Warden::generate_token();
+        $user->authentication_token = Warden::instance()->generate_token();
 
         if ($this->config['trackable'] === true) {
             $user->update_tracked_fields();
         } else {
+            if ($this->config['lockable']['in_use'] === true) {
+                $strategy = \Config::get('warden.lockable.lock_strategy');
+
+                if (!is_null($strategy) && $strategy != 'none') {
+                    $user->{$strategy} = 0;
+                }
+            }
+
             $user->save(false);
         }
 
         \Session::set('authenticity_token', $user->authentication_token);
         \Session::instance()->rotate();
 
-        $this->user = $user;
+        $this->set_user($user);
+
+        $this->_run_event('after_authentication');
 
         return true;
     }
@@ -346,5 +408,19 @@ BODY;
         }
 
         return array('username' => $data['username'], 'password' => $password);
+    }
+
+    /**
+     * Runs a Warden callback event if its been registered
+     *
+     * @param string $name The event to run
+     */
+    private function _run_event($name)
+    {
+        $event = "warden_{$name}";
+
+        if (\Event::has_events($event)) {
+            \Event::trigger($event, $this->user);
+        }
     }
 }

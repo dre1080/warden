@@ -1,7 +1,6 @@
 <?php
 /**
- * The Warden: User authorization library for FuelPHP.
- * Handles user login and logout, as well as secure password hashing.
+ * Warden: User authorization & authentication library for FuelPHP.
  *
  * @package    Warden
  * @subpackage Warden
@@ -40,19 +39,28 @@ class Model_User extends \Orm\Model
     public $password;
 
     /**
+     * We need these to avoid an error in the \Warden\Model_User::_init() method:
+     * "Access to undeclared static property"
+     *
+     * @var array
+     */
+    protected static $_has_one = array();
+    protected static $_has_many = array();
+
+    /**
      * Many Many; relationship properties
      *
      * @var array
      */
     protected static $_many_many = array(
         'roles' => array(
-            'key_from' => 'id',
+            'key_from'         => 'id',
             'key_through_from' => 'user_id',
             'key_through_to'   => 'role_id',
-            'table_through' => 'roles_users',
-            'model_to' => '\Warden\Model_Role',
-            'key_to' => 'id',
-            'cascade_delete' => true,
+            'table_through'    => 'roles_users',
+            'model_to'         => 'Model_Role',
+            'key_to'           => 'id',
+            'cascade_delete'   => true,
         )
     );
 
@@ -98,26 +106,16 @@ class Model_User extends \Orm\Model
     );
 
     /**
-     * Loads configuration options.
+     * Loads configuration options and sets up class properties.
      */
     public static function _init()
     {
-        if (\Config::get('warden.trackable', false)) {
-            static::$_properties = array_merge(static::$_properties, array(
-                'sign_in_count'      => array('default' => 0),
-                'current_sign_in_at' => array('default' => '0000-00-00 00:00:00'),
-                'last_sign_in_at'    => array('default' => '0000-00-00 00:00:00'),
-                'current_sign_in_ip' => array('default' => 0),
-                'last_sign_in_ip'    => array('default' => 0),
-            ));
-        }
-
-        if (\Config::get('warden.recoverable.in_use', false)) {
-            static::$_properties = array_merge(static::$_properties, array(
-                'reset_password_token' => array('default' => null),
-                'reset_password_sent_at' => array('default' => '0000-00-00 00:00:00')
-            ));
-        }
+        static::_init_trackable();
+        static::_init_recoverable();
+        static::_init_confirmable();
+        static::_init_lockable();
+        static::_init_profilable();
+        static::_init_omniauthable();
     }
 
     /**
@@ -131,6 +129,21 @@ class Model_User extends \Orm\Model
         if (isset($data['password'])) {
             $this->password = $data['password'];
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __call($method, $args)
+    {
+        $convenience = substr($method, 0, 2);
+        $role        = substr($method, 3);
+
+        if ($convenience == 'is') {
+            return Warden::has_access($role, $this);
+        }
+
+        return parent::__call($method, $args);
     }
 
     /**
@@ -166,6 +179,8 @@ class Model_User extends \Orm\Model
      *
      * @return \Warden\Model_User|null The user that matches the tokens or
      *                                 null if no user matches that condition.
+     *
+     * @throws \Warden\Warden_Failure If the user needs to be confirmed
      */
     public static function authenticate($username_or_email)
     {
@@ -173,16 +188,45 @@ class Model_User extends \Orm\Model
             return null;
         }
 
-        $username_or_email = \Str::lower($username_or_email);
+        $username_or_email = \DB::escape(\Str::lower($username_or_email));
 
-        $user = static::find('first', array(
-            'where' => array(
-                'email' => $username_or_email,
-                array('username', '=', $username_or_email),
-            ),
-        ));
+        $table = static::table();
+        $properties = implode('`, `', array_keys(static::properties()));
 
-        return $user;
+        // Indices lose their speed advantage when using them in OR-situations
+        // so this UNION is much faster than
+        // SELECT ... FROM ... WHERE email = 'foo' OR username = 'bar';
+        $sql = <<<SQL
+   (SELECT `$properties` FROM `$table`
+       WHERE `email` = $username_or_email)
+   UNION
+      (SELECT `$properties` FROM `$table`
+          WHERE `username` = $username_or_email)
+   LIMIT 1
+SQL;
+
+        $record = \DB::query($sql, \DB::SELECT)
+                  ->as_object('\Warden\Model_User')
+                  ->execute()
+                  ->current();
+
+        if (!empty($record)) {
+            if ($record->is_confirmation_required()) {
+                throw new Warden_Failure('unconfirmed');
+            } elseif ($record->is_access_locked()) {
+                throw new Warden_Failure('locked');
+            }
+
+            // Unlock the user if the lock is expired, no matter
+            // if the user can login or not (wrong password, etc)
+            if ($record->is_lock_expired()) {
+                $record->unlock_access();
+            }
+
+            return $record;
+        }
+
+        return null;
     }
 
     /**
@@ -243,8 +287,8 @@ class Model_User extends \Orm\Model
      */
     public function update_tracked_fields()
     {
-        if (!\Config::get('warden.trackable', false)) {
-            return true;
+        if (\Config::get('warden.trackable') !== true) {
+            return false;
         }
 
         $old_current = $this->current_sign_in_at;
@@ -267,7 +311,14 @@ class Model_User extends \Orm\Model
 
         $this->current_sign_in_ip = $new_current;
 
-        $this->sign_in_count += 1;
+        if (\Config::get('warden.lockable.in_use') === true &&
+            \Config::get('warden.lockable.lock_strategy') == 'sign_in_count')
+        {
+            $this->sign_in_count = 0;
+        } else {
+            $this->sign_in_count += 1;
+        }
+
 
         return $this->save(false);
     }
@@ -297,7 +348,7 @@ class Model_User extends \Orm\Model
      * @return \Warden\Model_User|null Returns a user if is found and token is still valid,
      *                                 or null if no user is found.
      *
-     * @throws \Orm\ValidationFailed If the token has expired
+     * @throws \Warden\Warden_Failure If the token has expired
      */
     public static function reset_password_by_token($reset_password_token, $new_password)
     {
@@ -311,7 +362,7 @@ class Model_User extends \Orm\Model
             if ($recoverable->is_reset_password_period_valid()) {
                 $recoverable->reset_password($new_password);
             } else {
-                throw new \Orm\ValidationFailed('Reset password token has expired, please request a new one.');
+                throw new Warden_Failure('expired_token', array('name' => 'Reset password'));
             }
         }
 
@@ -329,8 +380,8 @@ class Model_User extends \Orm\Model
             return true;
         }
 
-        $this->reset_password_token = Warden::generate_token();
-        $this->reset_password_sent_at = \DB::expr('CURRENT_TIMESTAMP');
+        $this->reset_password_token = Warden::instance()->generate_token();
+        $this->reset_password_sent_at = \Date::time('UTC')->format('mysql');
 
         return $this->save(false);
     }
@@ -363,10 +414,278 @@ class Model_User extends \Orm\Model
     }
 
     /**
-     * Event that tests if a username or email exists in the database.
-     * Also downcases and trims username and email.
+     * Attempt to find a user by it's confirmation token and try to confirm it.
      *
-     * @return void
+     * @param string $confirmation_token
+     *
+     * @return \Warden\Model_User|null Returns a user if is found and token is still valid,
+     *                                 or null if no user is found.
+     *
+     * @throws \Warden\Warden_Failure If the token has expired or the user is already confirmed
+     */
+    public static function confirm_by_token($confirmation_token)
+    {
+        $confirmable = static::find('first', array(
+            'where' => array(
+               'confirmation_token' => $confirmation_token
+            )
+        ));
+
+        if (!is_null($confirmable)) {
+            if ($confirmable->is_confirmation_period_valid()) {
+                $confirmable->confirm();
+            } else {
+                throw new Warden_Failure('expired_token', array('name' => 'Confirmation'));
+            }
+        }
+
+        return $confirmable;
+    }
+
+    /**
+     * Confirm a user.
+     *
+     * @return bool
+     *
+     * @throws \Warden\Warden_Failure If the user is already confirmed
+     */
+    public function confirm()
+    {
+        if ($this->is_confirmation_required()) {
+            $this->is_confirmed = true;
+            $this->confirmation_token = null;
+            return $this->save(false);
+        }
+
+        throw new Warden_Failure('already_confirmed', array('email' => $this->email));
+    }
+
+    /**
+     * Verifies whether a user is confirmed or not
+     *
+     * @return bool
+     */
+    public function is_confirmed()
+    {
+        return ((\Config::get('warden.confirmable.in_use') === true) && ($this->is_confirmed === true));
+    }
+
+    /**
+     * Checks if confirmation is required or not
+     *
+     * @return bool
+     */
+    public function is_confirmation_required()
+    {
+        return !$this->is_confirmed();
+    }
+
+    /**
+     * Checks if the confirmation for the user is within the limit time.
+     *
+     * @return bool Returns true if the user is not responding to reset_password_sent_at at all.
+     */
+    public function is_confirmation_period_valid()
+    {
+        if (!isset(static::$_properties['confirmation_sent_at'])) {
+            return true;
+        }
+
+        if ($this->confirmation_sent_at == static::$_properties['confirmation_sent_at']['default']) {
+            return false;
+        }
+
+        $lifetime = \Config::get('warden.confirmable.confirm_within');
+        $expires  = strtotime($lifetime, strtotime($this->confirmation_sent_at));
+
+        return (bool)($expires >= time());
+    }
+
+    /**
+     * Generates a new random token for confirmation, and stores the time
+     * this token is being generated.
+     *
+     * @return bool
+     */
+    public function generate_confirmation_token()
+    {
+        if (!is_null($this->confirmation_token) && $this->is_confirmation_period_valid()) {
+            return true;
+        }
+
+        $this->is_confirmed = false;
+        $this->confirmation_token = Warden::instance()->generate_token();
+        $this->confirmation_sent_at = \Date::time('UTC')->format('mysql');
+
+        return $this->save(false);
+    }
+
+    /**
+     * Finds a user by it's unlock token and try to unlock it.
+     *
+     * @param type $unlock_token
+     *
+     * @return \Warden\Model_User|null Returns a user if is found and token is still valid,
+     *                                 or null if no user is found.
+     *
+     * @throws \Warden\Warden_Failure If the token has expired or the user is not locked
+     */
+    public static function unlock_access_by_token($unlock_token)
+    {
+        $lockable = static::find('first', array(
+            'where' => array(
+               'unlock_token' => $unlock_token
+            )
+        ));
+
+        if (!is_null($lockable)) {
+            if ($lockable->is_access_locked()) {
+                $lockable->unlock_access();
+            } else {
+                throw new Warden_Failure('expired_token', array('name' => 'Unlock'));
+            }
+        }
+
+        return $lockable;
+    }
+
+    /**
+     * Lock a user setting it's locked_at to actual time.
+     *
+     * @return bool
+     */
+    public function lock_access()
+    {
+        $this->locked_at = \Date::time('UTC')->format('mysql');
+
+        if ($this->is_unlock_strategy_enabled('email')) {
+            $this->generate_unlock_token();
+        }
+
+        return $this->save(false);
+    }
+
+    /**
+     * Unlock a user by cleaning locket_at and lock strategy field.
+     *
+     * @return bool
+     */
+    public function unlock_access()
+    {
+        $this->locked_at = null;
+
+        $strategy = \Config::get('warden.lockable.lock_strategy');
+
+        if (!is_null($strategy) && $strategy != 'none') {
+            $this->{$strategy} = 0;
+        }
+
+        $this->unlock_token = null;
+
+        return $this->save(false);
+    }
+
+    /**
+     * Increments the user's attempts.
+     *
+     * @param int $attempts The attempts to increment by
+     *
+     * @throws \Warden\Warden_Failure If attempts exceeded
+     */
+    public function update_attempts($attempts)
+    {
+        $strategy = \Config::get('warden.lockable.lock_strategy');
+
+        if (!is_null($strategy) && $strategy != 'none') {
+            $this->{$strategy} += (int)$attempts;
+        }
+
+        if ($this->is_attempts_exceeded()) {
+            $this->lock_access();
+            throw new Warden_Failure('locked');
+        } else {
+            $this->save(false);
+        }
+    }
+
+    /**
+     * Checks whether the attempts have exceeded maximum number of attempts.
+     *
+     * @return bool
+     */
+    public function is_attempts_exceeded()
+    {
+        $strategy = \Config::get('warden.lockable.lock_strategy');
+
+        if (!is_null($strategy) && $strategy != 'none') {
+            return false;
+        }
+
+        return $this->{$strategy} > \Config::get('warden.lockable.maximum_attempts');
+    }
+
+    /**
+     * Is the unlock enabled for the given unlock strategy.
+     *
+     * @param string $strategy The strategy to check for
+     *
+     * @return bool
+     */
+    public function is_unlock_strategy_enabled($strategy)
+    {
+        return in_array(\Config::get('warden.lockable.unlock_strategy'), array($strategy, 'both'));
+    }
+
+    /**
+     * Tells if the lock is expired if 'time' unlock strategy is active.
+     *
+     * @return bool
+     */
+    public function is_lock_expired()
+    {
+        if (\Config::get('warden.lockable.in_use') === true &&
+            $this->is_unlock_strategy_enabled('time'))
+        {
+            $lifetime = \Config::get('warden.lockable.unlock_in');
+            $expires  = strtotime($lifetime, strtotime($this->locked_at));
+            return (bool)(($this->locked_at != static::$_properties['locked_at']['default']) &&
+                          ($expires >= time()));
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether the record is locked or not.
+     */
+    public function is_access_locked()
+    {
+        return !$this->is_lock_expired();
+    }
+
+    /**
+     * Generates a new random token for unlocking, and stores the time
+     * this token is being generated.
+     *
+     * @return bool
+     */
+    public function generate_unlock_token()
+    {
+        if (!is_null($this->unlock_token)) {
+            return true;
+        }
+
+        $this->unlock_token = Warden::instance()->generate_token();
+    }
+
+    /**
+     * Event that does the following:
+     *
+     * - tests if a username or email exists in the database.
+     * - downcases and trims username and email.
+     * - validates and ensures an encrypted password exists if the password has changed.
+     * - checks for unique fields.
+     * - adds a default role, if one was specified in the config file
      */
     public function _event_before_save()
     {
@@ -374,6 +693,18 @@ class Model_User extends \Orm\Model
         $this->_ensure_and_validate_password();
         $this->_username_or_email_exists();
         $this->_add_default_role();
+    }
+
+    /**
+     * Event that makes sure confirmation token is set if enabled.
+     *
+     * @return void
+     */
+    public function _event_before_insert()
+    {
+        if ($this->is_confirmation_required()) {
+            $this->generate_confirmation_token();
+        }
     }
 
     /**
@@ -435,15 +766,26 @@ class Model_User extends \Orm\Model
             return;
         }
 
-        $user = \DB::select('email')
-                ->from(static::table())
-                ->where('email', '=', $this->email)
-                ->or_where('username', '=', $this->username)
-                ->limit(1)
+        $email    = \DB::escape(\Str::lower($this->email));
+        $username = \DB::escape(\Str::lower($this->username));
+
+        $table = static::table();
+
+        $sql = <<<SQL
+   (SELECT `email` FROM `$table`
+       WHERE `email` = $email)
+   UNION
+      (SELECT `email` FROM `$table`
+          WHERE `username` = $username)
+   LIMIT 1
+SQL;
+
+        $user = \DB::query($sql, \DB::SELECT)
+                ->as_assoc()
                 ->execute()
                 ->current();
 
-        if ($user != false) {
+        if (!empty($user)) {
             if ($user['email'] === $this->email) {
                 throw new \Orm\ValidationFailed('Email address already exists');
             } else {
@@ -510,6 +852,123 @@ class Model_User extends \Orm\Model
                     $this->roles[] = $role;
                 }
             }
+        }
+    }
+
+    /**
+     * Checks that the trackable feature is enabled and adds its required
+     * fields to the properties
+     *
+     * @see \Warden\Model_User::_init()
+     */
+    private static function _init_trackable()
+    {
+        if (\Config::get('warden.trackable') === true) {
+            static::$_properties = array_merge(static::$_properties, array(
+                'sign_in_count'      => array('default' => 0),
+                'current_sign_in_at' => array('default' => '0000-00-00 00:00:00'),
+                'last_sign_in_at'    => array('default' => '0000-00-00 00:00:00'),
+                'current_sign_in_ip' => array('default' => 0),
+                'last_sign_in_ip'    => array('default' => 0),
+            ));
+        }
+    }
+
+    /**
+     * Checks that the recoverable feature is enabled and adds its required
+     * fields to the properties
+     *
+     * @see \Warden\Model_User::_init()
+     */
+    private static function _init_recoverable()
+    {
+        if (\Config::get('warden.recoverable.in_use') === true) {
+            static::$_properties = array_merge(static::$_properties, array(
+                'reset_password_token'   => array('default' => null),
+                'reset_password_sent_at' => array('default' => '0000-00-00 00:00:00')
+            ));
+        }
+    }
+
+    /**
+     * Checks that the confirmable feature is enabled and adds its required
+     * fields to the properties
+     *
+     * @see \Warden\Model_User::_init()
+     */
+    private static function _init_confirmable()
+    {
+        if (\Config::get('warden.confirmable.in_use') === true) {
+            static::$_properties = array_merge(static::$_properties, array(
+                'is_confirmed'         => array('default' => false),
+                'confirmation_token'   => array('default' => null),
+                'confirmation_sent_at' => array('default' => '0000-00-00 00:00:00')
+            ));
+        }
+    }
+
+    /**
+     * Checks that the lockable feature is enabled and adds its required
+     * fields to the properties
+     *
+     * @see \Warden\Model_User::_init()
+     */
+    private static function _init_lockable()
+    {
+        if (\Config::get('warden.lockable.in_use') === true) {
+            $strategy = \Config::get('warden.lockable.lock_strategy');
+            if ($strategy !== null) {
+                static::$_properties[$strategy] = array('default' => 0);
+            }
+
+            static::$_properties = array_merge(static::$_properties, array(
+                'unlock_token'    => array('default' => null),
+                'locked_at'       => array('default' => '0000-00-00 00:00:00')
+            ));
+        }
+    }
+
+    /**
+     * Checks that the profilable feature is enabled and sets up its relation.
+     *
+     * @see \Warden\Model_User::_init()
+     */
+    private static function _init_profilable()
+    {
+        if (\Config::get('warden.profilable') === true) {
+            static::$_has_one = array_merge(static::$_has_one, array(
+                'profile' => array(
+                    'key_from'       => 'id',
+                    'model_to'       => 'Model_Profile',
+                    'key_to'         => 'user_id',
+                    'cascade_save'   => true,
+                    'cascade_delete' => true,
+                )
+            ));
+        }
+    }
+
+    /**
+     * Checks that the omniauthable feature is enabled and sets up its relation.
+     *
+     * @see \Warden\Model_User::_init()
+     */
+    private static function _init_omniauthable()
+    {
+        if (\Config::get('warden.omniauthable.in_use') === true) {
+            $relation = (\Config::get('warden.omniauthable.link_multiple', false)
+                      ? array('_has_many', 'services')
+                      : array('_has_one', 'service'));
+
+            static::${$relation[0]} = array_merge(static::${$relation[0]}, array(
+                $relation[1] => array(
+                    'key_from'       => 'id',
+                    'model_to'       => 'Model_Service',
+                    'key_to'         => 'user_id',
+                    'cascade_save'   => true,
+                    'cascade_delete' => true,
+                )
+            ));
         }
     }
 }

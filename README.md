@@ -1,6 +1,6 @@
 # Warden
 
-A user database authorization package for FuelPHP.
+A user database authorization & authentication package for FuelPHP.
 
 Features:
 
@@ -10,7 +10,9 @@ Features:
 + User ACL
 + Remember-me functionality
 + Reset-password functionality
++ User confirmation functionality
 + Http authentication
++ oAuth support
 and many more to come
 
 ## Why use BCrypt?
@@ -23,7 +25,16 @@ and many more to come
 
 Packages:
 
-+ Orm (https://github.com/fuel/orm)
++ [Orm] (https://github.com/fuel/orm)
+
+If you're planning to use the `omniauthable` feature (OAuth), then the additional
+packages are needed:
+
++ [Fuel OAuth]  (https://github.com/fuel-packages/fuel-oauth)
++ [Fuel OAuth2] (https://github.com/fuel-packages/fuel-oauth2)
+
+The `omniauthable` feature uses [Fuel NinjAuth] (https://github.com/philsturgeon/fuel-ninjauth) internally, so you won't need to
+include it.
 
 ## Installation
 
@@ -41,24 +52,48 @@ or load it manually like so
 
     Fuel::add_package('warden');
 
-View `config/install.sql` for table structures.
-Create your roles in the `roles` table to assign roles to users.
+There are two ways to install Warden:
+
+### SQL File
+
+View `config/install.sql` for table structures or simply import into your database.
+
+### Command Line
+
+    php oil r warden
+
+**Don't forget to create your roles in the `roles` table to be able to assign roles to users.**
 
 ## Configuration
 For now, only config options are:
 
 + (int) `lifetime`: The remember-me cookie lifetime, in seconds. (default: 1209600)
 + (string) `default_role`: The default role to assign a newly created user, it must already exist. (default: null)
++ (bool) `profilable`: Set to add support for user profiles. (default: false)
 + (bool) `trackable`: Set to track information about user sign ins. (default: false)
 + `recoverable`: Takes care of resetting the user password.
     + (bool) `in_use`: Set to true, to enable (default: false)
     + (string) `reset_password_within`: The limit time within which the reset password token is valid. (default: '+1 week')
++ `confirmable`: verify if an account is already confirmed to sign in.
+    + (bool) `in_use`: Set to true, to enable (default: false)
+    + (string) `confirm_within`: The limit time within which the confirmation token is valid. (default: '+1 week')
++ `lockable`: handles blocking a user access after a certain number of attempts.
+    + (bool) `in_use`: Set to true, to enable (default: false)
+    + (integer) `maximum_attempts`: How many attempts should be accepted before blocking the user. (default: 10)
+    + (string) `lock_strategy`: This can be any integer column name in the users table.
+    + (string) `unlock_strategy`: Unlock the user account by time, email, both or none. (default: 'both')
+    + (string) `unlock_in`: The time you want to lock the user after to lock happens. (default: '+1 week')
 + `http_authenticatable`: provides basic and digest authentication.
     + (bool) `in_use`: Set to true, to enable (default: false)
     + (string) `method`: The type of Http method to use for authentication. (default: 'digest')
     + (string) `realm`: (default: 'Protected by Warden')
     + (array) `users`: The users to permit.
     + (string) `failure_text`: The message to display on failure.
++ `omniauthable`: provides OAuth support.
+    + (bool) `in_use`: Set to true, to enable (default: false)
+    + (array) `urls`: The urls to use for omniauth authentication.
+    + (array) `providers`: The providers that are available.
+    + (bool) `link_multiple`: Whether multiple providers can be attached to one user account.
 
 ## Usage
 
@@ -77,6 +112,12 @@ Getting the currently logged in user:
         echo $current_user->username;
     }
 
+Explicitly setting the current user:
+
+    if (($user = Model_User:find(1))) {
+        Warden::set_user($user);
+    }
+
 Checking for a specific role:
 
     if (Warden::logged_in('admin')) {
@@ -90,10 +131,20 @@ Checking for a specific role:
         echo "Fail!";
     }
 
+Checking the current user has permission for a resource:
+
+    try {
+        // Can the user create an article?
+        Warden::authorize('create', 'Article');
+    } catch (Warden_AccessDenied $ex) {
+        // Nope, get out
+        die($ex->getMessage());
+    }
+
 Log in a user by using a username or email and plain-text password:
 
     if (Input::method() === 'POST') {
-        if (Warden::authenticate_user(Input::post('username_or_email'), Input::post('password'))) {
+        if (Warden::authenticate(Input::post('username_or_email'), Input::post('password'))) {
             Session::set_flash('success', 'Logged in successfully');
         } else {
             Session::set_flash('error', 'Username or password invalid');
@@ -103,7 +154,7 @@ Log in a user by using a username or email and plain-text password:
 
 Log in a user using a http based authentication method:
 
-    if (($user_array = Warden::http_authenticate_user())) {
+    if (($user_array = Warden::http_authenticate())) {
         echo "Welcome {$user_array['username']}";
     }
 
@@ -134,10 +185,51 @@ Resetting a user's password
         } else {
             echo 'Not a valid user';
         }
-    } catch (\Orm\ValidationFailed $ex) {
+    } catch (Warden_Failure $ex) {
         // reset password token has expired
         echo $ex->getMessage();
     }
 
 
 More examples are in the doc comments for each method.
+
+## Callbacks
+
+There are 3 callbacks at various points in the authentication cycle available. Namely:
+
++ `after_set_user`
++ `after_authentication`
++ `before_logout`
+
+For each callback Warden will send the current user object as an argument.
+
+### after_set_user
+
+This is called every time the user is set. The user is set:
+
++ when the user is initially authenticated.
++ when the user is set via `Warden::set_user()`.
+
+```php
+Warden::after_set_user(function($user) {
+    if (!$user->is_confirmed()) {
+        Warden::logout();
+    }
+});
+```
+
+### after_authentication
+
+This is called every time the user is authenticated.
+
+    Warden::after_authentication(function($user) {
+        $user->last_login = time();
+    });
+
+### before_logout
+
+This is called before each user is logged out.
+
+    Warden::before_logout(function($user) {
+        logger(\Fuel::L_INFO, 'User '.$user->id.' logging out', 'Warden::before_logout');
+    });
