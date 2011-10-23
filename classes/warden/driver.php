@@ -4,7 +4,7 @@
  *
  * @package    Warden
  * @subpackage Warden
- * @version    0.6
+ * @version    0.8.6
  * @author     Andrew Wayne <lifeandcoding@gmail.com>
  * @license    MIT License
  * @copyright  (c) 2011 Andrew Wayne
@@ -126,7 +126,7 @@ class Warden_Driver
             foreach ($user->roles as $role) {
                 foreach ($role->permissions as $permission) {
                     if ((in_array('manage', $action) || in_array($permission->action, $action)) &&
-                        (in_array('all', $resource) || in_array($permission->resource, $resource)))
+                        (in_array('all', $resource)  || in_array($permission->resource, $resource)))
                     {
                         $status = true;
                         break;
@@ -351,6 +351,7 @@ BODY;
 
     /**
      * Handler for HTTP Basic Authentication
+     * Ported and modified from Lithium Auth.
      *
      * @return array A key/value array of the username => value and password => value
      */
@@ -361,7 +362,8 @@ BODY;
         $password = \Input::server('PHP_AUTH_PW');
 
         if (!isset($users[$username]) || $users[$username] !== $password) {
-            $response->set_header('WWW-Authenticate', "Basic realm=\"{$this->config['http_authenticatable']['realm']}\"");
+            $realm = $this->config['http_authenticatable']['realm'];
+            $response->set_header('WWW-Authenticate', "Basic realm=\"$realm\"");
             $response->send(true);
             exit;
         }
@@ -371,6 +373,7 @@ BODY;
 
     /**
      * Handler for HTTP Digest Authentication
+     * Ported and modified from Lithium Auth.
      *
      * @return array A key/value array of the username => value and password => value
      */
