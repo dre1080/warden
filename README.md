@@ -1,4 +1,4 @@
-# Warden
+# Warden v0.8.6
 
 A user database authorization & authentication package for FuelPHP.
 
@@ -212,9 +212,7 @@ This is called every time the user is set. The user is set:
 
 ```php
 Warden::after_set_user(function($user) {
-    if (!$user->is_confirmed()) {
-        Warden::logout();
-    }
+    logger(\Fuel::L_INFO, 'User '.$user->id.' was set as current user', 'Warden::after_set_user');
 });
 ```
 
@@ -223,7 +221,7 @@ Warden::after_set_user(function($user) {
 This is called every time the user is authenticated.
 
     Warden::after_authentication(function($user) {
-        $user->last_login = time();
+        logger(\Fuel::L_INFO, 'User '.$user->id.' was authenticated successfully at '.$user->current_sign_in_at, 'Warden::after_authentication');
     });
 
 ### before_logout

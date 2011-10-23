@@ -4,10 +4,12 @@
     <span class="error"><?php echo Session::get_flash('warden.omniauthable.error'); ?></span>
 <?php endif; ?>
 
-<!--<p>
-    <label for="full_name">Full Name</label>
-    <?php //echo Form::input('full_name', $user->full_name); ?>
-</p>-->
+<?php if (Config::get('warden.profilable') === true): ?>
+    <p>
+        <label for="full_name">Full Name</label>
+        <?php echo Form::input('full_name', $user->profile->full_name); ?>
+    </p>
+<?php endif; ?>
 
 <p>
     <label for="username">Username</label>

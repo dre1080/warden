@@ -4,7 +4,7 @@
  *
  * @package    Warden
  * @subpackage Warden
- * @version    0.6
+ * @version    0.8.6
  * @author     Andrew Wayne <lifeandcoding@gmail.com>
  * @license    MIT License
  * @copyright  (c) 2011 Andrew Wayne
@@ -45,22 +45,33 @@ class Controller_OmniAuth extends \Controller
 
     public function action_register()
     {
-        $user_hash = \Session::get('omniauth');
+        $user_hash  = \Session::get('omniauth');
+        $profilable = (bool)(\Config::get('warden.profilable') === true);
 
-//        $full_name = \Input::post('full_name') ? : \Arr::get($user_hash, 'name');
+        $full_name = true;
+        if ($profilable) {
+            $full_name = \Input::post('full_name') ? : \Arr::get($user_hash, 'name');
+        }
+
         $username  = \Input::post('username') ? : \Arr::get($user_hash, 'nickname');
         $email     = \Input::post('email') ? : \Arr::get($user_hash, 'email');
         $password  = \Input::post('password');
 
         $user = $service = null;
 
-        if ($username /*&& $full_name*/ && $email && $password) {
+        if ($username && $full_name && $email && $password) {
             try {
                 $user = new Model_User(array(
                     'email'    => $email,
                     'username' => $username,
                     'password' => $password
                 ));
+
+                if ($profilable) {
+                    $user->profile = new Model_Profile(array(
+                        'full_name' => $full_name
+                    ));
+                }
 
                 $service = new Model_Service(array(
                     'uid'           => $user_hash['credentials']['uid'],
@@ -88,7 +99,7 @@ class Controller_OmniAuth extends \Controller
         display:
 
         $this->response->body = \View::forge('register', array(
-            'user' => (object)compact('username', /*'full_name',*/ 'email', 'password')
+            'user' => (object)compact('username', 'full_name', 'email', 'password')
         ), false);
     }
 }
