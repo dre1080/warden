@@ -579,7 +579,8 @@ SQL;
         // Revoke authentication token
         $this->authentication_token = null;
 
-        return $this->save(false);
+        // Save and make sure session is destroyed completely
+        return $this->save(false) && Warden::logout(true);
     }
 
     /**

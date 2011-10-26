@@ -66,7 +66,7 @@ class Warden_Driver
                 'where' => array('authentication_token' => $auth_token)
             ));
 
-            if (!is_null($user)) {
+            if ($user && !$user->is_access_locked()) {
                 $this->set_user($user);
             }
         }
