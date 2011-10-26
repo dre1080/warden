@@ -227,7 +227,8 @@ SQL;
             // Unlock the user if the lock is expired, no matter
             // if the user can login or not (wrong password, etc)
             if ($record->is_lock_expired()) {
-                $record->unlock_access();
+                // unlock but do not save, saving handled by Warden_Driver::complete_login()
+                $record->unlock_access(false);
             }
 
             return $record;
@@ -521,7 +522,7 @@ SQL;
      *
      * @return bool
      */
-    public function generate_confirmation_token($save = false)
+    public function generate_confirmation_token($save = true)
     {
         if (!is_null($this->confirmation_token) && $this->is_confirmation_period_valid()) {
             return true;
@@ -590,7 +591,7 @@ SQL;
      *
      * @return bool
      */
-    public function unlock_access($save = false)
+    public function unlock_access($save = true)
     {
         if (\Config::get('warden.lockable.in_use') === false) {
             return true;
@@ -737,7 +738,8 @@ SQL;
     public function _event_before_insert()
     {
         if ($this->is_confirmation_required()) {
-            $this->generate_confirmation_token();
+            // Generate but do not save
+            $this->generate_confirmation_token(false);
         }
     }
 
