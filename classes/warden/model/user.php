@@ -150,7 +150,7 @@ class Model_User extends \Orm\Model
             return Warden::has_access($role, $this);
         }
 
-        return parent::__call($method, $args);
+        throw new \BadMethodCallException("Call to undefined method Model_User::$method()");
     }
 
     /**

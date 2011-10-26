@@ -43,15 +43,20 @@ class Warden
     }
 
     /**
-     * Create an instance of Warden. An alias for Warden::instance()
+     * Allows access to Warden::factory() and Warden::forge() aliases
+     * for Warden::instance().
      *
-     * @see Warden::instance()
-     *
-     * @return Warden
+     * @param string $method
+     * @param array  $arguments
      */
-    public static function forge($config = array())
+    public static function __callStatic($method, array $arguments)
     {
-        return static::instance($config);
+        if ($method == 'factory' || $method == 'forge') {
+            $config = (empty($arguments) ? $arguments : $arguments[0]);
+            return Warden::instance($config);
+        }
+
+        throw new \BadMethodCallException("Call to undefined method Warden::$method()");
     }
 
     /**
