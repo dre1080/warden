@@ -170,7 +170,7 @@ class Warden_Driver
             return true;
         }
 
-        if ($this->config['lockable']['in_use'] === true) {
+        if (!is_null($user) && $this->config['lockable']['in_use'] === true) {
             $user->update_attempts(1);
         }
 

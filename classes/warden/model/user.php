@@ -643,7 +643,7 @@ SQL;
     {
         $strategy = \Config::get('warden.lockable.lock_strategy');
 
-        if (!is_null($strategy) && $strategy != 'none') {
+        if (is_null($strategy) || $strategy == 'none') {
             return false;
         }
 
@@ -678,8 +678,8 @@ SQL;
 
             $lifetime = \Config::get('warden.lockable.unlock_in');
             $expires  = strtotime($lifetime, strtotime($this->locked_at));
-
-            return (bool)($expires >= time());
+            
+            return (bool)($expires <= time());
         }
 
         return false;
