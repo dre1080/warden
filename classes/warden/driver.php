@@ -66,8 +66,13 @@ class Warden_Driver
                 'where' => array('authentication_token' => $auth_token)
             ));
 
-            if (!is_null($user)) {
+            if ( $user && !$user->is_access_locked() ) {
                 $this->set_user($user);
+            }else{
+                // If the user doesn't exist with that authentication token, or the account is locked, force log out
+                $user->authentication_token = null;
+                $user->save();
+                \Session::destroy();
             }
         }
 
