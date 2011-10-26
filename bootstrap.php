@@ -10,7 +10,7 @@
  * @copyright  (c) 2011 Andrew Wayne
  */
 
-require_once __DIR__.'/vendor/cryptlib/bootstrap.php';
+require_once __DIR__.'/vendor/CryptLib/bootstrap.php';
 
 Autoloader::add_core_namespace('Warden');
 

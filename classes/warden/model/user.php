@@ -106,6 +106,13 @@ class Model_User extends \Orm\Model
     );
 
     /**
+     * Whether saving a tracking column is being executed. A fix for sign_in_ips.
+     *
+     * @var bool
+     */
+    private $_is_tracking = false;
+
+    /**
      * Loads configuration options and sets up class properties.
      */
     public static function _init()
@@ -151,7 +158,7 @@ class Model_User extends \Orm\Model
      */
     public function & __get($property)
     {
-        if ($property == 'current_sign_in_ip' || $property == 'last_sign_in_ip') {
+        if (!$this->_is_tracking && ($property == 'current_sign_in_ip' || $property == 'last_sign_in_ip')) {
             $value = $this->get_sign_in_ip($property);
             return $value;
         }
@@ -206,7 +213,7 @@ class Model_User extends \Orm\Model
 SQL;
 
         $record = \DB::query($sql, \DB::SELECT)
-                  ->as_object('\Warden\Model_User')
+                  ->as_object('Model_User')
                   ->execute()
                   ->current();
 
@@ -291,6 +298,8 @@ SQL;
             return false;
         }
 
+        $this->_is_tracking = true;
+
         $old_current = $this->current_sign_in_at;
         $new_current = \DB::expr('CURRENT_TIMESTAMP');
 
@@ -319,8 +328,11 @@ SQL;
             $this->sign_in_count += 1;
         }
 
+        $return = $this->save(false);
 
-        return $this->save(false);
+        $this->_is_tracking = false;
+
+        return $return;
     }
 
     /**
@@ -467,7 +479,7 @@ SQL;
      */
     public function is_confirmed()
     {
-        return ((\Config::get('warden.confirmable.in_use') === true) && ($this->is_confirmed === true));
+        return ((\Config::get('warden.confirmable.in_use') === true) && ((bool)$this->is_confirmed === true));
     }
 
     /**
@@ -487,7 +499,7 @@ SQL;
      */
     public function is_confirmation_period_valid()
     {
-        if (!isset(static::$_properties['confirmation_sent_at'])) {
+        if (\Config::get('warden.confirmable.in_use') !== true) {
             return true;
         }
 
@@ -505,9 +517,11 @@ SQL;
      * Generates a new random token for confirmation, and stores the time
      * this token is being generated.
      *
+     * @param  bool $save Whether to save the record after generating the token
+     *
      * @return bool
      */
-    public function generate_confirmation_token()
+    public function generate_confirmation_token($save = false)
     {
         if (!is_null($this->confirmation_token) && $this->is_confirmation_period_valid()) {
             return true;
@@ -517,7 +531,7 @@ SQL;
         $this->confirmation_token = Warden::instance()->generate_token();
         $this->confirmation_sent_at = \Date::time('UTC')->format('mysql');
 
-        return $this->save(false);
+        return (bool)($save === true ? $this->save(false) : true);
     }
 
     /**
@@ -568,11 +582,23 @@ SQL;
     /**
      * Unlock a user by cleaning locket_at and lock strategy field.
      *
+     * @param  bool $save Whether to save the record after unlocking.
+     *
      * @return bool
      */
-    public function unlock_access()
+    public function unlock_access($save = false)
     {
-        $this->locked_at = null;
+        if (\Config::get('warden.lockable.in_use') === false) {
+            return true;
+        }
+
+        if ($this->locked_at == static::$_properties['locked_at']['default'] ||
+            $this->unlock_token === null)
+        {
+            return true;
+        }
+
+        $this->locked_at = static::$_properties['locked_at']['default'];
 
         $strategy = \Config::get('warden.lockable.lock_strategy');
 
@@ -582,7 +608,7 @@ SQL;
 
         $this->unlock_token = null;
 
-        return $this->save(false);
+        return (bool)($save === true ? $this->save(false) : false);
     }
 
     /**
@@ -646,10 +672,14 @@ SQL;
         if (\Config::get('warden.lockable.in_use') === true &&
             $this->is_unlock_strategy_enabled('time'))
         {
+            if ($this->locked_at == static::$_properties['locked_at']['default']) {
+                return true;
+            }
+
             $lifetime = \Config::get('warden.lockable.unlock_in');
             $expires  = strtotime($lifetime, strtotime($this->locked_at));
-            return (bool)(($this->locked_at != static::$_properties['locked_at']['default']) &&
-                          ($expires >= time()));
+
+            return (bool)($expires >= time());
         }
 
         return false;
@@ -745,7 +775,7 @@ SQL;
      */
     protected function get_sign_in_ip($column)
     {
-        $ip = $this->get($column);
+        $ip = parent::__get($column);
         $value = ($ip != 0) ? long2ip($ip) : 0;
         return $value;
     }
