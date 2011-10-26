@@ -481,7 +481,7 @@ SQL;
     public function is_confirmed()
     {
         if (\Config::get('warden.confirmable.in_use') === true) {
-            return (bool)($this->is_confirmed === true);
+            return (bool)$this->is_confirmed === true;
         }
 
         return true;
