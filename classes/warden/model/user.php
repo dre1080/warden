@@ -576,7 +576,11 @@ SQL;
             $this->generate_unlock_token();
         }
 
-        return $this->save(false);
+        // Revoke authentication token
+        $this->authentication_token = null;
+
+        // Save and make sure session is destroyed completely
+        return $this->save(false) && Warden::logout(true);
     }
 
     /**
@@ -678,7 +682,7 @@ SQL;
 
             $lifetime = \Config::get('warden.lockable.unlock_in');
             $expires  = strtotime($lifetime, strtotime($this->locked_at));
-            
+
             return (bool)($expires <= time());
         }
 
