@@ -489,7 +489,7 @@ SQL;
      */
     public function is_confirmation_required()
     {
-        return !$this->is_confirmed();
+        return $this->is_confirmed();
     }
 
     /**
@@ -690,7 +690,7 @@ SQL;
      */
     public function is_access_locked()
     {
-        return !$this->is_lock_expired();
+        return $this->is_lock_expired();
     }
 
     /**
