@@ -299,8 +299,6 @@ SQL;
             return false;
         }
 
-        $this->_is_tracking = true;
-
         $old_current = $this->current_sign_in_at;
         $new_current = \DB::expr('CURRENT_TIMESTAMP');
 
@@ -330,8 +328,6 @@ SQL;
         }
 
         $return = $this->save(false);
-
-        $this->_is_tracking = false;
 
         return $return;
     }
@@ -728,6 +724,7 @@ SQL;
      */
     public function _event_before_save()
     {
+        $this->_is_tracking = true;
         $this->_strip_and_downcase_username_and_email();
         $this->_ensure_and_validate_password();
         $this->_username_or_email_exists();
@@ -754,6 +751,7 @@ SQL;
      */
     public function _event_after_save()
     {
+        $this->_is_tracking = false;
         unset($this->password);
     }
 
