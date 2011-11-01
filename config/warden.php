@@ -244,17 +244,12 @@ return array(
             'facebook' => array(
                 'id' => '',
                 'secret' => '',
-                'scope' => 'email, offline_access',
+                'scope' => 'email,offline_access',
             ),
 
             'twitter' => array(
-                'key' => 'VDX6hqBq0Dstgi2hooCeg',
-                'secret' => 'oRUvV7qY0GCUQMnWH41OJPDYKTSioab8z0Qt0FJg',
-                'client_options' => array(
-                    'ssl' => array(
-                        'verify' => false
-                    )
-                )
+                'key' => '',
+                'secret' => '',
             ),
 
             'dropbox' => array(

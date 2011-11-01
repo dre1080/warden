@@ -30,9 +30,10 @@ abstract class OmniAuth_Strategy
         'twitter'  => 'OAuth',
         'dropbox'  => 'OAuth',
         'flickr'   => 'OAuth',
-        'google'   => 'OAuth',
+        'google'   => 'OAuth2',
         'github'   => 'OAuth2',
         'linkedin' => 'OAuth',
+        'unmagnify'=> 'OAuth2',
         'youtube'  => 'OAuth',
     );
 
