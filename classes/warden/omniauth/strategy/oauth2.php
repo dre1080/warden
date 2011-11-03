@@ -21,7 +21,7 @@ namespace Warden;
  *
  * @author Phil Sturgeon, Modified by Andrew Wayne
  */
-class OmniAuth_Strategy_OAuth2 extends Strategy
+class OmniAuth_Strategy_OAuth2 extends OmniAuth_Strategy
 {
     public $provider;
 
