@@ -695,7 +695,7 @@ SQL;
      */
     public function is_access_locked()
     {
-        return !$this->is_lock_expired();
+        return (\Config::get('warden.lockable.in_use') === true && !$this->is_lock_expired());
     }
 
     /**
