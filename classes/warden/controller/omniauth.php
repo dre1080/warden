@@ -61,19 +61,19 @@ class Controller_OmniAuth extends \Controller
 
         if ($username && $full_name && $email && $password) {
             try {
-                $user = new Model_User(array(
+                $user = new \Model_User(array(
                     'email'    => $email,
                     'username' => $username,
                     'password' => $password
                 ));
 
                 if ($profilable) {
-                    $user->profile = new Model_Profile(array(
+                    $user->profile = new \Model_Profile(array(
                         'full_name' => $full_name
                     ));
                 }
 
-                $service = new Model_Service(array(
+                $service = new \Model_Service(array(
                     'uid'           => $user_hash['credentials']['uid'],
                     'provider'      => $user_hash['credentials']['provider'],
                     'access_token'  => $user_hash['credentials']['token'],

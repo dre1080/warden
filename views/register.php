@@ -7,7 +7,7 @@
 <?php if (Config::get('warden.profilable') === true): ?>
     <p>
         <label for="full_name">Full Name</label>
-        <?php echo Form::input('full_name', $user->profile->full_name); ?>
+        <?php echo Form::input('full_name', $user->full_name); ?>
     </p>
 <?php endif; ?>
 
