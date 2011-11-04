@@ -24,6 +24,7 @@ namespace Warden;
 abstract class OmniAuth_Strategy
 {
     public $name;
+    public $config;
 
     protected static $providers = array(
         'facebook' => 'OAuth2',
@@ -41,7 +42,7 @@ abstract class OmniAuth_Strategy
     {
         $this->provider = $provider;
 
-        $this->config = \Config::get("warden.omniauthable.providers.{$provider}");
+        $this->config = \Config::get("warden.omniauthable.providers.{$provider}", array());
 
         if (!$this->name) {
             // Attempt to guess the name from the class name
