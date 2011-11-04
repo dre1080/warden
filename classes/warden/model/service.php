@@ -41,6 +41,7 @@ class Model_Service extends \Orm\Model
      */
     protected static $_properties = array(
         'id',
+        'user_id',
         'uid',
         'provider',
         'access_token',
