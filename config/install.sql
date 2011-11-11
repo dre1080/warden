@@ -37,7 +37,9 @@ CREATE TABLE IF NOT EXISTS `users` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'When the user account was last updated',
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_users_on_email` (`email`),
-  UNIQUE KEY `index_users_on_username` (`username`)
+  UNIQUE KEY `index_users_on_username` (`username`),
+  KEY `index_users_on_authentication_token` (`authentication_token`),
+  KEY `index_users_on_remember_token` (`remember_token`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='User account details';
 
 -- --------------------------------------------------------
