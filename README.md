@@ -1,4 +1,4 @@
-# Warden v0.8.6
+# Warden v0.9
 
 A user database authorization & authentication package for FuelPHP.
 
