@@ -182,14 +182,17 @@ class Model_User extends \Orm\Model
      * Authenticates and allows a user to enter either their email address or
      * their username into the username field.
      *
-     * @param string $username_or_email
+     * @param string $username_or_email The username or email of the user to authenticate
+     * @param bool   $force             Whether to force an authentication, if this is
+     *                                  true, it will bypass checking whether the user
+     *                                  account is locked or confirmed.
      *
      * @return \Warden\Model_User|null The user that matches the tokens or
      *                                 null if no user matches that condition.
      *
      * @throws \Warden\Warden_Failure If the user needs to be confirmed
      */
-    public static function authenticate($username_or_email)
+    public static function authenticate($username_or_email, $force = false)
     {
         if (empty($username_or_email)) {
             return null;
@@ -217,7 +220,11 @@ SQL;
                   ->execute()
                   ->current();
 
-        if (!empty($record)) {
+        if ($record) {
+            if ($force) {
+                goto return_user;
+            }
+
             if ($record->is_confirmation_required()) {
                 throw new Warden_Failure('unconfirmed');
             } elseif ($record->is_access_locked()) {
@@ -231,7 +238,8 @@ SQL;
                 $record->unlock_access(false);
             }
 
-            return $record;
+            return_user:
+                return $record;
         }
 
         return null;
@@ -367,7 +375,7 @@ SQL;
             )
         ));
 
-        if (!is_null($recoverable)) {
+        if ($recoverable) {
             if ($recoverable->is_reset_password_period_valid()) {
                 $recoverable->reset_password($new_password);
             } else {
@@ -385,11 +393,11 @@ SQL;
      */
     public function generate_reset_password_token()
     {
-        if (!is_null($this->reset_password_token) && $this->is_reset_password_period_valid()) {
+        if ($this->reset_password_token && $this->is_reset_password_period_valid()) {
             return true;
         }
 
-        $this->reset_password_token = Warden::instance()->generate_token();
+        $this->reset_password_token   = Warden::instance()->generate_token();
         $this->reset_password_sent_at = \Date::time('UTC')->format('mysql');
 
         return $this->save(false);
@@ -408,7 +416,7 @@ SQL;
      */
     public function is_reset_password_period_valid()
     {
-        if (!isset(static::$_properties['reset_password_sent_at'])) {
+        if (\Config::get('warden.recoverable.in_use') === false) {
             return true;
         }
 
@@ -440,7 +448,7 @@ SQL;
             )
         ));
 
-        if (!is_null($confirmable)) {
+        if ($confirmable) {
             if ($confirmable->is_confirmation_period_valid()) {
                 $confirmable->confirm();
             } else {
@@ -500,7 +508,7 @@ SQL;
      */
     public function is_confirmation_period_valid()
     {
-        if (\Config::get('warden.confirmable.in_use') !== true) {
+        if (\Config::get('warden.confirmable.in_use') === false) {
             return true;
         }
 
@@ -524,12 +532,12 @@ SQL;
      */
     public function generate_confirmation_token($save = true)
     {
-        if (!is_null($this->confirmation_token) && $this->is_confirmation_period_valid()) {
+        if ($this->confirmation_token && $this->is_confirmation_period_valid()) {
             return true;
         }
 
-        $this->is_confirmed = false;
-        $this->confirmation_token = Warden::instance()->generate_token();
+        $this->is_confirmed         = false;
+        $this->confirmation_token   = Warden::instance()->generate_token();
         $this->confirmation_sent_at = \Date::time('UTC')->format('mysql');
 
         return (bool)($save === true ? $this->save(false) : true);
@@ -553,7 +561,7 @@ SQL;
             )
         ));
 
-        if (!is_null($lockable)) {
+        if ($lockable) {
             if ($lockable->is_access_locked()) {
                 $lockable->unlock_access();
             } else {
@@ -607,7 +615,7 @@ SQL;
 
         $strategy = \Config::get('warden.lockable.lock_strategy');
 
-        if (!is_null($strategy) && $strategy != 'none') {
+        if (!empty($strategy) && $strategy != 'none') {
             $this->{$strategy} = 0;
         }
 
@@ -627,7 +635,7 @@ SQL;
     {
         $strategy = \Config::get('warden.lockable.lock_strategy');
 
-        if (!is_null($strategy) && $strategy != 'none') {
+        if (!empty($strategy) && $strategy != 'none') {
             $this->{$strategy} += (int)$attempts;
         }
 
@@ -648,7 +656,7 @@ SQL;
     {
         $strategy = \Config::get('warden.lockable.lock_strategy');
 
-        if (is_null($strategy) || $strategy == 'none') {
+        if (empty($strategy) || $strategy == 'none') {
             return false;
         }
 
@@ -706,11 +714,11 @@ SQL;
      */
     public function generate_unlock_token()
     {
-        if (!is_null($this->unlock_token)) {
-            return true;
+        if ($this->unlock_token === null) {
+            $this->unlock_token = Warden::instance()->generate_token();
         }
 
-        $this->unlock_token = Warden::instance()->generate_token();
+        return true;
     }
 
     /**
@@ -760,7 +768,7 @@ SQL;
      */
     protected function clear_reset_password_token()
     {
-        $this->reset_password_token = null;
+        $this->reset_password_token   = null;
         $this->reset_password_sent_at = static::$_properties['reset_password_sent_at']['default'];
     }
 
@@ -880,7 +888,7 @@ SQL;
         if (empty($this->roles) || !static::query()->related('roles')->get_one()) {
             // Check for default role
             if (($default_role = \Config::get('warden.default_role'))) {
-                $role = Model_Role::find('first', array(
+                $role = \Model_Role::find('first', array(
                     'where' => array(
                         'name' => $default_role
                     )

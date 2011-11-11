@@ -58,7 +58,7 @@ class Warden_Driver
         $auth_token = \Session::get('authenticity_token');
 
         if (!empty($auth_token) &&
-            (is_null($this->user) || $this->user->authentication_token != $auth_token))
+            (is_null($this->user) || $this->user->authentication_token !== $auth_token))
         {
             $this->user = null;
 
@@ -241,7 +241,7 @@ BODY;
      */
     public function force_login($username_or_email)
     {
-        $user = \Model_User::authenticate($username_or_email);
+        $user = \Model_User::authenticate($username_or_email, true);
         return $user && $this->complete_login($user);
     }
 
@@ -259,7 +259,7 @@ BODY;
                 'where' => array('remember_token' => $token)
             ));
 
-            if (!is_null($user)) {
+            if ($user) {
                 if ($this->has_access($role, $user)) {
                     // Complete the login with the found data
                     $this->complete_login($user);
@@ -331,7 +331,7 @@ BODY;
             if ($this->config['lockable']['in_use'] === true) {
                 $strategy = \Config::get('warden.lockable.lock_strategy');
 
-                if (!is_null($strategy) && $strategy != 'none') {
+                if (!empty($strategy) && $strategy != 'none') {
                     $user->{$strategy} = 0;
                 }
             }

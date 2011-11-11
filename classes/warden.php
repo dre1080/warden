@@ -124,8 +124,8 @@ class Warden
             $status = true;
         }
 
-        if (!is_null($action)) {
-            $resource = (is_null($resource) ? $role : $resource);
+        if (!empty($action)) {
+            $resource = (empty($resource) ? $role : $resource);
             return $status && static::can($action, $resource);
         }
 
