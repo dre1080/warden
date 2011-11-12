@@ -189,21 +189,7 @@ class Warden_Driver
     public function http_authenticate_user()
     {
         $method = "_http_{$this->config['http_authenticatable']['method']}";
-
-        $body = <<<BODY
-    <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-     "http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd">
-    <html>
-        <head>
-            <title>Error</title>
-            <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-        </head>
-        <body>
-            {$this->config['http_authenticatable']['failure_text']}
-        </body>
-    </html>
-BODY;
-        return $this->{$method}(new \Response($body, 401));
+        return $this->{$method}(new \Response(\View::forge('warden/401'), 401));
     }
 
     /**
@@ -325,33 +311,37 @@ BODY;
         // Create and set new authentication token
         $user->authentication_token = Warden::instance()->generate_token();
 
-        if ($this->config['trackable'] === true) {
-            $user->update_tracked_fields();
-        } else {
-            if ($this->config['lockable']['in_use'] === true) {
-                $strategy = \Config::get('warden.lockable.lock_strategy');
+        try {
+            if ($this->config['trackable'] === true) {
+                $user->update_tracked_fields();
+            } else {
+                if ($this->config['lockable']['in_use'] === true) {
+                    $strategy = \Config::get('warden.lockable.lock_strategy');
 
-                if (!empty($strategy) && $strategy != 'none') {
-                    $user->{$strategy} = 0;
+                    if (!empty($strategy) && $strategy != 'none') {
+                        $user->{$strategy} = 0;
+                    }
                 }
+
+                $user->save(false);
             }
 
-            $user->save(false);
+            \Session::set('authenticity_token', $user->authentication_token);
+            \Session::instance()->rotate();
+
+            $this->set_user($user);
+
+            $this->_run_event('after_authentication');
+
+            return true;
+        } catch(\Exception $ex) {
+            logger(\Fuel::L_ERROR, 'Warden authentication failed because an exception was thrown.');
+            return false;
         }
-
-        \Session::set('authenticity_token', $user->authentication_token);
-        \Session::instance()->rotate();
-
-        $this->set_user($user);
-
-        $this->_run_event('after_authentication');
-
-        return true;
     }
 
     /**
      * Handler for HTTP Basic Authentication
-     * Ported and modified from Lithium Auth.
      *
      * @return array A key/value array of the username => value and password => value
      */
@@ -373,7 +363,6 @@ BODY;
 
     /**
      * Handler for HTTP Digest Authentication
-     * Ported and modified from Lithium Auth.
      *
      * @return array A key/value array of the username => value and password => value
      */
@@ -382,8 +371,12 @@ BODY;
         $realm = $this->config['http_authenticatable']['realm'];
 
         $data = array(
-            'username' => null, 'nonce' => null, 'nc' => null,
-            'cnonce'   => null, 'qop'  => null, 'uri' => null,
+            'nonce'    => null,
+            'nc'       => null,
+            'cnonce'   => null,
+            'qop'      => null,
+            'username' => null,
+            'uri'      => null,
             'response' => null
         );
 
@@ -392,13 +385,13 @@ BODY;
             $data[$parts[0]] = trim($parts[1], '"');
         }
 
-        $users = $this->config['http_authenticatable']['users'];
+        $users    = $this->config['http_authenticatable']['users'];
         $password = !empty($users[$data['username']]) ? $users[$data['username']] : null;
 
-        $user  = md5("{$data['username']}:{$realm}:{$password}");
-        $nonce = "{$data['nonce']}:{$data['nc']}:{$data['cnonce']}:{$data['qop']}";
-        $req   = md5(\Input::server('REQUEST_METHOD').':'.$data['uri']);
-        $hash  = md5("{$user}:{$nonce}:{$req}");
+        $A1   = md5("{$data['username']}:{$realm}:{$password}");
+        $A2   = "{$data['nonce']}:{$data['nc']}:{$data['cnonce']}:{$data['qop']}";
+        $A3   = md5(\Input::server('REQUEST_METHOD').':'.$data['uri']);
+        $hash = md5("{$A1}:{$A2}:{$A3}");
 
         if (!$data['username'] || $hash !== $data['response']) {
             $nonce        = uniqid();

@@ -46,9 +46,10 @@ class Controller_OmniAuth extends \Controller
     public function action_register()
     {
         $user_hash  = \Session::get('omniauth');
-        $profilable = (bool)(\Config::get('warden.profilable') === true);
+        $user_hash || $user_hash = array();
 
-        $full_name = true;
+        $profilable = (bool)(\Config::get('warden.profilable') === true);
+        $full_name  = true;
         if ($profilable) {
             $full_name = \Input::post('full_name') ? : \Arr::get($user_hash, 'name');
         }
@@ -98,7 +99,7 @@ class Controller_OmniAuth extends \Controller
 
         display:
 
-        $this->response->body = \View::forge('register', array(
+        $this->response->body = \View::forge('warden/omniauth/register', array(
             'user' => (object)compact('username', 'full_name', 'email', 'password')
         ), false);
     }

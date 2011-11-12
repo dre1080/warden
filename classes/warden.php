@@ -234,7 +234,7 @@ class Warden
     public static function authenticate_user($username_or_email, $password, $remember = false)
     {
         logger(\Fuel::L_WARNING,
-               'This method is deprecated.  Please use authenticate() instead.',
+               'This method is deprecated. Please use authenticate() instead.',
                 __METHOD__);
 
         return static::authenticate($username_or_email, $password, $remember);
@@ -280,7 +280,7 @@ class Warden
     public static function http_authenticate_user()
     {
         logger(\Fuel::L_WARNING,
-               'This method is deprecated.  Please use http_authenticate() instead.',
+               'This method is deprecated. Please use http_authenticate() instead.',
                 __METHOD__);
 
         return static::http_authenticate();

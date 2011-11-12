@@ -198,14 +198,7 @@ return array(
          */
         'users' => array(
             //'warden' => 'warden'
-        ),
-
-        /**
-         * The message to display on failure
-         *
-         * (string)
-         */
-        'failure_text' => '<h1>401 Unauthorized</h1>'
+        )
     ),
 
     /**
