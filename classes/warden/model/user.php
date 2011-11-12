@@ -833,9 +833,13 @@ SQL;
 
         if (!empty($user)) {
             if ($user['email'] === $this->email) {
-                throw new \Orm\ValidationFailed('Email address already exists');
+                throw new \Orm\ValidationFailed(
+                    __('warden.validation.unique', array('field' => 'Email address'))
+                );
             } else {
-                throw new \Orm\ValidationFailed('Username already exists');
+                throw new \Orm\ValidationFailed(
+                    __('warden.validation.unique', array('field' => 'Username'))
+                );
             }
         }
     }
@@ -866,14 +870,14 @@ SQL;
     {
         if (!empty($this->password)) {
             if (\Str::length($this->password) < 6) {
-                throw new \Orm\ValidationFailed('Password is too short (minimum is 6 characters)');
+                throw new \Orm\ValidationFailed(__('warden.validation.password.too_short'));
             }
 
             $this->encrypted_password = Warden::instance()->encrypt_password($this->password);
         }
 
         if (empty($this->encrypted_password)) {
-            throw new \Orm\ValidationFailed('Password is required');
+            throw new \Orm\ValidationFailed(__('warden.validation.password.required'));
         }
     }
 

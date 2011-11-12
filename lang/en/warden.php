@@ -30,6 +30,14 @@ return array(
         'inactive'              => 'Your account was not activated yet.'
     ),
 
+    'validation' => array(
+        'unique' => ':field already exists',
+        'password' => array(
+            'required'  => 'Password is required',
+            'too_short' => 'Password is too short (minimum is 6 characters)'
+        )
+    ),
+
     'sessions' => array(
         'signed_in'  => 'Signed in successfully.',
         'signed_out' => 'Signed out successfully.'
