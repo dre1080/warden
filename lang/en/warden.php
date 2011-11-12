@@ -65,5 +65,13 @@ return array(
     'omniauth_callbacks' => array(
         'success' => 'Successfully authorized from :provider account.',
         'failure' => 'Could not authorize you from :provider because ":reason".'
+    ),
+
+    'mailer' => array(
+        'subject' => array(
+            'reset_password' => 'Reset password instructions',
+            'confirmation'   => 'Confirmation instructions',
+            'unlock'         => 'Unlock instructions',
+        )
     )
 );

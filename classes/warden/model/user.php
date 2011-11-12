@@ -4,7 +4,7 @@
  *
  * @package    Warden
  * @subpackage Warden
- * @version    0.9
+ * @version    0.9.2
  * @author     Andrew Wayne <lifeandcoding@gmail.com>
  * @license    MIT License
  * @copyright  (c) 2011 Andrew Wayne
@@ -387,23 +387,6 @@ SQL;
     }
 
     /**
-     * Generates a new random token for reset password and save the record
-     *
-     * @return bool
-     */
-    public function generate_reset_password_token()
-    {
-        if ($this->reset_password_token && $this->is_reset_password_period_valid()) {
-            return true;
-        }
-
-        $this->reset_password_token   = Warden::instance()->generate_token();
-        $this->reset_password_sent_at = \Date::time('UTC')->format('mysql');
-
-        return $this->save(false);
-    }
-
-    /**
      * Checks if the reset password token sent is within the limit time.
      *
      * <code>
@@ -428,6 +411,39 @@ SQL;
         $expires  = strtotime($lifetime, strtotime($this->reset_password_sent_at));
 
         return (bool)($expires >= time());
+    }
+
+    /**
+     * Generates a new random token for reset password and save the record
+     *
+     * @return bool
+     */
+    public function generate_reset_password_token()
+    {
+        if ($this->reset_password_token && $this->is_reset_password_period_valid()) {
+            return true;
+        }
+
+        $this->reset_password_token   = Warden::instance()->generate_token();
+        $this->reset_password_sent_at = \Date::time('UTC')->format('mysql');
+
+        return $this->save(false);
+    }
+
+    /**
+     * Generates and sends the reset password instructions to a user's email address.
+     *
+     * @return bool
+     */
+    public function send_reset_password_instructions()
+    {
+        if (\Config::get('warden.recoverable.in_use') === true &&
+            $this->generate_reset_password_token())
+        {
+            return Warden_Mailer::send_reset_password_instructions($this);
+        }
+
+        return false;
     }
 
     /**
@@ -544,6 +560,22 @@ SQL;
     }
 
     /**
+     * Generates and sends the confirmation instructions to a user's email address.
+     *
+     * @return bool
+     */
+    public function send_confirmation_instructions()
+    {
+        if (\Config::get('warden.confirmable.in_use') === true &&
+            $this->generate_confirmation_token())
+        {
+            return Warden_Mailer::send_confirmation_instructions($this);
+        }
+
+        return false;
+    }
+
+    /**
      * Finds a user by it's unlock token and try to unlock it.
      *
      * @param type $unlock_token
@@ -589,11 +621,20 @@ SQL;
         $this->authentication_token = null;
 
         // Save and make sure session is destroyed completely
-        return $this->save(false) && Warden::logout(true);
+        if ($this->save(false) && Warden::logout(true)) {
+            // Only send instructions after token was saved successfully
+            if ($this->is_unlock_strategy_enabled('email')) {
+                return $this->send_unlock_instructions();
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
-     * Unlock a user by cleaning locket_at and lock strategy field.
+     * Unlock a user by cleaning locked_at and lock strategy field.
      *
      * @param  bool $save Whether to save the record after unlocking.
      *
@@ -719,6 +760,22 @@ SQL;
         }
 
         return true;
+    }
+
+    /**
+     * Generates and sends the unlock instructions to a user's email address.
+     *
+     * @return bool
+     */
+    public function send_unlock_instructions()
+    {
+        if (\Config::get('warden.lockable.in_use') === true &&
+            $this->generate_unlock_token())
+        {
+            return Warden_Mailer::send_unlock_instructions($this);
+        }
+
+        return false;
     }
 
     /**

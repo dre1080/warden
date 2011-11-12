@@ -4,7 +4,7 @@
  *
  * @package    Warden
  * @subpackage Warden
- * @version    0.9
+ * @version    0.9.2
  * @author     Andrew Wayne <lifeandcoding@gmail.com>
  * @license    MIT License
  * @copyright  (c) 2011 Andrew Wayne
@@ -89,7 +89,15 @@ return array(
          *
          * (string)
          */
-        'reset_password_within' => '+1 week'
+        'reset_password_within' => '+1 week',
+
+        /**
+         * The url a user will be taken to reset their password for their account.
+         * This url will also be included in the mail appended by the reset password token.
+         *
+         * (string)
+         */
+        'url' => ''
     ),
 
     /**
@@ -113,7 +121,15 @@ return array(
          *
          * (string)
          */
-        'confirm_within' => '+1 week'
+        'confirm_within' => '+1 week',
+
+        /**
+         * The url a user will be taken to confirm their account.
+         * This url will also be included in the mail appended by the confirmation token.
+         *
+         * (string)
+         */
+        'url' => ''
     ),
 
     /**
@@ -163,6 +179,14 @@ return array(
          * (string)
          */
         'unlock_in' => '+1 week',
+
+        /**
+         * The url a user will be taken to unlock their account.
+         * This url will also be included in the mail appended by the unlock token.
+         *
+         * (string)
+         */
+        'url' => ''
     ),
 
     /**

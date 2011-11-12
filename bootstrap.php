@@ -4,7 +4,7 @@
  *
  * @package    Warden
  * @subpackage Warden
- * @version    0.9
+ * @version    0.9.2
  * @author     Andrew Wayne <lifeandcoding@gmail.com>
  * @license    MIT License
  * @copyright  (c) 2011 Andrew Wayne
@@ -18,6 +18,7 @@ Autoloader::add_classes(array(
     // Base Warden classes
     'Warden\\Warden'              => __DIR__.'/classes/warden.php',
     'Warden\\Warden_Driver'       => __DIR__.'/classes/warden/driver.php',
+    'Warden\\Warden_Mailer'       => __DIR__.'/classes/warden/mailer.php',
     'Warden\\Warden_Failure'      => __DIR__.'/classes/warden/exceptions.php',
     'Warden\\Warden_AccessDenied' => __DIR__.'/classes/warden/exceptions.php',
 
