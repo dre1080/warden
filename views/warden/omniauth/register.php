@@ -104,8 +104,15 @@
     <body>
         <div id="wrapper">
             <div class="alert">
-                <span>This is an example View file for <strong>Warden\Controller_OmniAuth</strong>.</span>
-                <span>It is recommended that you copy this file to your <strong>APPPATH</strong> and modify it to suit your needs.</span>
+                <span>
+                    This is an example View file for <strong>Warden\Controller_OmniAuth</strong>
+                    located in<br>
+                    <strong style="font-size:11px;background:#eee;"><?php echo __FILE__; ?></strong>
+                </span>
+                <span>
+                    It is recommended that you copy this file to your <strong>APPPATH/views</strong>
+                    and modify it to suit your needs.
+                </span>
             </div>
             <?php echo Form::open(\Config::get('warden.omniauthable.urls.registration')); ?>
 
