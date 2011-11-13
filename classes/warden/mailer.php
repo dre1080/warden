@@ -32,15 +32,34 @@ class Warden_Mailer
      */
     private static function _send_instructions($name, Model_User $user)
     {
+        $config_key = null;
+
+        switch ($name) {
+            case 'confirmation':
+                $config_key = 'confirmable';
+                break;
+            case 'reset_password':
+                $config_key = 'recoverable';
+                break;
+            case 'unlock':
+                $config_key = 'lockable';
+                break;
+            default:
+                throw new \InvalidArgumentException("Invalid instruction: $name");
+        }
+
         $mail = \Email::forge();
-        $mail->from('no-reply@'.\Input::server('http_host'));
+        $mail->from('no-reply@'.\Input::server('http_host'), \Config::get('email.defaults.from.name'));
         $mail->to($user->email);
         $mail->subject(__("warden.mailer.subject.$name"));
 
         $token_name = "{$name}_token";
         $mail->html_body(\View::forge("warden/mailer/{$name}_instructions", array(
-            'username'  => $user->username,
-            $token_name => $user->{$token_name}
+            'username' => $user->username,
+            'uri'      => Uri::create(':url/:token', array(
+                'url'   => rtrim(\Config::get("warden.{$config_key}.url"), '/'),
+                'token' => $user->{$token_name}
+            ))
         )));
 
         $mail->priority(\Email::P_HIGH);

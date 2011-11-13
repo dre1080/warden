@@ -3,7 +3,7 @@
 <p>Someone has requested a link to change your password, and you can do this through the link below:</p>
 
 <p>
-    <a href="<?php echo rtrim(\Config::get('warden.recoverable.url'), '/').'/'.$reset_password_token ?>">
+    <a href="<?php echo $uri; ?>">
         Change my password
     </a>
 </p

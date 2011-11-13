@@ -94,6 +94,7 @@ return array(
         /**
          * The url a user will be taken to reset their password for their account.
          * This url will also be included in the mail appended by the reset password token.
+         * eg. reset_password
          *
          * (string)
          */
@@ -126,6 +127,7 @@ return array(
         /**
          * The url a user will be taken to confirm their account.
          * This url will also be included in the mail appended by the confirmation token.
+         * eg. confirmation
          *
          * (string)
          */
@@ -183,6 +185,7 @@ return array(
         /**
          * The url a user will be taken to unlock their account.
          * This url will also be included in the mail appended by the unlock token.
+         * eg. unlock
          *
          * (string)
          */
