@@ -56,14 +56,14 @@ class Warden_Mailer
         $token_name = "{$name}_token";
         $mail->html_body(\View::forge("warden/mailer/{$name}_instructions", array(
             'username' => $user->username,
-            'uri'      => Uri::create(':url/:token', array(
+            'uri'      => \Uri::create(':url/:token', array(
                 'url'   => rtrim(\Config::get("warden.{$config_key}.url"), '/'),
                 'token' => $user->{$token_name}
             ))
         )));
 
         $mail->priority(\Email::P_HIGH);
-
+        
         try {
             return $mail->send();
         } catch (\EmailSendingFailedException $ex) {

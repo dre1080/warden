@@ -13,7 +13,6 @@ Features:
 + User confirmation functionality
 + Http authentication
 + oAuth support
-and many more to come
 
 ## Why use BCrypt?
 
@@ -26,6 +25,7 @@ and many more to come
 Packages:
 
 + [Orm] (https://github.com/fuel/orm)
++ [Email] (https://github.com/fuel/email)
 
 If you're planning to use the `omniauthable` feature (OAuth), then the additional
 packages are needed:
@@ -74,15 +74,18 @@ For now, only config options are:
 + `recoverable`: Takes care of resetting the user password.
     + (bool) `in_use`: Set to true, to enable (default: false)
     + (string) `reset_password_within`: The limit time within which the reset password token is valid. (default: '+1 week')
+    + (string) `url`: The url a user will be taken to reset their password.
 + `confirmable`: verify if an account is already confirmed to sign in.
     + (bool) `in_use`: Set to true, to enable (default: false)
     + (string) `confirm_within`: The limit time within which the confirmation token is valid. (default: '+1 week')
+    + (string) `url`: The url a user will be taken to confirm their account.
 + `lockable`: handles blocking a user access after a certain number of attempts.
     + (bool) `in_use`: Set to true, to enable (default: false)
     + (integer) `maximum_attempts`: How many attempts should be accepted before blocking the user. (default: 10)
     + (string) `lock_strategy`: This can be any integer column name in the users table.
     + (string) `unlock_strategy`: Unlock the user account by time, email, both or none. (default: 'both')
     + (string) `unlock_in`: The time you want to lock the user after to lock happens. (default: '+1 week')
+    + (string) `url`: The url a user will be taken to unlock their account.
 + `http_authenticatable`: provides basic and digest authentication.
     + (bool) `in_use`: Set to true, to enable (default: false)
     + (string) `method`: The type of Http method to use for authentication. (default: 'digest')
