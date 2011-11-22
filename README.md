@@ -171,11 +171,11 @@ Resetting a user's password
 
     // Sending the password token
     $user = Model_User::find('first', array('where' => array('email' => 'myemail@warden.net')));
-    if (!is_null($user)) {
-        if ($user->generate_reset_password_token()) {
-            $token = $user->reset_password_token;
-            // mail it to the user with a link
-            // ...
+    if ($user) {
+        try {
+            $user->send_reset_password_instructions();
+        } catch (Exception $ex) {
+            echo sprintf('Oops, something went wrong: %s', $ex->getMessage());
         }
     }
 
@@ -183,14 +183,14 @@ Resetting a user's password
     try {
         $user = Model_User::reset_password_by_token(\Input::get('reset_password_token'), 'new_password');
 
-        if (!is_null($user)) {
+        if ($user) {
             echo 'Success!';
         } else {
             echo 'Not a valid user';
         }
-    } catch (Warden_Failure $ex) {
-        // reset password token has expired
-        echo $ex->getMessage();
+    } catch (Exception $ex) {
+        // something went wrong
+        echo sprintf('Oops, something went wrong: %s', $ex->getMessage());
     }
 
 

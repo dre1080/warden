@@ -165,9 +165,7 @@ class Warden_Driver
                              null, null, null, true);
             }
 
-            $this->complete_login($user);
-
-            return true;
+            return $this->complete_login($user);
         }
 
         if (!is_null($user) && $this->config['lockable']['in_use'] === true) {
@@ -335,7 +333,10 @@ class Warden_Driver
 
             return true;
         } catch(\Exception $ex) {
-            logger(\Fuel::L_ERROR, 'Warden authentication failed because an exception was thrown.');
+            logger(\Fuel::L_ERROR,
+                   'Warden authentication failed because an exception was thrown: '.
+                   $ex->getMessage()
+            );
             return false;
         }
     }
