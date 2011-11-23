@@ -529,6 +529,28 @@ class Warden
     }
 
     /**
+     * Executed every time a user is authorized.
+     *
+     * <code>
+     * Warden::after_authorization(function($user) {
+     *      logger(\Fuel::L_INFO, 'User '.$user->id.' was successfully authorized to access '.\Input::server('REQUEST_URI'));
+     * });
+     *
+     * // OR
+     *
+     * Warden::after_authorization('Myclass::method');
+     * </code>
+     *
+     * @param mixed $callback The callable function to execute
+     *
+     * @uses \Fuel\Core\Event::register()
+     */
+    public static function after_authorization($callback)
+    {
+        \Event::register('warden_after_authorization', $callback);
+    }
+
+    /**
      * Encrypts a user password using the Blowfish algo
      *
      * @param string $password The plaintext password

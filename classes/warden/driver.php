@@ -133,6 +133,8 @@ class Warden_Driver
                     }
                 }
             }
+
+            $status && $this->_run_event('after_authorization');
         }
 
         return $status;
