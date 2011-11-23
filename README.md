@@ -234,9 +234,11 @@ This is called every time the user is successfully authorized. The user is autho
 + `Warden::can()` is successful.
 + `Warden::authorize()` is successful.
 
-    Warden::after_authorization(function($user) {
-        logger(\Fuel::L_INFO, 'User '.$user->id.' was successfully authorized to access '.\Input::server('REQUEST_URI'));
-    });
+```php
+Warden::after_authorization(function($user) {
+    logger(\Fuel::L_INFO, 'User '.$user->id.' was successfully authorized to access '.\Input::server('REQUEST_URI'));
+});
+```
 
 ### before_logout
 
