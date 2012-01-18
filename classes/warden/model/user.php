@@ -4,7 +4,7 @@
  *
  * @package    Warden
  * @subpackage Warden
- * @version    0.9.2
+ * @version    1.0
  * @author     Andrew Wayne <lifeandcoding@gmail.com>
  * @license    MIT License
  * @copyright  (c) 2011 Andrew Wayne
@@ -27,6 +27,10 @@ class Model_User extends \Orm\Model
      * Validation regular expression for email
      */
     const REGEX_EMAIL = '/^([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,})$/i';
+    /**
+     * Validation regular expression for password
+     */
+    const REGEX_PASSWORD = '/^[.a-zA-Z_0-9-!@#$%\^&*()]{6,32}$/';
 
     /**
      * User's plaintext password, used for validation purposes
@@ -928,6 +932,8 @@ SQL;
         if (!empty($this->password)) {
             if (\Str::length($this->password) < 6) {
                 throw new \Orm\ValidationFailed(__('warden.validation.password.too_short'));
+            } elseif (!preg_match(self::REGEX_PASSWORD, $this->password)) {
+                throw new \Orm\ValidationFailed(__('warden.validation.password.invalid'));
             }
 
             $this->encrypted_password = Warden::instance()->encrypt_password($this->password);

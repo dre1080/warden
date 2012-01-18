@@ -4,7 +4,7 @@
  *
  * @package    Warden
  * @subpackage Warden
- * @version    0.9
+ * @version    1.0
  * @author     Andrew Wayne <lifeandcoding@gmail.com>
  * @license    MIT License
  * @copyright  (c) 2011 Andrew Wayne
@@ -34,6 +34,7 @@ return array(
         'unique' => ':field already exists',
         'password' => array(
             'required'  => 'Password is required',
+            'invalid'   => 'Password is invalid.',
             'too_short' => 'Password is too short (minimum is 6 characters)'
         )
     ),
