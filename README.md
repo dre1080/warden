@@ -198,10 +198,11 @@ More examples are in the doc comments for each method.
 
 ## Callbacks
 
-There are 3 callbacks at various points in the authentication cycle available. Namely:
+There are 4 callbacks at various points in the authentication cycle available. Namely:
 
 + `after_set_user`
 + `after_authentication`
++ `after_authorization`
 + `before_logout`
 
 For each callback Warden will send the current user object as an argument.
