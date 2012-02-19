@@ -35,14 +35,6 @@ class Warden
     final private function __construct() {}
 
     /**
-     * Loads configuration options.
-     */
-    public static function _init()
-    {
-        static::check();
-    }
-
-    /**
      * Allows access to Warden::factory() and Warden::forge() aliases
      * for Warden::instance().
      *
