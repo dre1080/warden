@@ -49,7 +49,7 @@ class Warden_Mailer
         }
 
         $mail = \Email::forge();
-        $mail->from('no-reply@'.\Input::server('http_host'), \Config::get('email.defaults.from.name'));
+        $mail->from(\Config::get('email.defaults.from.email'), \Config::get('email.defaults.from.name'));
         $mail->to($user->email);
         $mail->subject(__("warden.mailer.subject.$name"));
 
