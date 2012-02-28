@@ -289,7 +289,7 @@ class Warden_Driver
 
         if ($destroy === true) {
             // Destroy the session completely
-           \Session::destroy();
+            \Session::destroy();
         } else {
             // Regenerate session_id
             \Session::instance()->rotate();
