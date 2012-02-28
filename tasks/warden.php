@@ -101,7 +101,7 @@ class Warden
 
         \DBUtil::create_table('users', $fields, array('id'), false, 'InnoDB', 'utf8_unicode_ci');
 
-        \DB::query("ALTER TABLE users
+        \DB::query("ALTER TABLE ".\DB::table_prefix('users')."
                         ADD UNIQUE index_users_on_email(email),
                         ADD UNIQUE index_users_on_username(username),
                         ADD INDEX index_users_on_authentication_token(authentication_token),
@@ -130,7 +130,7 @@ class Warden
             'description' => array('constraint' => 100, 'type' => 'varchar'),
         ), array('id'), false, 'InnoDB', 'utf8_unicode_ci');
 
-        \DB::query("ALTER TABLE roles
+        \DB::query("ALTER TABLE ".\DB::table_prefix('roles')."
                         ADD UNIQUE index_roles_on_name(name)",
                    \DB::UPDATE)->execute();
 
@@ -141,14 +141,14 @@ class Warden
             'user_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
         ), array('role_id', 'user_id'), false, 'InnoDB', 'utf8_unicode_ci');
 
-        \DB::query("ALTER TABLE roles_users
+        \DB::query("ALTER TABLE ".\DB::table_prefix('roles_users')."
                         ADD KEY index_roles_users_on_user_id(user_id),
                         ADD CONSTRAINT fk_index_roles_users_on_user_id
                             FOREIGN KEY (user_id)
-                            REFERENCES users (id) ON DELETE CASCADE,
+                            REFERENCES ".\DB::table_prefix('users')." (id) ON DELETE CASCADE,
                         ADD CONSTRAINT fk_index_roles_users_on_role_id
                             FOREIGN KEY (role_id)
-                            REFERENCES roles (id) ON DELETE CASCADE",
+                            REFERENCES ".\DB::table_prefix('roles')." (id) ON DELETE CASCADE",
                    \DB::UPDATE)->execute();
 
         \Cli::write(\Cli::color('Created roles_users table successfully', 'green'));
@@ -164,7 +164,7 @@ class Warden
             'description' => array('constraint' => 100, 'type' => 'varchar'),
         ), array('id'), false, 'InnoDB', 'utf8_unicode_ci');
 
-        \DB::query("ALTER TABLE permissions
+        \DB::query("ALTER TABLE ".\DB::table_prefix('permissions')."
                         ADD UNIQUE index_permissions_on_name(name),
                         ADD UNIQUE index_permissions_on_resource_and_action(resource, action)",
                    \DB::UPDATE)->execute();
@@ -176,14 +176,14 @@ class Warden
             'permission_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
         ), array('role_id', 'permission_id'), false, 'InnoDB', 'utf8_unicode_ci');
 
-        \DB::query("ALTER TABLE roles_permissions
+        \DB::query("ALTER TABLE ".\DB::table_prefix('roles_permissions')."
                         ADD KEY index_roles_permissions_on_permission_id(permission_id),
                         ADD CONSTRAINT fk_index_roles_permissions_on_role_id
                             FOREIGN KEY (role_id)
-                            REFERENCES roles (id) ON DELETE CASCADE,
+                            REFERENCES ".\DB::table_prefix('roles')." (id) ON DELETE CASCADE,
                         ADD CONSTRAINT fk_index_roles_permissions_on_permission_id
                             FOREIGN KEY (permission_id)
-                            REFERENCES permissions (id) ON DELETE CASCADE",
+                            REFERENCES ".\DB::table_prefix('permissions')." (id) ON DELETE CASCADE",
                    \DB::UPDATE)->execute();
 
         \Cli::write(\Cli::color('Created roles_permissions table successfully', 'green'));
@@ -285,12 +285,12 @@ class Warden
                 'updated_at' => array('type' => 'timestamp ON UPDATE CURRENT_TIMESTAMP', 'default' => \DB::expr('CURRENT_TIMESTAMP'))
             ), array('id'), false, 'InnoDB', 'utf8_unicode_ci');
 
-            \DB::query("ALTER TABLE services
+            \DB::query("ALTER TABLE ".\DB::table_prefix('services')."
                             ADD KEY index_services_on_access_token(access_token),
                             ADD KEY index_services_on_user_id(user_id),
                             ADD CONSTRAINT fk_index_services_on_user_id
                                 FOREIGN KEY (user_id)
-                                REFERENCES users (id) ON DELETE CASCADE",
+                                REFERENCES ".\DB::table_prefix('users')." (id) ON DELETE CASCADE",
                        \DB::UPDATE)->execute();
         }
 
@@ -314,11 +314,11 @@ class Warden
                 'user_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true)
             ), array('id'), false, 'InnoDB', 'utf8_unicode_ci');
 
-            \DB::query("ALTER TABLE profiles
+            \DB::query("ALTER TABLE ".\DB::table_prefix('profiles')."
                             ADD KEY index_profiles_on_user_id(user_id),
                             ADD CONSTRAINT fk_index_profiles_on_user_id
                                 FOREIGN KEY (user_id)
-                                REFERENCES users (id) ON DELETE CASCADE",
+                                REFERENCES ".\DB::table_prefix('users')." (id) ON DELETE CASCADE",
                        \DB::UPDATE)->execute();
         }
 
