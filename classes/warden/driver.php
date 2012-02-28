@@ -316,7 +316,7 @@ class Warden_Driver
                 $user->update_tracked_fields();
             } else {
                 if ($this->config['lockable']['in_use'] === true) {
-                    $strategy = \Config::get('warden.lockable.lock_strategy');
+                    $strategy = $this->config['lockable']['lock_strategy'];
 
                     if (!empty($strategy) && $strategy != 'none') {
                         $user->{$strategy} = 0;
