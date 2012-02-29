@@ -17,7 +17,7 @@
 
 * Tidied up and improved README
 * Warden_Mailer will now use default email set in Email package
-* Made the install tasks table_prefix aware. [Tenga]
+* Made the install tasks table_prefix aware. [Tenga](https://github.com/Tenga)
 * Code formatted
 
 
@@ -25,3 +25,5 @@
 ================
 
 Huge changes to pretty much everything since initial release. See README for full details.
+Contributions from: [andreoav](https://github.com/andreoav), [JesseObrien](https://github.com/JesseObrien),
+[rclanan](https://github.com/rclanan)
