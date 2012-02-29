@@ -7,12 +7,12 @@
  * @version    1.0
  * @author     Andrew Wayne <lifeandcoding@gmail.com>
  * @license    MIT License
- * @copyright  (c) 2011 Andrew Wayne
+ * @copyright  (c) 2011 - 2012 Andrew Wayne
  */
 
 /**
  * An example that shows how to use the omniauthable feature.
- * 
+ *
  * Its as simple as just extending \Warden\Controller_OmniAuth
  * in your APPPATH/classes/controller
  */

@@ -7,7 +7,7 @@
  * @version    1.0
  * @author     Andrew Wayne <lifeandcoding@gmail.com>
  * @license    MIT License
- * @copyright  (c) 2011 Andrew Wayne
+ * @copyright  (c) 2011 - 2012 Andrew Wayne
  */
 namespace Fuel\Tasks;
 
