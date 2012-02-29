@@ -27,6 +27,14 @@ hr.soften {
   border: 0;
 }
 
+.table td .table thead th {
+  background-color: #fff;
+}
+
+.table td .table tbody td {
+  background-color: #F5F5F5;
+}
+
 /* Jumbotrons
 -------------------------------------------------- */
 .jumbotron {
