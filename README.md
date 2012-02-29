@@ -1,6 +1,9 @@
-# Warden 1.0
+![Warden!](https://github.com/dre1080/warden/raw/gh-pages/assets/img/warden-logo-text.jpg)
 
-A user database authorization & authentication package for FuelPHP.
+# Warden
+
+Latest release: 1.0 ([view changelog](https://github.com/dre1080/warden/blob/1.1/dev/HISTORY.md))
+
 
 Features:
 
