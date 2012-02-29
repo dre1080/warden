@@ -1,0 +1,3 @@
+[submodule "vendor/CryptLib"]
+	path = vendor/CryptLib
+	url = git://github.com/ircmaxell/PHP-CryptLib.git
