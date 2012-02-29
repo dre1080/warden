@@ -150,6 +150,15 @@ hr.soften {
   border-top-color: #08C;
 }
 
+.navbar .nav .active > .dropdown-toggle .caret {
+  border-top-color: #fff;
+}
+
+.navbar .nav .active > .dropdown-toggle,
+.navbar .nav .open.active > .dropdown-toggle {
+  background-color: #333;
+}
+
 .quick-links {
   min-height: 30px;
   padding: 5px 20px;
