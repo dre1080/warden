@@ -253,6 +253,6 @@ This is called before each user is logged out.
 
 Creator and lead developer: Andrew Wayne.
 
-Special thanks to Jesse O'Brien, Andreo Vieira and Ray Clanan for contributing code, ideas and testing early versions.
+Special thanks to Jesse O'Brien, Andreo Vieira, Ray Clanan and Dražen Tenžera for contributing code, ideas and testing early versions.
 
 Thanks also to the many who have contributed code, ideas and issues.
