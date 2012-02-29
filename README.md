@@ -248,3 +248,11 @@ This is called before each user is logged out.
     Warden::before_logout(function($user) {
         logger(\Fuel::L_INFO, 'User '.$user->id.' logging out', 'Warden::before_logout');
     });
+
+## Contributors
+
+Creator and lead developer: Andrew Wayne.
+
+Special thanks to Jesse O'Brien, Andreo Vieira and Ray Clanan for contributing code, ideas and testing early versions.
+
+Thanks also to the many who have contributed code, ideas and issues.
