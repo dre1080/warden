@@ -39,18 +39,18 @@
           <a class="brand" href="./index.html">Warden</a>
           <div class="nav-collapse">
             <ul class="nav">
-              <li class="active">
+              <li>
                 <a href="./index.html">Overview</a>
               </li>
-              <li>
+              <li class="active">
                 <a href="./getting-started.html">Getting Started & Configuration</a>
               </li>
               <li class="divider-vertical"></li>
               <li class="dropdown">
                 <a href="./examples.html" class="dropdown-toggle" data-toggle="dropdown">Examples <b class="caret"></b></a>
                 <ul class="dropdown-menu">
-                  <li><a href="./examples/omniauthable.html">Omniauthable</a></li>
-                  <li><a href="./examples/confirmable.html">Confirmable</a></li>
+                  <li><a href="./confirmable.html">Omniauthable</a></li>
+                  <li><a href="./confirmable.html">Confirmable</a></li>
                 </ul>
               </li>
             </ul>
@@ -60,94 +60,65 @@
     </div>
 
     <div class="container">
-      <!-- Jumbotron
-      ================================================== -->
-      <header class="jumbotron">
-        <div class="inner">
-          <a href="./index.html">
-            <img src="assets/img/warden-logo.png" height="352" alt="Warden"/>
-          </a>
-
-          <p>
-            <a href="https://github.com/dre1080/warden" class="btn btn-primary btn-large">Warden on GitHub</a>
-            <a href="https://github.com/dre1080/warden/zipball/v1.0" class="btn btn-large">Download Warden</a>
-          </p>
-        </div>
-
-        <ul class="quick-links">
-          <li><a href="https://github.com/dre1080/warden/issues?state=open">Issues</a></li>
-          <li><a href="https://github.com/dre1080/warden/blob/1.1/dev/HISTORY.md">Changelog</a></li>
-          <li><a href="https://github.com/dre1080/warden/wiki">Wiki</a></li>
-          <li class="divider">&middot;</li>
-          <li>
-            <iframe class="github-btn" src="http://markdotto.github.com/github-buttons/github-btn.html?user=dre1080&repo=warden&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="112px" height="20px"></iframe>
-          </li>
-          <li>
-            <iframe class="github-btn" src="http://markdotto.github.com/github-buttons/github-btn.html?user=dre1080&repo=warden&type=fork&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="95px" height="20px"></iframe>
-          </li>
-          <li class="divider">&middot;</li>
-          <li class="tweet-btn">
-            <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://dre1080.github.com/warden/" data-count="horizontal" data-via="heyando" data-related="heyando:Creator of Warden" data-hashtags="FuelPHP">Tweet</a>
-          </li>
-        </ul>
+      <header class="jumbotron subhead">
+        <h1>Getting Started and Configuration</h1>
+        <p class="lead">It's very easy to get started with Warden, here's how.</p>
       </header>
 
-      <hr class="soften">
-
-
-      <!-- About
+      <!-- Installation
       ================================================== -->
-      <div class="about">
+      <section id="installation">
         <div class="page-header">
-          <h1>About Warden <small>Objective, features and requirements.</small></h1>
+          <h1>Setup <small>Getting it up and running.</small></h1>
         </div>
+
         <div class="row">
           <div class="span4">
-            <h3>What is Warden?</h3>
-            <p>Warden is a user database auth package for the FuelPHP framework
-              that aims to fast track development by handling the work load of authenticating and authorizing user's.
-              Built for performance, it comes with ready-to-use models and database install tasks.
+            <p>
+              This package follows standard installation rules.
+              You have two options, you can autoload the package in your <em>app/config.php</em>:
             </p>
+            <pre class="prettyprint linenums">
+  'always_load' => array(
+  'packages'  => array(
+  array('warden')
+  ),
+  ) //...</pre>
 
-            <h3>Why use BCrypt?</h3>
-            <ul>
-              <li><a href="http://codahale.com/how-to-safely-store-a-password" target="_blank">How To Safely Store A Password</a></li>
-              <li><a href="http://yorickpeterse.com/articles/use-bcrypt-fool" target="_blank">Use BCrypt Fool!</a></li>
-            </ul>
+            <p>or load it manually like so:</p>
+            <pre class="prettyprint linenums">Fuel::add_package('warden');</pre>
           </div>
 
-          <div class="span4">
-            <h3>Features</h3>
-            <ul>
-              <li>Secure BCrypt password hashing.</li>
-              <li>User login/logout with "remember-me" functionality.</li>
-              <li>User ACL (roles / groups, and permissions).</li>
-              <li>Track information about user sign ins.</li>
-              <li>User account password resets.</li>
-              <li>User activation.</li>
-              <li>User account locking / login attempt limits.</li>
-              <li>User profiles.</li>
-              <li>HTTP Authentication.</li>
-              <li>OAuth support.</li>
-            </ul>
-          </div>
+          <div class="span8">
+            <h3>There are two ways to install the Warden tables:</h3>
 
-          <div class="span4">
-            <h3>Requirements <small>Wait! Before you start...</small></h3>
-            <p>Packages:</p>
-            <ul>
-              <li><a href="https://github.com/fuel/orm">Orm</a></li>
-              <li><a href="https://github.com/fuel/email">Email</a></li>
-            </ul>
-            <p>If you're planning to use the omniauthable feature (OAuth), then the additional packages are needed:</p>
-            <ul>
-              <li><a href="https://github.com/fuel-packages/fuel-oauth">Fuel OAuth</a></li>
-              <li><a href="https://github.com/fuel-packages/fuel-oauth2">Fuel OAuth2</a></li>
-            </ul>
+            <ol>
+              <li>
+                <h4>SQL File</h4>
+                <p>View <code>config/install.sql</code> for table structures and import into your database.</p>
+              </li>
+              <li>
+                <h4>Oil Task <small>(Recommended)</small></h4>
+                <div class="alert">
+                  Your database connection needs to be setup first for this to work.
+                </div>
+                <p><code>php oil r warden</code></p>
+                <p>
+                  This will install warden and the tables required depending on the values in your warden configuration file.
+                  If no configuration file exists, Warden will create a file named <code>warden.php</code> in your <code>APPPATH/config</code> directory.
+                </p>
+              </li>
+            </ol>
+
+            <div class="alert alert-info">
+              <strong>Heads up!</strong>
+              Once done, don't forget to create your roles and permissions in the <code>roles</code> and <code>permissions</code> tables, respectively;
+              in order to be able to assign roles and permissions to users.
+            </div>
           </div>
-        </div>
-      </div>
-    </div><!-- /container -->
+        </div><!-- /row -->
+      </section>
+    </div>
 
 
     <!-- Footer

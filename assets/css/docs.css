@@ -8,101 +8,456 @@
 /* Body and structure
 -------------------------------------------------- */
 body {
-  background-color: #fff;
+  background: #fff url(../img/grid-18px-masked.png) 0 40px repeat-x;
   position: relative;
+  padding-top: 90px;
 }
+
 section {
   padding-top: 60px;
 }
-section > .row {
-  margin-bottom: 10px;
-}
-#description {
-    background: #F5F5F5;
-    text-align: center;
-}
-#description .lead {
-    padding: 20px;
-}
 
-.upper-bar {
-  background-color: #049CD9;
-  background-repeat: no-repeat;
-  background-image: -webkit-gradient(linear, left top, left bottom, from(#004D9F), to(#049CD9));
-  background-image: -webkit-linear-gradient(#004D9F, #049CD9);
-  background-image: -moz-linear-gradient(#004D9F, #049CD9);
-  background-image: -o-linear-gradient(top, #004D9F, #049CD9);
-  background-image: -khtml-gradient(linear, left top, left bottom, from(#004D9F), to(#049CD9));
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#004D9F', endColorstr='#049CD9', GradientType=0);
+hr.soften {
+  height: 1px;
+  margin: 54px 0;
+  background-image: -webkit-linear-gradient(left, transparent, rgba(0, 0, 0, .1), transparent);
+  background-image: -moz-linear-gradient(left, transparent, rgba(0, 0, 0, .1), transparent);
+  background-image: -ms-linear-gradient(left, transparent, rgba(0, 0, 0, .1), transparent);
+  background-image: -o-linear-gradient(left, transparent, rgba(0, 0, 0, .1), transparent);
+  border: 0;
 }
 
 /* Jumbotrons
 -------------------------------------------------- */
 .jumbotron {
-  min-width: 940px;
-}
-.jumbotron .inner {
-  padding: 55px 0;
-  -webkit-box-shadow: inset 0 10px 30px rgba(0,0,0,.3);
-     -moz-box-shadow: inset 0 10px 30px rgba(0,0,0,.3);
-/*          box-shadow: inset 0 10px 30px rgba(0,0,0,.3);
-*/}
-.jumbotron h1,
-.jumbotron p {
-  margin-bottom: 9px;
-  color: #fff;
+  position: relative;
   text-align: center;
-  text-shadow: 0 1px 1px rgba(0,0,0,.3);
+  overflow: hidden;
 }
+
 .jumbotron h1 {
-  font-size: 54px;
+  margin-bottom: 9px;
+  font-size: 81px;
+  letter-spacing: -1px;
   line-height: 1;
-  text-shadow: 0 1px 2px rgba(0,0,0,.5);
 }
-.jumbotron p {
-  font-weight: 300;
+
+.jumbotron img {
+  margin: 0 20px 30px 0;
 }
-.jumbotron .lead {
+
+.jumbotron .btn-large {
   font-size: 20px;
-  line-height: 27px;
+  font-weight: normal;
+  padding: 14px 24px;
+  margin-right: 10px;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
 }
-.jumbotron p a {
-  color: #fff;
-  font-weight: bold;
+
+.jumbotron p {
+  margin-bottom: 18px;
+  font-weight: 300;
 }
 
 /* Specific jumbotrons
 ------------------------- */
-/* main docs page */
-.masthead {
-  background-color: #000000;
-  background-repeat: no-repeat;
-  background-image: -webkit-gradient(linear, left top, left bottom, from(#333333), to(#000000));
-  background-image: -webkit-linear-gradient(#333333, #000000);
-  background-image: -moz-linear-gradient(#333333, #000000);
-  background-image: -o-linear-gradient(top, #333333, #000000);
-  background-image: -khtml-gradient(linear, left top, left bottom, from(#333333), to(#000000));
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#333333', endColorstr='#000000', GradientType=0); /* IE8 and down */
+.subhead {
+  padding-bottom: 0;
+  margin-bottom: 9px;
+  text-align: left;
 }
+
+.subhead h1 {
+  font-size: 54px;
+}
+
+
+/* Navigation
+-------------------------------------------------- */
+
+.navbar-inner {
+  background-color: #FAFAFA;
+  background-image: -moz-linear-gradient(top, #FAFAFA, #EAEAEA);
+  background-image: -ms-linear-gradient(top, #FAFAFA, #EAEAEA);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#FAFAFA), to(#EAEAEA));
+  background-image: -webkit-linear-gradient(top, #FAFAFA, #EAEAEA);
+  background-image: -o-linear-gradient(top, #FAFAFA, #EAEAEA);
+  background-image: linear-gradient(top, #FAFAFA, #EAEAEA);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FAFAFA', endColorstr='#EAEAEA', GradientType=0);
+  border-bottom: 1px solid #CACACA;
+  -webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.4),0 0 10px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0 1px 0 rgba(255,255,255,0.4),0 0 10px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.4),0 0 10px rgba(0,0,0,0.1);
+}
+
+.navbar-fixed-top .brand:hover {
+  color: #08C;
+  text-decoration: none;
+}
+
+.navbar-fixed-top .brand {
+  padding-right: 0;
+  padding-left: 0;
+  margin-left: 20px;
+  float: right;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .1), 0 0 30px rgba(255, 255, 255, .125);
+}
+
+.navbar-fixed-top .brand, .navbar .nav > li > a {
+  color: #222;
+  font-weight: bold;
+  -webkit-transition: color .15s ease-in 0;
+  -moz-transition: color .15s linear;
+  transition: color .15s linear;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.navbar .nav > li > a:hover {
+  color: #08C;
+}
+
+.navbar .nav .active > a, .navbar .nav .active > a:hover {
+  background-color: #333;
+  text-shadow: 0 -1px 0 #000;
+}
+
+.navbar .divider-vertical {
+  background-color: #999;
+  border-right: 1px solid white;
+}
+
+.dropdown.open .dropdown-toggle {
+  color: #000;
+}
+
+.navbar .nav .dropdown-toggle .caret {
+  border-top-color: #222;
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+
+.navbar .nav .open.dropdown .caret {
+  border-top-color: #08C;
+}
+
+.quick-links {
+  min-height: 30px;
+  padding: 5px 20px;
+  margin: 36px 0;
+  list-style: none;
+  text-align: center;
+  overflow: hidden;
+}
+
+.quick-links li {
+  color: #999;
+  display: inline;
+  margin: 0 5px;
+}
+
+.quick-links .github-btn, .quick-links .tweet-btn, .quick-links .follow-btn {
+  position: relative;
+  top: 5px;
+}
+
+.subnav {
+  width: 100%;
+  height: 36px;
+  background-color: #EEE;
+  background-repeat: repeat-x;
+  background-image: -moz-linear-gradient(top, whiteSmoke 0%, #EEE 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,whiteSmoke), color-stop(100%,#EEE));
+  background-image: -webkit-linear-gradient(top, whiteSmoke 0%,#EEE 100%);
+  background-image: -ms-linear-gradient(top, whiteSmoke 0%,#EEE 100%);
+  background-image: -o-linear-gradient(top, whiteSmoke 0%,#EEE 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f5f5f5', endColorstr='#eeeeee',GradientType=0 );
+  background-image: linear-gradient(top, whiteSmoke 0%,#EEE 100%);
+  border: 1px solid #E5E5E5;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+
+.subnav .nav {
+  margin-bottom: 0;
+}
+
+.subnav .nav > li > a {
+  margin: 0;
+  padding-top:    11px;
+  padding-bottom: 11px;
+  border-left: 1px solid #f5f5f5;
+  border-right: 1px solid #e5e5e5;
+  -webkit-border-radius: 0;
+     -moz-border-radius: 0;
+          border-radius: 0;
+}
+.subnav .nav > .active > a,
+.subnav .nav > .active > a:hover {
+  padding-left: 13px;
+  color: #777;
+  background-color: #e9e9e9;
+  border-right-color: #ddd;
+  border-left: 0;
+  -webkit-box-shadow: inset 0 3px 5px rgba(0,0,0,.05);
+     -moz-box-shadow: inset 0 3px 5px rgba(0,0,0,.05);
+          box-shadow: inset 0 3px 5px rgba(0,0,0,.05);
+}
+.subnav .nav > .active > a .caret,
+.subnav .nav > .active > a:hover .caret {
+  border-top-color: #777;
+}
+.subnav .nav > li:first-child > a,
+.subnav .nav > li:first-child > a:hover {
+  border-left: 0;
+  padding-left: 12px;
+  -webkit-border-radius: 4px 0 0 4px;
+     -moz-border-radius: 4px 0 0 4px;
+          border-radius: 4px 0 0 4px;
+}
+.subnav .nav > li:last-child > a {
+  border-right: 0;
+}
+.subnav .dropdown-menu {
+  -webkit-border-radius: 0 0 4px 4px;
+     -moz-border-radius: 0 0 4px 4px;
+          border-radius: 0 0 4px 4px;
+}
+
+/* Fixed subnav on scroll, but only for 980px and up (sorry IE!) */
+@media (min-width: 980px) {
+  .subnav-fixed {
+    position: fixed;
+    top: 40px;
+    left: 0;
+    right: 0;
+    z-index: 1020; /* 10 less than .navbar-fixed to prevent any overlap */
+    border-color: #d5d5d5;
+    border-width: 0 0 1px; /* drop the border on the fixed edges */
+    -webkit-border-radius: 0;
+       -moz-border-radius: 0;
+            border-radius: 0;
+    -webkit-box-shadow: inset 0 1px 0 #fff, 0 1px 5px rgba(0,0,0,.1);
+       -moz-box-shadow: inset 0 1px 0 #fff, 0 1px 5px rgba(0,0,0,.1);
+            box-shadow: inset 0 1px 0 #fff, 0 1px 5px rgba(0,0,0,.1);
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled=false); /* IE6-9 */
+  }
+  .subnav-fixed .nav {
+    width: 938px;
+    margin: 0 auto;
+    padding: 0 1px;
+  }
+  .subnav .nav > li:first-child > a,
+  .subnav .nav > li:first-child > a:hover {
+    -webkit-border-radius: 0;
+       -moz-border-radius: 0;
+            border-radius: 0;
+  }
+}
+
+
+
+
 
 /* Footer
 -------------------------------------------------- */
 .footer {
-  background-color: #eee;
-  min-width: 940px;
-  padding: 30px 0;
-  text-shadow: 0 1px 0 #fff;
-  border-top: 1px solid #e5e5e5;
-  -webkit-box-shadow: inset 0 5px 15px rgba(0,0,0,.025);
-     -moz-box-shadow: inset 0 5px 15px rgba(0,0,0,.025);
-/*          box-shadow: inset 0 5px 15px rgba(0,0,0,.025);
-*/}
-.footer p {
-  color: #555;
+  background: #F7F7F7;
+  border-top: 1px solid #E5E5E5;
+  margin-top: 45px;
+  padding: 35px 0 36px;
 }
 
 /* Pretty Print
 -------------------------------------------------- */
 pre.prettyprint {
   overflow: hidden;
+}
+
+
+
+/* Responsive Docs
+-------------------------------------------------- */
+@media (max-width: 480px) {
+
+  /* Reduce padding above jumbotron */
+  body {
+    background: #fff;
+    padding-top: 70px;
+  }
+
+  .hide-on-desktop { display: block !important; }
+
+  /* Change up some type stuff */
+  h2 {
+    margin-top: 27px;
+  }
+  h2 small {
+    display: block;
+    line-height: 18px;
+  }
+  h3 {
+    margin-top: 18px;
+  }
+
+  /* Adjust the jumbotron */
+  .jumbotron p {
+    text-align: center;
+    margin-right: 0;
+  }
+
+  .jumbotron p {
+    margin-right: 0;
+    margin-left: 0;
+    font-size: 18px;
+    line-height: 24px;
+  }
+  .jumbotron .btn {
+    display: block;
+    font-size: 18px;
+    padding: 10px 14px;
+    margin: 0 auto 10px;
+  }
+  /* Masthead (home page jumbotron) */
+  .masthead {
+    padding-top: 0;
+  }
+
+  /* Don't space out quick links so much */
+  .quick-links {
+    margin: 40px 0 0;
+  }
+  /* hide the bullets on mobile since our horizontal space is limited */
+  .quick-links .divider {
+    display: none;
+  }
+
+  table code {
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-all;
+  }
+
+  /* Modal example */
+  .modal-example .modal {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+  }
+
+}
+
+
+@media (max-width: 768px) {
+
+  /* Remove any padding from the body */
+  body {
+    background: #fff;
+    padding-top: 0;
+  }
+
+  /* Jumbotron buttons */
+  .jumbotron .btn {
+    margin-bottom: 10px;
+  }
+
+  /* Subnav */
+  .subnav {
+    position: static;
+    top: auto;
+    z-index: auto;
+    width: auto;
+    height: auto;
+    background: #fff; /* whole background property since we use a background-image for gradient */
+    -webkit-box-shadow: none;
+       -moz-box-shadow: none;
+            box-shadow: none;
+  }
+  .subnav .nav > li {
+    float: none;
+  }
+  .subnav .nav > li > a {
+    border: 0;
+  }
+  .subnav .nav > li + li > a {
+    border-top: 1px solid #e5e5e5;
+  }
+  .subnav .nav > li:first-child > a,
+  .subnav .nav > li:first-child > a:hover {
+      -webkit-border-radius: 4px 4px 0 0;
+         -moz-border-radius: 4px 4px 0 0;
+              border-radius: 4px 4px 0 0;
+  }
+
+  /* Popovers */
+  .large-bird {
+    display: none;
+  }
+  .popover-well .popover-wrapper {
+    margin-left: 0;
+  }
+
+  /* Unfloat the back to top link in footer */
+  .footer .pull-right {
+    float: none;
+  }
+  .footer p {
+    margin-bottom: 9px;
+  }
+
+}
+
+
+@media (min-width: 480px) and (max-width: 768px) {
+
+  /* Scale down the jumbotron content */
+  .jumbotron p {
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+}
+
+@media (min-width: 768px) and (max-width: 980px) {
+
+  /* Remove any padding from the body */
+  body {
+    background: #fff;
+    padding-top: 0;
+  }
+
+  .hide-on-desktop { display: block !important; }
+}
+
+@media (max-width: 980px) {
+
+  /* Unfloat brand */
+  .navbar-fixed-top .brand {
+    float: left;
+    margin-left: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  /* Inline-block quick links for more spacing */
+  .quick-links li {
+    display: inline-block;
+    margin: 5px;
+  }
+}
+
+@media (max-width: 979px) {
+  .navbar .nav > li > a:hover,
+  .navbar .nav .active > a,
+  .navbar .nav .active > a:hover {
+    text-shadow: none;
+  }
+
+  .navbar .nav > li > a:hover {
+    color: #F0F0F0;
+  }
 }
