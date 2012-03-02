@@ -26,7 +26,7 @@ class Warden
     public function run()
     {
         \Cli::write('================================================================');
-        \Cli::write('Warden: User authorization & authentication library for FuelPHP.');
+        \Cli::write('Warden: An awesome user auth package for FuelPHP.');
         \Cli::write('Copyright (c) 2011 Andrew Wayne');
 
         $eye = \Cli::color("*", 'red');
@@ -59,6 +59,9 @@ class Warden
 
         $this->install();
 
+        $this->_create_default_role();
+        $this->_create_admin();
+
         \Cli::write("\nSaving Warden config...");
         $this->_save_config();
 
@@ -78,19 +81,21 @@ class Warden
             'remember_token' => array('constraint' => 60, 'type' => 'varbinary', 'null' => true, 'default' => \DB::expr('NULL')),
         );
 
-        if (\Config::get('warden.recoverable.in_use') === true) {
+        $all = \Cli::option('all', false);
+
+        if (\Config::get('warden.recoverable.in_use') === true || $all) {
             $fields = array_merge($fields, $this->recoverable(true));
         }
 
-        if (\Config::get('warden.confirmable.in_use') === true) {
+        if (\Config::get('warden.confirmable.in_use') === true || $all) {
             $fields = array_merge($fields, $this->confirmable(true));
         }
 
-        if (\Config::get('warden.trackable') === true) {
+        if (\Config::get('warden.trackable') === true || $all) {
             $fields = array_merge($fields, $this->trackable(true));
         }
 
-        if (\Config::get('warden.lockable.in_use') === true) {
+        if (\Config::get('warden.lockable.in_use') === true || $all) {
             $fields = array_merge($fields, $this->lockable(true));
         }
 
@@ -328,6 +333,94 @@ class Warden
         }
 
         \Cli::write(\Cli::color('Created profiles table successfully', 'green'));
+    }
+
+    public static function help()
+	{
+		$output = <<<HELP
+
+Usage:
+  php oil r warden [install] [options]
+
+Runtime options:
+  -a, [--all]            # Install with all features enabled
+  -d, [--delete]         # Disable/Remove feature(s)
+  -t, [--trackable]      # Tracking user account sign in info
+  -r, [--recoverable]    # Reset passwords feature
+  -c, [--confirmable]    # Confirming user accounts
+  -l, [--lockable]       # Locking user accounts
+  -o, [--omniauthable]   # oAuth support
+  -p, [--profilable]     # User profiles
+
+Description:
+  The 'warden' task can be used to setup warden on a fresh install
+  and enable/disable features.
+
+Examples:
+  php oil r warden install --all
+  php oil r warden <install> [<feature1> |<feature2> |..]
+  php oil r warden [<feature1> |<feature2> |..]
+  php oil r warden [<feature1> |<feature2> |..] --delete
+
+Documentation:
+  http://dre1080.github.com/warden/tasks.html
+HELP;
+		\Cli::write($output);
+
+	}
+
+    private function _create_default_role()
+    {
+        \Cli::beep(1); // get attention
+        $create_role = \Cli::prompt("\nCreate a default user role?", array('y', 'n'));
+
+        if ($create_role === 'y') {
+            try {
+                $new = \Model_Role::forge(array(
+                    'name'        => 'User',
+                    'description' => 'Default login role.'
+                ))->save();
+
+                \Config::set('warden.default_role', 'User');
+
+                \Cli::color("\nNice! :) Default role created successfully.", 'green');
+                \Cli::write('Role id  : ' . $new);
+                \Cli::write('Role name: User');
+            } catch (\Exception $e) {
+                \Cli::error("\n:( Failed to create default role because: " . $e->getMessage());
+            }
+        }
+    }
+
+    private function _create_admin()
+    {
+        \Cli::beep(1); // get attention
+        $create_admin = \Cli::prompt("\nCreate an admin user?", array('y', 'n'));
+
+        if ($create_admin === 'y') {
+            try {
+                $user = new \Model_User(array(
+                    'username' => 'admin',
+                    'email'    => 'admin@example.com',
+                    'password' => '123warden',
+                ));
+
+                $user->roles[] = new \Model_Role(array(
+                    'name'        => 'Admin',
+                    'description' => 'Site admin role.'
+                ));
+
+                $user->save();
+
+                \Cli::color("\nWoohoo! :) Admin user created successfully.", 'green');
+                \Cli::write('Username : admin');
+                \Cli::write('Email    : admin@example.com');
+                \Cli::write('Password : 123warden');
+                \Cli::write('User role: Admin');
+            } catch (\Exception $e) {
+                \Cli::error("\n:( Failed to create admin user because: " . $e->getMessage());
+            }
+        }
     }
 
     private function _setup_config()
