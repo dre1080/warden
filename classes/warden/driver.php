@@ -58,13 +58,11 @@ class Warden_Driver
         $auth_token = \Session::get('authenticity_token');
 
         if (!empty($auth_token) &&
-            (is_null($this->user) || $this->user->authentication_token !== $auth_token))
+            (!$this->user || $this->user->authentication_token !== $auth_token))
         {
             $this->user = null;
 
-            $user = \Model_User::find('first', array(
-                'where' => array('authentication_token' => $auth_token)
-            ));
+            $user = \Model_User::find_by_authentication_token($auth_token);
 
             if ($user && !$user->is_access_locked()) {
                 $this->set_user($user);
@@ -211,11 +209,7 @@ class Warden_Driver
      */
     public function current_user()
     {
-        if ($this->logged_in(null)) {
-            return $this->user;
-        }
-
-        return false;
+        return $this->user;
     }
 
     /**
@@ -241,9 +235,7 @@ class Warden_Driver
     public function auto_login($role = null)
     {
         if (($token = \Cookie::get('remember_token'))) {
-            $user = \Model_User::find('first', array(
-                'where' => array('remember_token' => $token)
-            ));
+            $user = \Model_User::find_by_remember_token($token);
 
             if ($user) {
                 if ($this->has_access($role, $user)) {

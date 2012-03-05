@@ -48,7 +48,7 @@ class Controller_User
     public function action_confirm()
     {
         try {
-            $user = \Model_User::confirm_by_token($this->param('token'));
+            $user = \Model_User::confirm_by_token($this->request()->param('token'));
             if ($user) {
                 \Session::set_flash($ex->getMessage());
             } else {
