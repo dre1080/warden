@@ -15,6 +15,7 @@
 
 ##### Other Changes
 
+* Fixed issue where `Warden::current_user()` was returning false, even when logged in.
 * Tidied up and improved README
 * Warden_Mailer will now use default email set in Email package
 * Made the install tasks table_prefix aware ([Tenga](https://github.com/Tenga))
