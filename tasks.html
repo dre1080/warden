@@ -41,13 +41,13 @@
           <a class="brand" href="./index.html">Warden</a>
           <div class="nav-collapse">
             <ul class="nav">
-              <li class="active">
+              <li>
                 <a href="./index.html">Overview</a>
               </li>
               <li>
                 <a href="./getting-started.html">Setup &amp; Configuration</a>
               </li>
-              <li>
+              <li class="active">
                 <a href="./tasks.html">Tasks</a>
               </li>
               <li>
@@ -70,95 +70,87 @@
     <div class="container">
       <!-- Jumbotron
       ================================================== -->
-      <header class="jumbotron">
-        <div class="inner">
-          <a href="./index.html">
-            <img src="assets/img/warden-logo.png" height="352" alt="Warden"/>
-          </a>
-
-          <p>
-            <a href="https://github.com/dre1080/warden" class="btn btn-primary btn-large">Warden on GitHub</a>
-            <a href="https://github.com/dre1080/warden/zipball/v1.0" class="btn btn-large">Download Warden</a>
-          </p>
-        </div>
-
-        <ul class="quick-links">
-          <li><a href="https://github.com/dre1080/warden/issues?state=open">Issues</a></li>
-          <li><a href="https://github.com/dre1080/warden/blob/1.1/dev/HISTORY.md">Changelog</a></li>
-          <li><a href="https://github.com/dre1080/warden/wiki">Wiki</a></li>
-          <li class="divider">&middot;</li>
-          <li>
-            <iframe class="github-btn" src="http://markdotto.github.com/github-buttons/github-btn.html?user=dre1080&repo=warden&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="112px" height="20px"></iframe>
-          </li>
-          <li>
-            <iframe class="github-btn" src="http://markdotto.github.com/github-buttons/github-btn.html?user=dre1080&repo=warden&type=fork&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="95px" height="20px"></iframe>
-          </li>
-          <li class="divider">&middot;</li>
-          <li class="tweet-btn">
-            <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://dre1080.github.com/warden/" data-count="horizontal" data-via="heyando" data-related="heyando:Creator of Warden" data-hashtags="FuelPHP">Tweet</a>
-          </li>
-        </ul>
+      <header class="jumbotron subhead">
+        <h1>More on Warden Tasks</h1>
+        <p class="lead">Warden comes bundled with tasks to help you install and/or add and remove features.</p>
       </header>
 
-      <hr class="soften">
-
-
-      <!-- About
+      <!-- Tasks
       ================================================== -->
-      <div class="about">
+      <section id="adding-tasks">
         <div class="page-header">
-          <h1>About Warden <small>Objective, features and dependencies.</small></h1>
+          <h1>Adding a Warden feature</h1>
         </div>
+
         <div class="row">
           <div class="span4">
-            <h3>What is Warden?</h3>
-            <p>Warden is a user database auth package for the FuelPHP framework
-              that aims to fast track development by handling the work load of authenticating and authorizing user's.
-              Built for performance, it comes with ready-to-use models and database install tasks.
+            <p>
+              Issuing one of the commands on the right will add the required fields
+              to your <code>users</code> table or create a new table if the feature doesn't use
+              the <code>users</code> table.
+              It will also activate the feature in your config.
             </p>
-
-            <h3>Why use BCrypt?</h3>
+            <p>
+              You can also add multiple features in the same command, eg.: <br>
+              <code>php oil r warden --omniauthable --confirmable</code>
+            </p>
+            <p>This will do the following:</p>
             <ul>
-              <li><a href="http://codahale.com/how-to-safely-store-a-password" target="_blank">How To Safely Store A Password</a></li>
-              <li><a href="http://yorickpeterse.com/articles/use-bcrypt-fool" target="_blank">Use BCrypt Fool!</a></li>
-              <li><a href="http://phpmaster.com/why-you-should-use-bcrypt-to-hash-stored-passwords/" target="_blank">Why You Should Use Bcrypt to Hash Stored Passwords</a></li>
-              <li><a href="http://chargen.matasano.com/chargen/2007/9/7/enough-with-the-rainbow-tables-what-you-need-to-know-about-s.html" target="_blank">Enough With The Rainbow Tables: What You Need To Know About Secure Password Schemes</a></li>
-              <li><a href="http://news.ycombinator.com/item?id=2004962" target="_blank">No. Use Bcrypt. <em>Always</em>.</a></li>
+              <li>
+                Enable the omniauthable and confirmable features in your <code>APPPATH/config/warden.php</code>.
+                Creating the file if it doesn't exist.
+              </li>
+              <li>Creating the <code>services</code> table if it doesn't exist for omniauthable.</li>
+              <li>Add the <code>confirmable</code> fields to the <code>users</code> table if they don't exist.</li>
             </ul>
           </div>
 
-          <div class="span4">
-            <h3>Features</h3>
+          <div class="span8">
+            <p>To add a Warden feature to an existing installation, use the command line to issue the following commands:</p>
             <ul>
-              <li>Secure BCrypt password hashing.</li>
-              <li>User login/logout with "remember-me" functionality.</li>
-              <li>User ACL (roles / groups, and permissions).</li>
-              <li>Track information about user sign ins.</li>
-              <li>User account password resets.</li>
-              <li>User activation.</li>
-              <li>User account locking / login attempt limits.</li>
-              <li>User profiles.</li>
-              <li>HTTP Authentication.</li>
-              <li>OAuth support.</li>
-            </ul>
-            <p>And many more to come!</p>
-          </div>
-
-          <div class="span4">
-            <h3>Dependencies <small>Wait! Before you start...</small></h3>
-            <p>Packages:</p>
-            <ul>
-              <li><a href="https://github.com/fuel/orm">Orm</a></li>
-              <li><a href="https://github.com/fuel/email">Email</a></li>
-            </ul>
-            <p>If you're planning to use the omniauthable feature (OAuth), then the additional packages are needed:</p>
-            <ul>
-              <li><a href="https://github.com/fuel-packages/fuel-oauth">Fuel OAuth</a></li>
-              <li><a href="https://github.com/fuel-packages/fuel-oauth2">Fuel OAuth2</a></li>
+              <li>
+                <p>recoverable:</p>
+                <p><code>php oil r warden --recoverable</code> or <code>php oil r warden -r</code></p>
+              </li>
+              <li>
+                <p>confirmable:</p>
+                <p><code>php oil r warden --confirmable</code> or <code>php oil r warden -c</code></p>
+              </li>
+              <li>
+                <p>trackable:</p>
+                <p><code>php oil r warden --trackable</code> or <code>php oil r warden -t</code></p>
+              </li>
+              <li>
+                <p>lockable:</p>
+                <p><code>php oil r warden --lockable</code> or <code>php oil r warden -l</code></p>
+              </li>
+              <li>
+                <p>omniauthable:</p>
+                <p><code>php oil r warden --trackable</code> or <code>php oil r warden -t</code></p>
+              </li>
+              <li>
+                <p>profilable:</p>
+                <p><code>php oil r warden --profilable</code> or <code>php oil r warden -p</code></p>
+              </li>
             </ul>
           </div>
         </div>
-      </div>
+      </section>
+
+      <section id="removing-tasks">
+        <div class="page-header">
+          <h1>Removing/Deleting a Warden feature</h1>
+        </div>
+
+        <div class="row">
+          <div class="span12">
+            <p>To remove a feature use one of the commands above followed by the option: <code>-d</code> or <code>--delete</code></p>
+            <p>For example to remove the lockable feature, just issue the following command:</p>
+            <p><code>php oil r warden --lockable --delete</code> or <code>php oil r warden --lockable -d</code></p>
+            <p>This will remove the <code>lockable</code> fields from your <code>users</code> table and deactivate the feature in your config.</p>
+          </div>
+        </div>
+      </section>
     </div><!-- /container -->
 
 

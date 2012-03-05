@@ -150,6 +150,15 @@ hr.soften {
   border-top-color: #08C;
 }
 
+.navbar .nav .active > .dropdown-toggle .caret {
+  border-top-color: #fff;
+}
+
+.navbar .nav .active > .dropdown-toggle,
+.navbar .nav .open.active > .dropdown-toggle {
+  background-color: #333;
+}
+
 .quick-links {
   min-height: 30px;
   padding: 5px 20px;
@@ -165,7 +174,7 @@ hr.soften {
   margin: 0 5px;
 }
 
-.quick-links .github-btn, .quick-links .tweet-btn, .quick-links .plus1-btn {
+.quick-links .github-btn, .quick-links .tweet-btn {
   position: relative;
   top: 5px;
 }
@@ -274,7 +283,7 @@ hr.soften {
 .footer {
   background: #F7F7F7;
   border-top: 1px solid #E5E5E5;
-  margin-top: 45px;
+  margin-top: 95px;
   padding: 35px 0 36px;
 }
 
