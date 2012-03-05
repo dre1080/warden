@@ -523,7 +523,7 @@ class Warden
     public function encrypt_password($password)
     {
         static $hasher = null;
-        $hasher || $hasher = new BCrypt;
+        !$hasher && $hasher = new BCrypt;
         return $hasher->create($password);
     }
 
@@ -556,7 +556,7 @@ class Warden
     public function generate_token()
     {
         static $cryptlib = null;
-        $cryptlib || $cryptlib = new CryptLib;
+        !$cryptlib && $cryptlib = new CryptLib;
 
         $token = $cryptlib->getRandomToken(32).':'.time();
         return str_replace(array('+', '/', '='), array('x', 'y', 'z'), base64_encode($token));
