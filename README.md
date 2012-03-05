@@ -1,6 +1,6 @@
 ![Warden!](https://github.com/dre1080/warden/raw/gh-pages/assets/img/warden-logo-text.jpg)
 
-Latest release: 1.0 ([view changelog](https://github.com/dre1080/warden/blob/1.1/dev/HISTORY.md))
+Latest release: 1.1 ([view changelog](https://github.com/dre1080/warden/blob/master/HISTORY.md))
 
 
 #### Features:
