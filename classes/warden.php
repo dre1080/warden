@@ -11,8 +11,7 @@
  */
 namespace Warden;
 
-use CryptLib\CryptLib;
-use CryptLib\Password\Implementation\Blowfish as BCrypt;
+use PasswordHash;
 
 /**
  * Warden
@@ -522,9 +521,8 @@ class Warden
      */
     public function encrypt_password($password)
     {
-        static $hasher = null;
-        !$hasher && $hasher = new BCrypt;
-        return $hasher->create($password);
+        $hasher = new PasswordHash(8, false);
+        return $hasher->HashPassword($password);
     }
 
     /**
@@ -535,31 +533,29 @@ class Warden
      *
      * @return bool
      */
-    public function has_password(Model_User $user, $submitted_password)
+    public static function has_password(Model_User $user, $submitted_password)
     {
         if (empty($user->encrypted_password) || empty($submitted_password)) {
             return false;
         }
 
-        $cryptlib = new CryptLib;
-        return $cryptlib->verifyPasswordHash($submitted_password, $user->encrypted_password);
+        $hasher = new PasswordHash(8, false);
+        return $hasher->CheckPassword($submitted_password, $user->encrypted_password);
     }
 
     /**
      * Generate a unique friendly string to be used as a token.
-     * We don't use the built in \Str::random('unique') because it is based on using
-     * uniqid() prefixed with mt_rand() which is a very weak source in random
-     * string generation.
      *
      * @return string
      */
-    public function generate_token()
+    public static function generate_token()
     {
-        static $cryptlib = null;
-        !$cryptlib && $cryptlib = new CryptLib;
-
-        $token = $cryptlib->getRandomToken(32).':'.time();
-        return str_replace(array('+', '/', '='), array('x', 'y', 'z'), base64_encode($token));
+        $token = join(':', array(Str::random('alnum', 15), time()));
+        return str_replace(
+	        array('+', '/', '=', 'l', 'I', 'O', '0'), 
+	        array('p', 'q', 'r', 's', 'x', 'y', 'z'), 
+	        base64_encode($token)
+		);
     }
 
     /**
