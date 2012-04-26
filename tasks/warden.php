@@ -25,18 +25,20 @@ class Warden
      */
     public function run()
     {
-        \Cli::write('================================================================');
-        \Cli::write('Warden: An awesome user auth package for FuelPHP.');
-        \Cli::write('Copyright (c) 2011 Andrew Wayne');
+        \Cli::write(static::_bold_text('================================================================'));
+        \Cli::write(static::_bold_text('Warden: An awesome user auth package for FuelPHP.'));
+        \Cli::write(static::_bold_text('Copyright (c) 2011 Andrew Wayne'));
 
         $eye = \Cli::color("*", 'red');
 
-		\Cli::write(\Cli::color("
+		\Cli::write(\Cli::color(static::_bold_text("
 					\"TO SERVE & PROTECT\"
 			          _____     /
-			         /_____\\", 'blue')."\n"
-.\Cli::color("			    ____[\\", 'blue').$eye.\Cli::color('---', 'blue').$eye.\Cli::color('/]____', 'blue')."\n"
-.\Cli::color("			   /\\ #\\ \\_____/ /# /\\
+			         /_____\\"), 'blue')."\n"
+.\Cli::color(static::_bold_text("			    ____[\\"), 'blue').$eye
+.\Cli::color(static::_bold_text('---'), 'blue').$eye
+.\Cli::color(static::_bold_text('/]____'), 'blue')."\n"
+.\Cli::color(static::_bold_text("			   /\\ #\\ \\_____/ /# /\\
 			  /  \\# \\_.---._/ #/  \\
 			 /   /|\\  |   |  /|\\   \\
 			/___/ | | | W | | | \\___\\
@@ -50,9 +52,9 @@ class Warden
 			      |   |   |   |
 			      |___|   |___|
 			      /   \\   /   \\
-			     |_____| |_____|", 'blue'));
+			     |_____| |_____|"), 'blue'));
 
-        \Cli::write('================================================================');
+        \Cli::write(static::_bold_text('================================================================'));
 
         \Cli::write("\nSetting up Warden config...");
         $this->_setup_config();
@@ -65,9 +67,9 @@ class Warden
         \Cli::write("\nSaving Warden config...");
         $this->_save_config();
 
-        \Cli::write('================================================================');
+        \Cli::write(static::_bold_text('================================================================'));
 
-        \Cli::write("\n".\Cli::color('Warden installed successfully!', 'green'));
+        \Cli::write("\n".\Cli::color(static::_bold_text('Warden installed successfully!'), 'green'));
     }
 
     public function install()
@@ -121,11 +123,36 @@ class Warden
         if (\Config::get('warden.profilable') === true) {
             $this->profilable(true);
         }
-
-        if (\Config::get('warden.omniauthable.in_use') === true) {
-            $this->omniauthable(true);
-        }
     }
+
+	public function uninstall()
+	{
+		\DBUtil::drop_table('roles_users');
+        \Cli::write(\Cli::color('Dropped roles_users table successfully', 'green'));
+		
+		\DBUtil::drop_table('roles_permissions');
+        \Cli::write(\Cli::color('Dropped roles_permissions table successfully', 'green'));
+		
+		\DBUtil::drop_table('profiles');
+        \Cli::write(\Cli::color('Dropped profiles table successfully', 'green'));
+        
+		\DBUtil::drop_table('permissions');
+        \Cli::write(\Cli::color('Dropped permissions table successfully', 'green'));
+        
+		\DBUtil::drop_table('roles');
+        \Cli::write(\Cli::color('Dropped roles table successfully', 'green'));
+        
+		\DBUtil::drop_table('users');
+        \Cli::write(\Cli::color('Dropped users table successfully', 'green'));
+		
+		$config_file = APPPATH.'config'.DIRECTORY_SEPARATOR.'warden.php';
+		if (file_exists($config_file)) {
+			\File::delete($config_file);
+        	\Cli::write(\Cli::color('Deleted warden config file successfully', 'green'));
+		}
+		
+        \Cli::write("\n".\Cli::color(static::_bold_text('Warden uninstalled successfully!'), 'green'));
+	}
 
     public function roles()
     {
@@ -272,41 +299,6 @@ class Warden
         return $this->_alter_or_return_fields('Lockable', $fields, $new);
     }
 
-    public function omniauthable($new = false)
-    {
-        $delete = \Cli::option('d', false) ? \Cli::option('d', false) : \Cli::option('delete', false);
-
-        if ($delete) {
-            \DBUtil::drop_table('services');
-        } else {
-            \DBUtil::create_table('services', array(
-                'id'   => array('constraint' => 11, 'type' => 'int', 'unsigned' => true, 'auto_increment' => true),
-                'user_id' => array('constraint' => 11, 'type' => 'int', 'unsigned' => true),
-                'uid' => array('constraint' => 255, 'type' => 'varchar'),
-                'provider' => array('constraint' => 50, 'type' => 'varchar'),
-                'access_token' => array('constraint' => 255, 'type' => 'varchar'),
-                'access_secret' => array('constraint' => 255, 'type' => 'varchar'),
-                'created_at' => array('type' => 'timestamp', 'default' => '0000-00-00 00:00:00'),
-                'updated_at' => array('type' => 'timestamp ON UPDATE CURRENT_TIMESTAMP', 'default' => \DB::expr('CURRENT_TIMESTAMP'))
-            ), array('id'), false, 'InnoDB', 'utf8_unicode_ci');
-
-            \DB::query("ALTER TABLE ".\DB::table_prefix('services')."
-                            ADD KEY index_services_on_access_token(access_token),
-                            ADD KEY index_services_on_user_id(user_id),
-                            ADD CONSTRAINT fk_index_services_on_user_id
-                                FOREIGN KEY (user_id)
-                                REFERENCES ".\DB::table_prefix('users')." (id) ON DELETE CASCADE",
-                       \DB::UPDATE)->execute();
-        }
-
-        \Cli::write(\Cli::color('Created services table successfully', 'green'));
-
-        if (!$new) {
-            \Config::set('warden.omniauthable.in_use', $delete ? false : true);
-            $this->_save_config();
-        }
-    }
-
     public function profilable($new = false)
     {
         $delete = \Cli::option('d', false) ? \Cli::option('d', false) : \Cli::option('delete', false);
@@ -337,36 +329,50 @@ class Warden
 
     public static function help()
 	{
+		$usage_header = static::_bold_text('Usage:');
+		$runtime_header = static::_bold_text('Runtime options:');
+		$desc_header = static::_bold_text('Description:');
+		$eg_header = static::_bold_text('Examples:');
+		$doc_header = static::_bold_text('Documentation:');
+		
 		$output = <<<HELP
+$usage_header
+  php oil r warden:[install | uninstall] [options]
 
-Usage:
-  php oil r warden [install] [options]
-
-Runtime options:
+$runtime_header
   -a, [--all]            # Install with all features enabled
   -d, [--delete]         # Disable/Remove feature(s)
   -t, [--trackable]      # Tracking user account sign in info
   -r, [--recoverable]    # Reset passwords feature
   -c, [--confirmable]    # Confirming user accounts
   -l, [--lockable]       # Locking user accounts
-  -o, [--omniauthable]   # oAuth support
   -p, [--profilable]     # User profiles
 
-Description:
+$desc_header
   The 'warden' task can be used to setup warden on a fresh install
   and enable/disable features.
 
-Examples:
-  php oil r warden install --all
+$eg_header
+  php oil r warden:install --all
+  php oil r warden:uninstall
   php oil r warden <install> [<feature1> |<feature2> |..]
   php oil r warden [<feature1> |<feature2> |..]
   php oil r warden [<feature1> |<feature2> |..] --delete
 
-Documentation:
+$doc_header
   http://dre1080.github.com/warden/tasks.html
 HELP;
 		\Cli::write($output);
 
+	}
+
+	private static function _bold_text($text)
+	{
+		if (\Cli::is_windows()) {
+			return $text;
+		}
+		
+		return "\033[1m{$text}\033[0m";
 	}
 
     private function _create_default_role()
