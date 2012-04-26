@@ -388,7 +388,7 @@ $eg_header
   # New install of Warden with trackable and recoverable
   php oil r warden:install -t -r
   
-  # Uninstall all traces of Warden (Drops tables and deletes config Warden file)
+  # Uninstall all traces of Warden (Drops tables and deletes Warden config file)
   php oil r warden:uninstall
   
   # Add feature(s) to existing Warden installation
