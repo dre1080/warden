@@ -34,28 +34,11 @@ class Warden
     final private function __construct() {}
 
     /**
-     * Allows access to Warden::factory() and Warden::forge() aliases
-     * for Warden::instance().
-     *
-     * @param string $method
-     * @param array  $arguments
-     */
-    public static function __callStatic($method, array $arguments)
-    {
-        if ($method == 'factory' || $method == 'forge') {
-            $config = (empty($arguments) ? $arguments : $arguments[0]);
-            return Warden::instance($config);
-        }
-
-        throw new \BadMethodCallException("Call to undefined method Warden::$method()");
-    }
-
-    /**
      * Return a static instance of Warden.
      *
      * @return Warden
      */
-    public static function instance($config = array())
+    public static function forge($config = array())
     {
         static $instance = null;
 
@@ -296,13 +279,13 @@ class Warden
      * }
      * </code>
      *
-     * @param mixed $username The user's username
+     * @param mixed $username_or_email_or_id
      *
      * @return bool
      */
-    public static function force_login($username)
+    public static function force_login($username_or_email_or_id)
     {
-        return static::driver()->force_login($username);
+        return static::driver()->force_login($username_or_email_or_id);
     }
 
     /**
@@ -519,7 +502,7 @@ class Warden
      *
      * @return string The hashed password string
      */
-    public function encrypt_password($password)
+    public static function encrypt_password($password)
     {
         $hasher = new PasswordHash(8, false);
         return $hasher->HashPassword($password);
@@ -565,6 +548,6 @@ class Warden
      */
     protected static function driver()
     {
-        return static::instance()->driver;
+        return static::forge()->driver;
     }
 }

@@ -30,15 +30,6 @@ Autoloader::add_classes(array(
     'Warden\\Model_Permission'    => __DIR__.'/classes/warden/model/permission.php',
     'Warden\\Model_Service'       => __DIR__.'/classes/warden/model/service.php',
     'Warden\\Observer_Timestamps' => __DIR__.'/classes/warden/observer/timestamps.php',
-
-    // Controllers
-    'Warden\\Controller_OmniAuth' => __DIR__.'/classes/warden/controller/omniauth.php',
-
-    // OmniAuth Support
-    'Warden\\OmniAuth_Exception'       => __DIR__.'/classes/warden/omniauth/exception.php',
-    'Warden\\OmniAuth_Strategy'  				  => __DIR__.'/classes/warden/omniauth/strategy.php',
-    'Warden\\OmniAuth_Strategy_OAuth'  => __DIR__.'/classes/warden/omniauth/strategy/oauth.php',
-    'Warden\\OmniAuth_Strategy_OAuth2' => __DIR__.'/classes/warden/omniauth/strategy/oauth2.php',
 ));
 
 Config::load('warden', true);

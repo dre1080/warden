@@ -83,7 +83,7 @@ class Warden_Driver
      */
     public function has_access($role, Model_User $user = null)
     {
-        $status   = !!$user;
+        $status = !!$user;
 
         if (!empty($role) && $status) {
             $role = (is_array($role) ? $role : array($role));
@@ -152,7 +152,7 @@ class Warden_Driver
     public function authenticate_user($username_or_email, $password, $remember)
     {
         if (($user = \Model_User::authenticate($username_or_email)) &&
-             Warden::instance()->has_password($user, $password))
+             Warden::has_password($user, $password))
         {
             if ($remember === true) {
                 // Set token data
@@ -215,13 +215,13 @@ class Warden_Driver
     /**
      * Forces a user to be logged in, without specifying a password.
      *
-     * @param string $username_or_email
+     * @param mixed $username_or_email_or_id
      *
      * @return bool
      */
-    public function force_login($username_or_email)
+    public function force_login($username_or_email_or_id)
     {
-        $user = \Model_User::authenticate($username_or_email, true);
+        $user = \Model_User::authenticate($username_or_email_or_id, true);
         return $user && $this->complete_login($user);
     }
 
