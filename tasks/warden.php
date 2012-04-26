@@ -419,19 +419,20 @@ HELP;
         $create_role = \Cli::prompt("\nCreate a default user role?", array('y', 'n'));
 
         if ($create_role === 'y') {
+        	$role_name = \Cli::prompt("\nPlease enter the role name");
+			
             try {
                 $new = \Model_Role::forge(array(
-                    'name'        => 'User',
+                    'name'        => $role_name,
                     'description' => 'Default login role.'
                 ))->save();
 
-                \Config::set('warden.default_role', 'User');
+                \Config::set('warden.default_role', $role_name);
 
-                \Cli::color("\nNice! :) Default role created successfully.", 'green');
-                \Cli::write('Role id  : ' . $new);
-                \Cli::write('Role name: User');
+                \Cli::write(\Cli::color("\nRole id  : {$new}", 'blue'));
+                \Cli::write(\Cli::color("Role name: {$role_name}", 'blue'));
             } catch (\Exception $e) {
-                \Cli::error("\n:( Failed to create default role because: " . $e->getMessage());
+                \Cli::error("\n:( Failed to create default role because: {$e->getMessage()}");
             }
         }
     }
@@ -442,12 +443,14 @@ HELP;
         $create_admin = \Cli::prompt("\nCreate an admin user?", array('y', 'n'));
 
         if ($create_admin === 'y') {
+			$data = array(
+                'username' => \Cli::prompt("Please enter an admin username"),
+                'email'    => \Cli::prompt("Please enter an admin email"),
+                'password' => \Cli::prompt("Please enter an admin password"),
+            );
+			
             try {
-                $user = new \Model_User(array(
-                    'username' => 'admin',
-                    'email'    => 'admin@example.com',
-                    'password' => '123warden',
-                ));
+                $user = new \Model_User($data);
 				
 				if (\Config::get('warden.confirmable.in_use') === true) {
 					$user->is_confirmed = true;
@@ -459,12 +462,18 @@ HELP;
                 ));
 
                 $user->save();
-
-                \Cli::color("\nWoohoo! :) Admin user created successfully.", 'green');
-                \Cli::write('Username : admin');
-                \Cli::write('Email    : admin@example.com');
-                \Cli::write('Password : 123warden');
-                \Cli::write('User role: Admin');
+				
+				$roles = array();
+				foreach ($user->roles as $role) {
+					$roles[] = "<id: {$role->id}, name: {$role->name}>";
+				}
+				
+                \Cli::write(\Cli::color("\nUsername : {$user->username}", 'blue'));
+                \Cli::write(\Cli::color("Email    : {$user->email}", 'blue'));
+                \Cli::write(\Cli::color("Password : {$data['password']}", 'blue'));
+                if (!empty($roles)) {
+                	\Cli::write(\Cli::color('Roles	 : ' . join(', ', $roles), 'blue'));
+                }
             } catch (\Exception $e) {
                 \Cli::error("\n:( Failed to create admin user because: " . $e->getMessage());
             }
