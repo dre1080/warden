@@ -143,14 +143,22 @@ class Model_User extends \Orm\Model
     }
 
     /**
-     * {@inheritdoc}
+     * Allows checking of user roles.
+     * 
+     * <code>
+     * if (Model_User::is_admin()) {
+     *     echo "You are an admin";
+     * }
+     * </code>
+     * 
+     * @see {@link \Warden\Warden::has_access}
      */
     public function __call($method, $args)
     {
-        $convenience = substr($method, 0, 2);
-        $role        = substr($method, 3);
+        $convenience = substr($method, 0, 3);
+        $role        = substr($method, 4);
 
-        if ($convenience == 'is') {
+        if ($convenience == 'is_') {
             return Warden::has_access($role, $this);
         }
 
@@ -432,7 +440,7 @@ SQL;
             return true;
         }
 
-        $this->reset_password_token   = Warden::instance()->generate_token();
+        $this->reset_password_token   = Warden::forge()->generate_token();
         $this->reset_password_sent_at = \Date::time('UTC')->format('mysql');
 
         return $this->save(false);
@@ -561,7 +569,7 @@ SQL;
         }
 
         $this->is_confirmed         = false;
-        $this->confirmation_token   = Warden::instance()->generate_token();
+        $this->confirmation_token   = Warden::forge()->generate_token();
         $this->confirmation_sent_at = \Date::time('UTC')->format('mysql');
 
         return (bool)($save === true ? $this->save(false) : true);
@@ -764,7 +772,7 @@ SQL;
     public function generate_unlock_token()
     {
         if ($this->unlock_token === null) {
-            $this->unlock_token = Warden::instance()->generate_token();
+            $this->unlock_token = Warden::forge()->generate_token();
         }
 
         return true;
