@@ -6,6 +6,8 @@ Latest release: 1.1 ([view changelog](https://github.com/dre1080/warden/blob/mas
 
 For docs, see [http://dre1080.github.com/warden](http://dre1080.github.com/warden)
 
+For oAuth feature use [Fuel NinjAuth](https://github.com/dre1080/fuel-ninjauth).
+
 
 ## Usage
 
