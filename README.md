@@ -28,7 +28,7 @@ Getting the currently logged in user:
 
 Explicitly setting the current user:
 
-    if (($user = Model_User:find(1))) {
+    if (($user = Model_User::find(1))) {
         Warden::set_user($user);
     }
 
