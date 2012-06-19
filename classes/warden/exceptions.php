@@ -17,7 +17,7 @@ namespace Warden;
  * @package    Warden
  * @subpackage Warden
  */
-class Warden_Failure extends \Fuel_Exception
+class Warden_Failure extends \FuelException
 {
     public function __construct($lang_key, array $params = array())
     {
@@ -36,7 +36,7 @@ class Warden_Failure extends \Fuel_Exception
  * throw new Warden\Warden_AccessDenied('Not authorized!', 'read', 'Article');
  * </code>
  */
-class Warden_AccessDenied extends \Fuel_Exception
+class Warden_AccessDenied extends \FuelException
 {
     public $action;
     public $resource;
