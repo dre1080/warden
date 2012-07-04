@@ -213,7 +213,7 @@ class Model_User extends \Orm\Model
 		if (is_int($username_or_email_or_id)) {
 			$record = static::find($username_or_email_or_id);
 		} else {
-	        $username_or_email = \DB::escape(\Str::lower($username_or_email));
+	        $username_or_email = \DB::escape(\Str::lower($username_or_email_or_id));
 	
 	        $table = static::table();
 	        $properties = implode('`, `', array_keys(static::properties()));
