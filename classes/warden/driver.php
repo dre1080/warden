@@ -156,7 +156,7 @@ class Warden_Driver
         {
             if ($remember === true) {
                 // Set token data
-                $user->remember_token = Warden::generate_token();
+                $user->remember_token = Warden::forge()->generate_token();
 
                 // Set the remember-me cookie
                 \Cookie::set('remember_token',
@@ -301,7 +301,7 @@ class Warden_Driver
     protected function complete_login(Model_User $user)
     {
         // Create and set new authentication token
-        $user->authentication_token = Warden::generate_token();
+        $user->authentication_token = Warden::forge()->generate_token();
 
         try {
             if ($this->config['trackable'] === true) {
