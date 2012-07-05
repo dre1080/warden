@@ -533,7 +533,7 @@ class Warden
      */
     public static function generate_token()
     {
-        $token = join(':', array(Str::random('alnum', 15), time()));
+        $token = join(':', array(\Str::random('alnum', 15), time()));
         return str_replace(
 	        array('+', '/', '=', 'l', 'I', 'O', '0'), 
 	        array('p', 'q', 'r', 's', 'x', 'y', 'z'), 
