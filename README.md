@@ -2,7 +2,7 @@
 
 # Warden
 
-Latest release: 1.1 ([view changelog](https://github.com/dre1080/warden/blob/master/HISTORY.md))
+Latest release: 1.2 ([view changelog](https://github.com/dre1080/warden/blob/master/HISTORY.md))
 
 For docs, see [http://dre1080.github.com/warden](http://dre1080.github.com/warden)
 
