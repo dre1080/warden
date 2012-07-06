@@ -4,7 +4,7 @@
  *
  * @package    Warden
  * @subpackage Warden
- * @version    1.1
+ * @version    1.2
  * @author     Andrew Wayne <lifeandcoding@gmail.com>
  * @license    MIT License
  * @copyright  (c) 2011 - 2012 Andrew Wayne
@@ -83,7 +83,7 @@ class Warden_Driver
      */
     public function has_access($role, Model_User $user = null)
     {
-        $status   = !!$user;
+        $status = !!$user;
 
         if (!empty($role) && $status) {
             $role = (is_array($role) ? $role : array($role));
@@ -152,11 +152,11 @@ class Warden_Driver
     public function authenticate_user($username_or_email, $password, $remember)
     {
         if (($user = \Model_User::authenticate($username_or_email)) &&
-             Warden::instance()->has_password($user, $password))
+             Warden::has_password($user, $password))
         {
             if ($remember === true) {
                 // Set token data
-                $user->remember_token = Warden::instance()->generate_token();
+                $user->remember_token = Warden::forge()->generate_token();
 
                 // Set the remember-me cookie
                 \Cookie::set('remember_token',
@@ -215,13 +215,13 @@ class Warden_Driver
     /**
      * Forces a user to be logged in, without specifying a password.
      *
-     * @param string $username_or_email
+     * @param mixed $username_or_email_or_id
      *
      * @return bool
      */
-    public function force_login($username_or_email)
+    public function force_login($username_or_email_or_id)
     {
-        $user = \Model_User::authenticate($username_or_email, true);
+        $user = \Model_User::authenticate($username_or_email_or_id, true);
         return $user && $this->complete_login($user);
     }
 
@@ -301,7 +301,7 @@ class Warden_Driver
     protected function complete_login(Model_User $user)
     {
         // Create and set new authentication token
-        $user->authentication_token = Warden::instance()->generate_token();
+        $user->authentication_token = Warden::forge()->generate_token();
 
         try {
             if ($this->config['trackable'] === true) {

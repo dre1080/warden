@@ -2,9 +2,11 @@
 
 # Warden
 
-Latest release: 1.1 ([view changelog](https://github.com/dre1080/warden/blob/master/HISTORY.md))
+Latest release: 1.2 ([view changelog](https://github.com/dre1080/warden/blob/master/HISTORY.md))
 
 For docs, see [http://dre1080.github.com/warden](http://dre1080.github.com/warden)
+
+For oAuth feature use the Warden adapter in [Fuel NinjAuth](https://github.com/happyninjas/fuel-ninjauth).
 
 
 ## Usage
@@ -26,7 +28,7 @@ Getting the currently logged in user:
 
 Explicitly setting the current user:
 
-    if (($user = Model_User:find(1))) {
+    if (($user = Model_User::find(1))) {
         Warden::set_user($user);
     }
 

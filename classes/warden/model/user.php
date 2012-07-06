@@ -4,7 +4,7 @@
  *
  * @package    Warden
  * @subpackage Warden
- * @version    1.1
+ * @version    1.2
  * @author     Andrew Wayne <lifeandcoding@gmail.com>
  * @license    MIT License
  * @copyright  (c) 2011 - 2012 Andrew Wayne
@@ -26,7 +26,7 @@ class Model_User extends \Orm\Model
     /**
      * Validation regular expression for email
      */
-    const REGEX_EMAIL = '/^([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,})$/i';
+    const REGEX_EMAIL = '/^[^@]+@([^@\.]+\.)+[^@\.]+$/';
     /**
      * Validation regular expression for password
      */
@@ -143,14 +143,22 @@ class Model_User extends \Orm\Model
     }
 
     /**
-     * {@inheritdoc}
+     * Allows checking of user roles.
+     * 
+     * <code>
+     * if (Model_User::is_admin()) {
+     *     echo "You are an admin";
+     * }
+     * </code>
+     * 
+     * @see {@link \Warden\Warden::has_access}
      */
     public function __call($method, $args)
     {
-        $convenience = substr($method, 0, 2);
-        $role        = substr($method, 3);
+        $convenience = substr($method, 0, 3);
+        $role        = substr($method, 4);
 
-        if ($convenience == 'is') {
+        if ($convenience == 'is_') {
             return Warden::has_access($role, $this);
         }
 
@@ -186,31 +194,34 @@ class Model_User extends \Orm\Model
      * Authenticates and allows a user to enter either their email address or
      * their username into the username field.
      *
-     * @param string $username_or_email The username or email of the user to authenticate
-     * @param bool   $force             Whether to force an authentication, if this is
-     *                                  true, it will bypass checking whether the user
-     *                                  account is locked or confirmed.
+     * @param string $username_or_email_or_id The username or email or id of the user to authenticate
+     * @param bool   $force             	  Whether to force an authentication, if this is
+     *                                  	  true, it will bypass checking whether the user
+     *                                  	  account is locked or confirmed.
      *
      * @return \Warden\Model_User|null The user that matches the tokens or
      *                                 null if no user matches that condition.
      *
      * @throws \Warden\Warden_Failure If the user needs to be confirmed
      */
-    public static function authenticate($username_or_email, $force = false)
+    public static function authenticate($username_or_email_or_id, $force = false)
     {
-        if (empty($username_or_email)) {
+        if (empty($username_or_email_or_id)) {
             return null;
         }
 
-        $username_or_email = \DB::escape(\Str::lower($username_or_email));
-
-        $table = static::table();
-        $properties = implode('`, `', array_keys(static::properties()));
-
-        // Indices lose their speed advantage when using them in OR-situations
-        // so this UNION is much faster than
-        // SELECT ... FROM ... WHERE email = 'foo' OR username = 'bar';
-        $sql = <<<SQL
+		if (is_int($username_or_email_or_id)) {
+			$record = static::find($username_or_email_or_id);
+		} else {
+	        $username_or_email = \DB::escape(\Str::lower($username_or_email_or_id));
+	
+	        $table = static::table();
+	        $properties = implode('`, `', array_keys(static::properties()));
+	
+	        // Indices lose their speed advantage when using them in OR-situations
+	        // so this UNION is much faster than
+	        // SELECT ... FROM ... WHERE email = 'foo' OR username = 'bar';
+	        $sql = <<<SQL
    (SELECT `$properties` FROM `$table`
        WHERE `email` = $username_or_email)
    UNION
@@ -219,11 +230,12 @@ class Model_User extends \Orm\Model
    LIMIT 1
 SQL;
 
-        $record = \DB::query($sql, \DB::SELECT)
-                  ->as_object('Model_User')
-                  ->execute()
-                  ->current();
-
+	        $record = \DB::query($sql, \DB::SELECT)
+	                  ->as_object('Model_User')
+	                  ->execute()
+	                  ->current();
+		}
+		
         if ($record) {
             if ($force) {
                 goto return_user;
@@ -428,7 +440,7 @@ SQL;
             return true;
         }
 
-        $this->reset_password_token   = Warden::instance()->generate_token();
+        $this->reset_password_token   = Warden::forge()->generate_token();
         $this->reset_password_sent_at = \Date::time('UTC')->format('mysql');
 
         return $this->save(false);
@@ -557,7 +569,7 @@ SQL;
         }
 
         $this->is_confirmed         = false;
-        $this->confirmation_token   = Warden::instance()->generate_token();
+        $this->confirmation_token   = Warden::forge()->generate_token();
         $this->confirmation_sent_at = \Date::time('UTC')->format('mysql');
 
         return (bool)($save === true ? $this->save(false) : true);
@@ -760,7 +772,7 @@ SQL;
     public function generate_unlock_token()
     {
         if ($this->unlock_token === null) {
-            $this->unlock_token = Warden::instance()->generate_token();
+            $this->unlock_token = Warden::forge()->generate_token();
         }
 
         return true;
@@ -936,7 +948,7 @@ SQL;
                 throw new \Orm\ValidationFailed(__('warden.validation.password.invalid'));
             }
 
-            $this->encrypted_password = Warden::instance()->encrypt_password($this->password);
+            $this->encrypted_password = Warden::encrypt_password($this->password);
         }
 
         if (empty($this->encrypted_password)) {

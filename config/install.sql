@@ -1,5 +1,5 @@
 --
--- Warden 0.9.2
+-- Warden 1.2
 --
 
 -- --------------------------------------------------------
@@ -116,33 +116,6 @@ CREATE TABLE IF NOT EXISTS `roles_permissions` (
 ALTER TABLE `roles_permissions`
   ADD CONSTRAINT `fk_index_roles_permissions_on_role_id` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_index_roles_permissions_on_permission_id` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE;
-
--- --------------------------------------------------------
-
--- IF USING omniauthable the following table is required
---
--- Table structure for table `services`
---
-
-CREATE TABLE IF NOT EXISTS `services` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique service id',
-  `user_id` int(11) unsigned NOT NULL COMMENT 'Unique user id',
-  `uid` varchar(255) DEFAULT NULL COMMENT 'An identifier unique to the given provider, such as a Twitter user ID. Should be stored as a string.',
-  `provider` varchar(50) DEFAULT NULL COMMENT 'The provider with which the user authenticated (e.g. ''twitter'' or ''facebook'')',
-  `access_token` varchar(255) DEFAULT NULL COMMENT 'The access token, supplied by OAuth and OAuth 2.0 providers',
-  `access_secret` varchar(255) DEFAULT NULL COMMENT 'The access token secret, supplied by OAuth providers',
-  `created_at` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'When the service was created',
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'When the service was updated',
-  PRIMARY KEY (`id`),
-  KEY `index_services_on_access_token` (`access_token`),
-  KEY `index_services_on_user_id` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User services for OAuth';
-
---
--- Constraints for table `services`
---
-ALTER TABLE `services`
-  ADD CONSTRAINT `fk_index_services_on_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 -- --------------------------------------------------------
 

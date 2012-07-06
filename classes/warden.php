@@ -4,15 +4,14 @@
  *
  * @package    Warden
  * @subpackage Warden
- * @version    1.1
+ * @version    1.2
  * @author     Andrew Wayne <lifeandcoding@gmail.com>
  * @license    MIT License
  * @copyright  (c) 2011 - 2012 Andrew Wayne
  */
 namespace Warden;
 
-use CryptLib\CryptLib;
-use CryptLib\Password\Implementation\Blowfish as BCrypt;
+use PasswordHash;
 
 /**
  * Warden
@@ -35,28 +34,11 @@ class Warden
     final private function __construct() {}
 
     /**
-     * Allows access to Warden::factory() and Warden::forge() aliases
-     * for Warden::instance().
-     *
-     * @param string $method
-     * @param array  $arguments
-     */
-    public static function __callStatic($method, array $arguments)
-    {
-        if ($method == 'factory' || $method == 'forge') {
-            $config = (empty($arguments) ? $arguments : $arguments[0]);
-            return Warden::instance($config);
-        }
-
-        throw new \BadMethodCallException("Call to undefined method Warden::$method()");
-    }
-
-    /**
      * Return a static instance of Warden.
      *
      * @return Warden
      */
-    public static function instance($config = array())
+    public static function forge($config = array())
     {
         static $instance = null;
 
@@ -297,13 +279,13 @@ class Warden
      * }
      * </code>
      *
-     * @param mixed $username The user's username
+     * @param mixed $username_or_email_or_id
      *
      * @return bool
      */
-    public static function force_login($username)
+    public static function force_login($username_or_email_or_id)
     {
-        return static::driver()->force_login($username);
+        return static::driver()->force_login($username_or_email_or_id);
     }
 
     /**
@@ -520,11 +502,10 @@ class Warden
      *
      * @return string The hashed password string
      */
-    public function encrypt_password($password)
+    public static function encrypt_password($password)
     {
-        static $hasher = null;
-        !$hasher && $hasher = new BCrypt;
-        return $hasher->create($password);
+        $hasher = new PasswordHash(8, false);
+        return $hasher->HashPassword($password);
     }
 
     /**
@@ -535,31 +516,29 @@ class Warden
      *
      * @return bool
      */
-    public function has_password(Model_User $user, $submitted_password)
+    public static function has_password(Model_User $user, $submitted_password)
     {
         if (empty($user->encrypted_password) || empty($submitted_password)) {
             return false;
         }
 
-        $cryptlib = new CryptLib;
-        return $cryptlib->verifyPasswordHash($submitted_password, $user->encrypted_password);
+        $hasher = new PasswordHash(8, false);
+        return $hasher->CheckPassword($submitted_password, $user->encrypted_password);
     }
 
     /**
      * Generate a unique friendly string to be used as a token.
-     * We don't use the built in \Str::random('unique') because it is based on using
-     * uniqid() prefixed with mt_rand() which is a very weak source in random
-     * string generation.
      *
      * @return string
      */
-    public function generate_token()
+    public static function generate_token()
     {
-        static $cryptlib = null;
-        !$cryptlib && $cryptlib = new CryptLib;
-
-        $token = $cryptlib->getRandomToken(32).':'.time();
-        return str_replace(array('+', '/', '='), array('x', 'y', 'z'), base64_encode($token));
+        $token = join(':', array(\Str::random('alnum', 15), time()));
+        return str_replace(
+	        array('+', '/', '=', 'l', 'I', 'O', '0'), 
+	        array('p', 'q', 'r', 's', 'x', 'y', 'z'), 
+	        base64_encode($token)
+		);
     }
 
     /**
@@ -569,6 +548,6 @@ class Warden
      */
     protected static function driver()
     {
-        return static::instance()->driver;
+        return static::forge()->driver;
     }
 }
