@@ -4,7 +4,7 @@
 
 Latest release: 1.2 ([view changelog](https://github.com/dre1080/warden/blob/master/HISTORY.md))
 
-For docs, see [http://dre1080.github.com/warden](http://dre1080.github.com/warden)
+For docs, and installation see [http://dre1080.github.com/warden](http://dre1080.github.com/warden)
 
 For oAuth feature use the Warden adapter in [Fuel NinjAuth](https://github.com/happyninjas/fuel-ninjauth).
 
@@ -111,6 +111,6 @@ More examples are in the doc comments for each method.
 
 Creator and lead developer: Andrew Wayne.
 
-Special thanks to Jesse O'Brien, Andreo Vieira, Ray Clanan and Drazen Tenzera for contributing code, ideas and testing early versions.
+Special thanks to Craig Hooghiem, Jesse O'Brien, Andreo Vieira, Ray Clanan and Drazen Tenzera for contributing code, ideas and testing early versions.
 
 Thanks also to the FuelPHP dev team + many who have contributed code, ideas and issues.
