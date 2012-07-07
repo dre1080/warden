@@ -1,3 +1,22 @@
+1.2 / 2012-07-07
+================
+
+##### Major Changes
+
+* Native omniauthable feature removed in favor of using Fuel Ninjauth
+  with Warden adapter (https://github.com/happyninjas/fuel-ninjauth).
+* PHP-CryptLib removed in favor of PHPASS.
+
+##### Other Changes
+
+* No more `Warden::instance` use `Warden::forge()` instead.
+* Can now find User roles using the Model_User object. 
+  Eg. `$user->is_ROLE()` where "ROLE" is the name of the role you're checking for, returns a bool.
+* Many various bugfixes.
+* Fixed tasks. View `php oil r warden help`.
+* Code formatted. Much less code, same great features.
+
+
 1.1 / 2012-03-06
 ================
 
