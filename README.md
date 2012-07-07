@@ -81,8 +81,7 @@ Log out a user by removing the related session variables:
 Resetting a user's password
 
     // Sending the password token
-    $user = Model_User::find('first', array('where' => array('email' => 'myemail@warden.net')));
-    if ($user) {
+    if (($user = Model_User::find('first', array('where' => array('email' => 'myemail@warden.net'))))) {
         try {
             $user->send_reset_password_instructions();
         } catch (Exception $ex) {
@@ -92,9 +91,7 @@ Resetting a user's password
 
     // Resetting the password
     try {
-        $user = Model_User::reset_password_by_token(\Input::get('reset_password_token'), 'new_password');
-
-        if ($user) {
+        if (($user = Model_User::reset_password_by_token(\Input::get('reset_password_token'), 'new_password'))) {
             echo 'Success!';
         } else {
             echo 'Not a valid user';
@@ -109,7 +106,7 @@ More examples are in the doc comments for each method.
 
 ## Contributors
 
-Creator and lead developer: Andrew Wayne.
+Creator and lead developer: Andrew Wayne (Ando).
 
 Special thanks to Craig Hooghiem, Jesse O'Brien, Andreo Vieira, Ray Clanan and Drazen Tenzera for contributing code, ideas and testing early versions.
 
