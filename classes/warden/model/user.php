@@ -30,7 +30,7 @@ class Model_User extends \Orm\Model
     /**
      * Validation regular expression for password
      */
-    const REGEX_PASSWORD = '/^[.a-zA-Z_0-9-!@#$%\^&*()]{6,32}$/';
+    const REGEX_PASSWORD = '/^[.a-zA-Z_0-9-!@#$%\^&*()]{8,32}$/';
 
     /**
      * User's plaintext password, used for validation purposes
@@ -942,7 +942,7 @@ SQL;
     private function _ensure_and_validate_password()
     {
         if (!empty($this->password)) {
-            if (\Str::length($this->password) < 6) {
+            if (\Str::length($this->password) < 8) {
                 throw new \Orm\ValidationFailed(__('warden.validation.password.too_short'));
             } elseif (!preg_match(self::REGEX_PASSWORD, $this->password)) {
                 throw new \Orm\ValidationFailed(__('warden.validation.password.invalid'));
