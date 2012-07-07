@@ -18,8 +18,8 @@ Package::load(array('orm', 'email'));
 Autoloader::add_core_namespace('Warden');
 
 Autoloader::add_classes(array(
-	// PHPass
-	'PasswordHash' => __DIR__.'/vendor/phpass/PasswordHash.php',
+  // PHPass
+  'PasswordHash' => __DIR__.'/vendor/phpass/PasswordHash.php',
 	
   // Base Warden classes
   'Warden\\Warden'              => __DIR__.'/classes/warden.php',
@@ -33,7 +33,6 @@ Autoloader::add_classes(array(
   'Warden\\Model_Profile'       => __DIR__.'/classes/warden/model/profile.php',
   'Warden\\Model_Role'          => __DIR__.'/classes/warden/model/role.php',
   'Warden\\Model_Permission'    => __DIR__.'/classes/warden/model/permission.php',
-  'Warden\\Model_Service'       => __DIR__.'/classes/warden/model/service.php',
   'Warden\\Observer_Timestamps' => __DIR__.'/classes/warden/observer/timestamps.php',
 ));
 
