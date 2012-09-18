@@ -28,112 +28,187 @@
         </ul>
       </header>
       <section>
-        <p>Latest release: 1.2 (<a href="https://github.com/dre1080/warden/blob/master/HISTORY.md">view changelog</a>)</p>
+        <p>Warden is a user database auth package for the FuelPHP framework that aims to fast track development by handling the work load of authenticating and authorizing user's.
+Built for performance, it comes with ready-to-use models and database install tasks.</p>
 
-<p>For oAuth feature use the Warden adapter in <a href="https://github.com/happyninjas/fuel-ninjauth">Fuel NinjAuth</a>.</p>
+<p>Latest release: 1.2 (<a href="https://github.com/dre1080/warden/blob/master/HISTORY.md">view changelog</a>)</p>
+
+<h2>Features</h2>
+
+<ul>
+<li>Secure BCrypt password hashing and protection against brute force attacks.</li>
+<li>User login/logout with "remember-me" functionality.</li>
+<li>HTTP Authentication.</li>
+<li>User ACL (roles / groups, and permissions).</li>
+<li>User "friendships" and profiles.</li>
+<li>Track information about user sign ins.</li>
+<li>User account password resets.</li>
+<li>User activation by email.</li>
+<li>User account locking.</li>
+<li>OAuth support.</li>
+<li>And many more!</li>
+</ul><h2>Why use BCrypt?</h2>
+
+<ul>
+<li><a href="http://codahale.com/how-to-safely-store-a-password">How To Safely Store A Password</a></li>
+<li><a href="http://yorickpeterse.com/articles/use-bcrypt-fool">Use BCrypt Fool!</a></li>
+<li><a href="http://phpmaster.com/why-you-should-use-bcrypt-to-hash-stored-passwords">Why You Should Use Bcrypt to Hash Stored Passwords</a></li>
+<li><a href="http://chargen.matasano.com/chargen/2007/9/7/enough-with-the-rainbow-tables-what-you-need-to-know-about-s.html">Enough With The Rainbow Tables: What You Need To Know About Secure Password Schemes</a></li>
+<li><a href="http://news.ycombinator.com/item?id=2004962">No. Use Bcrypt. Always</a></li>
+</ul><h2>Installation</h2>
+
+<h3>Dependencies</h3>
+
+<p>Required Packages:</p>
+
+<ul>
+<li><a href="https://github.com/fuel/orm">Orm</a></li>
+<li><a href="https://github.com/fuel/email">Email</a></li>
+</ul><p>Optional:</p>
+
+<ul>
+<li>
+<a href="https://github.com/happyninjas/fuel-ninjauth">Fuel NinjAuth</a> for oAuth feature (use the Warden adapter).</li>
+</ul><h3>Download</h3>
+
+<p>This package follows standard installation rules.</p>
+
+<p>Download Warden into your FuelPHP's packages directory.</p>
+
+<p>Or</p>
+
+<pre><code>git clone -b master git@github.com:dre1080/warden.git warden
+</code></pre>
+
+<p>Then autoload the package in your app/config.php file.</p>
+
+<div class="highlight"><pre><span class="s1">'always_load'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
+  <span class="s1">'packages'</span>  <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span>
+    <span class="k">array</span><span class="p">(</span><span class="s1">'warden'</span><span class="p">)</span>
+  <span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+
+<p><strong>After adding warden to your fuelphp packages stack, have a look at the warden config file to setup
+warden configs before adding the required tables.</strong></p>
+
+<h3>Adding required tables to your database</h3>
+
+<p>There are two ways to add the Warden tables:</p>
+
+<p>1) SQL File in warden/config/install.sql</p>
+
+<p>2) Oil Task</p>
+
+<pre><code>php oil r warden help
+</code></pre>
+
+<p>To get a list of supported commands.</p>
+
+<p><strong>Once done, don't forget to create your roles and permissions in the <em>roles</em> and <em>permissions</em> tables, respectively; in order to be able to assign roles and permissions to users.</strong></p>
 
 <h2>Usage</h2>
 
 <p>Check for validated login:</p>
 
-<pre><code>if (Warden::check()) {
-    echo "I'm logged in :D";
-} else {
-    echo "Failed, I'm NOT logged in :(";
-}
-</code></pre>
+<div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">check</span><span class="p">())</span> <span class="p">{</span>
+        <span class="k">echo</span> <span class="s2">"I'm logged in :D"</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">echo</span> <span class="s2">"Failed, I'm NOT logged in :("</span><span class="p">;</span>
+    <span class="p">}</span>
+</pre></div>
 
 <p>Getting the currently logged in user:</p>
 
-<pre><code>if (Warden::check()) {
-    $current_user = Warden::current_user();
-    echo $current_user-&gt;username;
-}
-</code></pre>
+<div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">check</span><span class="p">())</span> <span class="p">{</span>
+        <span class="nv">$current_user</span> <span class="o">=</span> <span class="nx">Warden</span><span class="o">::</span><span class="na">current_user</span><span class="p">();</span>
+        <span class="k">echo</span> <span class="nv">$current_user</span><span class="o">-&gt;</span><span class="na">username</span><span class="p">;</span>
+    <span class="p">}</span>
+</pre></div>
 
 <p>Explicitly setting the current user:</p>
 
-<pre><code>if (($user = Model_User::find(1))) {
-    Warden::set_user($user);
-}
-</code></pre>
+<div class="highlight"><pre>    <span class="k">if</span> <span class="p">((</span><span class="nv">$user</span> <span class="o">=</span> <span class="nx">Model_User</span><span class="o">::</span><span class="na">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span> <span class="p">{</span>
+        <span class="nx">Warden</span><span class="o">::</span><span class="na">set_user</span><span class="p">(</span><span class="nv">$user</span><span class="p">);</span>
+    <span class="p">}</span>
+</pre></div>
 
 <p>Checking for a specific role:</p>
 
-<pre><code>if (Warden::logged_in('admin')) {
-    echo "Current user logged in as an admin";
-}
+<div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">logged_in</span><span class="p">(</span><span class="s1">'admin'</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">echo</span> <span class="s2">"Current user logged in as an admin"</span><span class="p">;</span>
+    <span class="p">}</span>
 
-$user = Model_User::find(2);
-if (Warden::has_access(array('editor', 'moderator'), $user)) {
-    echo "Hey, editor - moderator";
-} else {
-    echo "Fail!";
-}
-</code></pre>
+    <span class="nv">$user</span> <span class="o">=</span> <span class="nx">Model_User</span><span class="o">::</span><span class="na">find</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">has_access</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="s1">'editor'</span><span class="p">,</span> <span class="s1">'moderator'</span><span class="p">),</span> <span class="nv">$user</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">echo</span> <span class="s2">"Hey, editor - moderator"</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">echo</span> <span class="s2">"Fail!"</span><span class="p">;</span>
+    <span class="p">}</span>
+</pre></div>
 
 <p>Checking the current user has permission for a resource:</p>
 
-<pre><code>try {
-    // Can the user create an article?
-    Warden::authorize('create', 'Article');
-} catch (Warden_AccessDenied $ex) {
-    // Nope, get out
-    die($ex-&gt;getMessage());
-}
-</code></pre>
+<div class="highlight"><pre>    <span class="k">try</span> <span class="p">{</span>
+        <span class="c1">// Can the user create an article?</span>
+        <span class="nx">Warden</span><span class="o">::</span><span class="na">authorize</span><span class="p">(</span><span class="s1">'create'</span><span class="p">,</span> <span class="s1">'Article'</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">Warden_AccessDenied</span> <span class="nv">$ex</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// Nope, get out</span>
+        <span class="k">die</span><span class="p">(</span><span class="nv">$ex</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">());</span>
+    <span class="p">}</span>
+</pre></div>
 
 <p>Log in a user by using a username or email and plain-text password:</p>
 
-<pre><code>if (Input::method() === 'POST') {
-    if (Warden::authenticate(Input::post('username_or_email'), Input::post('password'))) {
-        Session::set_flash('success', 'Logged in successfully');
-    } else {
-        Session::set_flash('error', 'Username or password invalid');
-    }
-    Response::redirect();
-}
-</code></pre>
+<div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="nx">Input</span><span class="o">::</span><span class="na">method</span><span class="p">()</span> <span class="o">===</span> <span class="s1">'POST'</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">authenticate</span><span class="p">(</span><span class="nx">Input</span><span class="o">::</span><span class="na">post</span><span class="p">(</span><span class="s1">'username_or_email'</span><span class="p">),</span> <span class="nx">Input</span><span class="o">::</span><span class="na">post</span><span class="p">(</span><span class="s1">'password'</span><span class="p">)))</span> <span class="p">{</span>
+            <span class="nx">Session</span><span class="o">::</span><span class="na">set_flash</span><span class="p">(</span><span class="s1">'success'</span><span class="p">,</span> <span class="s1">'Logged in successfully'</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">Session</span><span class="o">::</span><span class="na">set_flash</span><span class="p">(</span><span class="s1">'error'</span><span class="p">,</span> <span class="s1">'Username or password invalid'</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="nx">Response</span><span class="o">::</span><span class="na">redirect</span><span class="p">();</span>
+    <span class="p">}</span>
+</pre></div>
 
 <p>Log in a user using a http based authentication method:</p>
 
-<pre><code>if (($user_array = Warden::http_authenticate())) {
-    echo "Welcome {$user_array['username']}";
-}
-</code></pre>
+<div class="highlight"><pre>    <span class="k">if</span> <span class="p">((</span><span class="nv">$user_array</span> <span class="o">=</span> <span class="nx">Warden</span><span class="o">::</span><span class="na">http_authenticate</span><span class="p">()))</span> <span class="p">{</span>
+        <span class="k">echo</span> <span class="s2">"Welcome </span><span class="si">{</span><span class="nv">$user_array</span><span class="p">[</span><span class="s1">'username'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">;</span>
+    <span class="p">}</span>
+</pre></div>
 
 <p>Log out a user by removing the related session variables:</p>
 
-<pre><code>if (Warden::logout()) {
-     echo "I'm logged out";
-}
-</code></pre>
+<div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">logout</span><span class="p">())</span> <span class="p">{</span>
+         <span class="k">echo</span> <span class="s2">"I'm logged out"</span><span class="p">;</span>
+    <span class="p">}</span>
+</pre></div>
 
 <p>Resetting a user's password</p>
 
-<pre><code>// Sending the password token
-if (($user = Model_User::find('first', array('where' =&gt; array('email' =&gt; 'myemail@warden.net'))))) {
-    try {
-        $user-&gt;send_reset_password_instructions();
-    } catch (Exception $ex) {
-        echo sprintf('Oops, something went wrong: %s', $ex-&gt;getMessage());
-    }
-}
+<div class="highlight"><pre>    <span class="c1">// Sending the password token</span>
+    <span class="k">if</span> <span class="p">((</span><span class="nv">$user</span> <span class="o">=</span> <span class="nx">Model_User</span><span class="o">::</span><span class="na">find</span><span class="p">(</span><span class="s1">'first'</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">'where'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span><span class="s1">'email'</span> <span class="o">=&gt;</span> <span class="s1">'myemail@warden.net'</span><span class="p">)))))</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="p">{</span>
+            <span class="nv">$user</span><span class="o">-&gt;</span><span class="na">send_reset_password_instructions</span><span class="p">();</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">Exception</span> <span class="nv">$ex</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">echo</span> <span class="nb">sprintf</span><span class="p">(</span><span class="s1">'Oops, something went wrong: %s'</span><span class="p">,</span> <span class="nv">$ex</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">());</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
 
-// Resetting the password
-try {
-    if (($user = Model_User::reset_password_by_token(\Input::get('reset_password_token'), 'new_password'))) {
-        echo 'Success!';
-    } else {
-        echo 'Not a valid user';
-    }
-} catch (Exception $ex) {
-    // something went wrong
-    echo sprintf('Oops, something went wrong: %s', $ex-&gt;getMessage());
-}
-</code></pre>
+    <span class="c1">// Resetting the password</span>
+    <span class="k">try</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">((</span><span class="nv">$user</span> <span class="o">=</span> <span class="nx">Model_User</span><span class="o">::</span><span class="na">reset_password_by_token</span><span class="p">(</span><span class="nx">\Input</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">'reset_password_token'</span><span class="p">),</span> <span class="s1">'new_password'</span><span class="p">)))</span> <span class="p">{</span>
+            <span class="k">echo</span> <span class="s1">'Success!'</span><span class="p">;</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">echo</span> <span class="s1">'Not a valid user'</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">Exception</span> <span class="nv">$ex</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// something went wrong</span>
+        <span class="k">echo</span> <span class="nb">sprintf</span><span class="p">(</span><span class="s1">'Oops, something went wrong: %s'</span><span class="p">,</span> <span class="nv">$ex</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">());</span>
+    <span class="p">}</span>
+</pre></div>
 
-<p>More examples are in the doc comments for each method.</p>
+<p><em>More examples are in the doc comments for each method.</em></p>
 
 <h2>Contributors</h2>
 
@@ -141,7 +216,7 @@ try {
 
 <p>Special thanks to <a href="https://github.com/craighooghiem" class="user-mention">@craighooghiem</a>, <a href="https://github.com/JesseObrien" class="user-mention">@JesseObrien</a>, <a href="https://github.com/Tenga" class="user-mention">@Tenga</a>, <a href="https://github.com/rclanan" class="user-mention">@rclanan</a>, <a href="https://github.com/aranw" class="user-mention">@aranw</a> and <a href="https://github.com/andreoav" class="user-mention">@andreoav</a> for contributing code, ideas and testing early versions.</p>
 
-<p>Thanks also to the <a href="https://github.com/fuelphp" class="user-mention">@fuelphp</a> dev team + many who have contributed code, ideas and issues.</p>
+<p>Thanks also to the <a href="https://github.com/fuel" class="user-mention">@fuel</a> and <a href="https://github.com/happyninjas" class="user-mention">@happyninjas</a> dev team + many who have contributed code, ideas and issues.</p>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/dre1080">dre1080</a></p>
