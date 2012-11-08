@@ -89,10 +89,11 @@ class Warden_Driver
             $role = (is_array($role) ? $role : array($role));
 
             $diff = array_udiff($role, $user->roles, function ($r, $ur) {
-                // check for a role object
+                // check for role objects
                 $r = (is_object($r) ? $r->name : $r);
+                $ur = (is_object($ur) ? $ur->name : $ur);
                 // compare each given role against the user's roles
-                return $r != $ur->name;
+                return $r != $ur;
             });
 
             // empty = true
