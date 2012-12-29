@@ -13,8 +13,9 @@ CREATE TABLE IF NOT EXISTS `users` (
   `username` varchar(32) NOT NULL COMMENT 'User username',
   `email` varchar(255) NOT NULL COMMENT 'User email',
   `encrypted_password` varbinary(60) NOT NULL COMMENT 'Encryption of the user password',
-  `authentication_token` varbinary(60) DEFAULT NULL COMMENT 'Session authentication token',
-  `remember_token` varbinary(60) DEFAULT NULL COMMENT 'Cookie remember token',
+
+  -- IF USING rememberable uncomment the following lines
+  -- `remember_token` varbinary(60) DEFAULT NULL COMMENT 'Cookie remember token',
 
   -- IF USING recoverable uncomment the following lines
   -- `reset_password_token` varbinary(60) DEFAULT NULL COMMENT 'Reset password token',
@@ -42,8 +43,13 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `index_users_on_email` (`email`),
   UNIQUE KEY `index_users_on_username` (`username`),
-  KEY `index_users_on_authentication_token` (`authentication_token`),
-  KEY `index_users_on_remember_token` (`remember_token`)
+
+  -- UNCOMMENT THE APPROPRIATE LINES
+
+  -- UNIQUE KEY `index_users_on_remember_token` (`remember_token`),
+  -- UNIQUE KEY `index_users_on_reset_password_token` (`reset_password_token`),
+  -- UNIQUE KEY `index_users_on_confirmation_token` (`confirmation_token`),
+  -- UNIQUE KEY `index_users_on_unlock_token` (`unlock_token`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='User account details';
 
 -- --------------------------------------------------------
