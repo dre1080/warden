@@ -3,7 +3,7 @@
 Warden is a user database auth package for the FuelPHP framework that aims to fast track development by handling the work load of authenticating and authorizing user's.
 Built for performance, it comes with ready-to-use models and database install tasks.
 
-Latest release: 1.2 ([view changelog](https://github.com/dre1080/warden/blob/master/HISTORY.md))
+Latest release: 2.0 ([view changelog](https://github.com/dre1080/warden/blob/master/HISTORY.md))
 
 For docs, and installation see [http://dre1080.github.com/warden](http://dre1080.github.com/warden)
 
