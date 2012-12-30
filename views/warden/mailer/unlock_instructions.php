@@ -5,7 +5,7 @@
 <p>Click the link below to unlock your account:</p>
 
 <p>
-    <a href="<?php echo $uri; ?>">
-        Unlock my account
-    </a>
+  <a href="<?php echo $uri; ?>">
+    Unlock my account
+  </a>
 </p>

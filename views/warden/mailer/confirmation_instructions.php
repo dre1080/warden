@@ -3,7 +3,7 @@
 <p>You can confirm your account through the link below:</p>
 
 <p>
-    <a href="<?php echo $uri; ?>">
-        Confirm my account
-    </a>
+  <a href="<?php echo $uri; ?>">
+    Confirm my account
+  </a>
 </p>
