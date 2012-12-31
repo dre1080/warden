@@ -4,34 +4,42 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>Warden by dre1080</title>
-
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
     <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
   </head>
   <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/dre1080/warden">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/dre1080/warden/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/dre1080/warden/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
     <div class="wrapper">
-      <header>
-        <h1>Warden</h1>
-        <p>More than just a user database auth package for FuelPHP</p>
 
-        <p class="view"><a href="https://github.com/dre1080/warden">View the Project on GitHub <small>dre1080/warden</small></a></p>
-
-
-        <ul>
-          <li><a href="https://github.com/dre1080/warden/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/dre1080/warden/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/dre1080/warden">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
       <section>
+        <div id="title">
+          <h1>Warden</h1>
+          <p>More than just a user database auth package for FuelPHP</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/dre1080">dre1080</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
+        </div>
+
         <p>Warden is a user database auth package for the FuelPHP framework that aims to fast track development by handling the work load of authenticating and authorizing user's.
 Built for performance, it comes with ready-to-use models and database install tasks.</p>
-
-<p>Latest release: 1.2 (<a href="https://github.com/dre1080/warden/blob/master/HISTORY.md">view changelog</a>)</p>
 
 <h2>Features</h2>
 
@@ -111,101 +119,132 @@ warden configs before adding the required tables.</strong></p>
 
 <p>Check for validated login:</p>
 
-<div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">check</span><span class="p">())</span> <span class="p">{</span>
-        <span class="k">echo</span> <span class="s2">"I'm logged in :D"</span><span class="p">;</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="k">echo</span> <span class="s2">"Failed, I'm NOT logged in :("</span><span class="p">;</span>
-    <span class="p">}</span>
+<div class="highlight"><pre><span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">check</span><span class="p">())</span> <span class="p">{</span>
+  <span class="k">echo</span> <span class="s2">"I'm logged in :D"</span><span class="p">;</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+  <span class="k">echo</span> <span class="s2">"Failed, I'm NOT logged in :("</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 
 <p>Getting the currently logged in user:</p>
 
-<div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">check</span><span class="p">())</span> <span class="p">{</span>
-        <span class="nv">$current_user</span> <span class="o">=</span> <span class="nx">Warden</span><span class="o">::</span><span class="na">current_user</span><span class="p">();</span>
-        <span class="k">echo</span> <span class="nv">$current_user</span><span class="o">-&gt;</span><span class="na">username</span><span class="p">;</span>
-    <span class="p">}</span>
+<div class="highlight"><pre><span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">check</span><span class="p">())</span> <span class="p">{</span>
+  <span class="nv">$current_user</span> <span class="o">=</span> <span class="nx">Warden</span><span class="o">::</span><span class="na">current_user</span><span class="p">();</span>
+  <span class="k">echo</span> <span class="nv">$current_user</span><span class="o">-&gt;</span><span class="na">username</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 
 <p>Explicitly setting the current user:</p>
 
-<div class="highlight"><pre>    <span class="k">if</span> <span class="p">((</span><span class="nv">$user</span> <span class="o">=</span> <span class="nx">Model_User</span><span class="o">::</span><span class="na">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span> <span class="p">{</span>
-        <span class="nx">Warden</span><span class="o">::</span><span class="na">set_user</span><span class="p">(</span><span class="nv">$user</span><span class="p">);</span>
-    <span class="p">}</span>
+<div class="highlight"><pre><span class="k">if</span> <span class="p">((</span><span class="nv">$user</span> <span class="o">=</span> <span class="nx">Model_User</span><span class="o">::</span><span class="na">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span> <span class="p">{</span>
+  <span class="nx">Warden</span><span class="o">::</span><span class="na">set_user</span><span class="p">(</span><span class="nv">$user</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 
 <p>Checking for a specific role:</p>
 
-<div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">logged_in</span><span class="p">(</span><span class="s1">'admin'</span><span class="p">))</span> <span class="p">{</span>
-        <span class="k">echo</span> <span class="s2">"Current user logged in as an admin"</span><span class="p">;</span>
-    <span class="p">}</span>
+<div class="highlight"><pre><span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">logged_in</span><span class="p">(</span><span class="s1">'admin'</span><span class="p">))</span> <span class="p">{</span>
+  <span class="k">echo</span> <span class="s2">"Current user logged in as an admin"</span><span class="p">;</span>
+<span class="p">}</span>
 
-    <span class="nv">$user</span> <span class="o">=</span> <span class="nx">Model_User</span><span class="o">::</span><span class="na">find</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">has_access</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="s1">'editor'</span><span class="p">,</span> <span class="s1">'moderator'</span><span class="p">),</span> <span class="nv">$user</span><span class="p">))</span> <span class="p">{</span>
-        <span class="k">echo</span> <span class="s2">"Hey, editor - moderator"</span><span class="p">;</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="k">echo</span> <span class="s2">"Fail!"</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="nv">$user</span> <span class="o">=</span> <span class="nx">Model_User</span><span class="o">::</span><span class="na">find</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">has_access</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="s1">'editor'</span><span class="p">,</span> <span class="s1">'moderator'</span><span class="p">),</span> <span class="nv">$user</span><span class="p">))</span> <span class="p">{</span>
+  <span class="k">echo</span> <span class="s2">"Hey, editor - moderator"</span><span class="p">;</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+  <span class="k">echo</span> <span class="s2">"Fail!"</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 
 <p>Checking the current user has permission for a resource:</p>
 
-<div class="highlight"><pre>    <span class="k">try</span> <span class="p">{</span>
-        <span class="c1">// Can the user create an article?</span>
-        <span class="nx">Warden</span><span class="o">::</span><span class="na">authorize</span><span class="p">(</span><span class="s1">'create'</span><span class="p">,</span> <span class="s1">'Article'</span><span class="p">);</span>
-    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">Warden_AccessDenied</span> <span class="nv">$ex</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// Nope, get out</span>
-        <span class="k">die</span><span class="p">(</span><span class="nv">$ex</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">());</span>
-    <span class="p">}</span>
+<div class="highlight"><pre><span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">can</span><span class="p">(</span><span class="s1">'create'</span><span class="p">,</span> <span class="s1">'Article'</span><span class="p">))</span> <span class="p">{</span>
+  <span class="c1">// do something</span>
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+  <span class="nx">Response</span><span class="o">::</span><span class="na">redirect</span><span class="p">(</span><span class="s1">'/403'</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>or the inverse:</p>
+
+<div class="highlight"><pre><span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">cannot</span><span class="p">(</span><span class="s1">'create'</span><span class="p">,</span> <span class="s1">'Article'</span><span class="p">))</span> <span class="p">{</span>
+  <span class="nx">Response</span><span class="o">::</span><span class="na">redirect</span><span class="p">(</span><span class="s1">'/403'</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>It also accepts array arguments to check for multiple permissions for actions/resources:</p>
+
+<div class="highlight"><pre><span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">can</span><span class="p">(</span><span class="k">array</span><span class="p">(</span><span class="s1">'destroy'</span><span class="p">,</span> <span class="s1">'create'</span><span class="p">),</span> <span class="k">array</span><span class="p">(</span><span class="s1">'Project'</span><span class="p">,</span> <span class="s1">'Task'</span><span class="p">)))</span> <span class="p">{</span>
+  <span class="c1">// do something</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Or if you want to throw an exception, use <code>Warden::authorize</code>:</p>
+
+<div class="highlight"><pre><span class="k">try</span> <span class="p">{</span>
+  <span class="nx">Warden</span><span class="o">::</span><span class="na">authorize</span><span class="p">(</span><span class="s1">'create'</span><span class="p">,</span> <span class="s1">'Article'</span><span class="p">);</span>
+<span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">\Warden\AccessDenied</span> <span class="nv">$ex</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">die</span><span class="p">(</span><span class="nv">$ex</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">());</span>
+<span class="p">}</span>
 </pre></div>
 
 <p>Log in a user by using a username or email and plain-text password:</p>
 
-<div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="nx">Input</span><span class="o">::</span><span class="na">method</span><span class="p">()</span> <span class="o">===</span> <span class="s1">'POST'</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">authenticate</span><span class="p">(</span><span class="nx">Input</span><span class="o">::</span><span class="na">post</span><span class="p">(</span><span class="s1">'username_or_email'</span><span class="p">),</span> <span class="nx">Input</span><span class="o">::</span><span class="na">post</span><span class="p">(</span><span class="s1">'password'</span><span class="p">)))</span> <span class="p">{</span>
-            <span class="nx">Session</span><span class="o">::</span><span class="na">set_flash</span><span class="p">(</span><span class="s1">'success'</span><span class="p">,</span> <span class="s1">'Logged in successfully'</span><span class="p">);</span>
-        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-            <span class="nx">Session</span><span class="o">::</span><span class="na">set_flash</span><span class="p">(</span><span class="s1">'error'</span><span class="p">,</span> <span class="s1">'Username or password invalid'</span><span class="p">);</span>
-        <span class="p">}</span>
-        <span class="nx">Response</span><span class="o">::</span><span class="na">redirect</span><span class="p">();</span>
-    <span class="p">}</span>
+<div class="highlight"><pre><span class="k">if</span> <span class="p">(</span><span class="nx">Input</span><span class="o">::</span><span class="na">method</span><span class="p">()</span> <span class="o">===</span> <span class="s1">'POST'</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">authenticate</span><span class="p">(</span><span class="nx">Input</span><span class="o">::</span><span class="na">post</span><span class="p">(</span><span class="s1">'username_or_email'</span><span class="p">),</span> <span class="nx">Input</span><span class="o">::</span><span class="na">post</span><span class="p">(</span><span class="s1">'password'</span><span class="p">)))</span> <span class="p">{</span>
+    <span class="nx">Session</span><span class="o">::</span><span class="na">set_flash</span><span class="p">(</span><span class="s1">'success'</span><span class="p">,</span> <span class="s1">'Logged in successfully'</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nx">Session</span><span class="o">::</span><span class="na">set_flash</span><span class="p">(</span><span class="s1">'error'</span><span class="p">,</span> <span class="s1">'Username or password invalid'</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">Response</span><span class="o">::</span><span class="na">redirect</span><span class="p">();</span>
+<span class="p">}</span>
 </pre></div>
 
 <p>Log in a user using a http based authentication method:</p>
 
-<div class="highlight"><pre>    <span class="k">if</span> <span class="p">((</span><span class="nv">$user_array</span> <span class="o">=</span> <span class="nx">Warden</span><span class="o">::</span><span class="na">http_authenticate</span><span class="p">()))</span> <span class="p">{</span>
-        <span class="k">echo</span> <span class="s2">"Welcome </span><span class="si">{</span><span class="nv">$user_array</span><span class="p">[</span><span class="s1">'username'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">;</span>
-    <span class="p">}</span>
+<div class="highlight"><pre><span class="k">if</span> <span class="p">((</span><span class="nv">$user_array</span> <span class="o">=</span> <span class="nx">Warden</span><span class="o">::</span><span class="na">http_authenticate</span><span class="p">()))</span> <span class="p">{</span>
+  <span class="k">echo</span> <span class="s2">"Welcome </span><span class="si">{</span><span class="nv">$user_array</span><span class="p">[</span><span class="s1">'username'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 
 <p>Log out a user by removing the related session variables:</p>
 
-<div class="highlight"><pre>    <span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">logout</span><span class="p">())</span> <span class="p">{</span>
-         <span class="k">echo</span> <span class="s2">"I'm logged out"</span><span class="p">;</span>
-    <span class="p">}</span>
+<div class="highlight"><pre><span class="k">if</span> <span class="p">(</span><span class="nx">Warden</span><span class="o">::</span><span class="na">logout</span><span class="p">())</span> <span class="p">{</span>
+  <span class="k">echo</span> <span class="s2">"I'm logged out"</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 
 <p>Resetting a user's password</p>
 
-<div class="highlight"><pre>    <span class="c1">// Sending the password token</span>
-    <span class="k">if</span> <span class="p">((</span><span class="nv">$user</span> <span class="o">=</span> <span class="nx">Model_User</span><span class="o">::</span><span class="na">find</span><span class="p">(</span><span class="s1">'first'</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">'where'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span><span class="s1">'email'</span> <span class="o">=&gt;</span> <span class="s1">'myemail@warden.net'</span><span class="p">)))))</span> <span class="p">{</span>
-        <span class="k">try</span> <span class="p">{</span>
-            <span class="nv">$user</span><span class="o">-&gt;</span><span class="na">send_reset_password_instructions</span><span class="p">();</span>
-        <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">Exception</span> <span class="nv">$ex</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">echo</span> <span class="nb">sprintf</span><span class="p">(</span><span class="s1">'Oops, something went wrong: %s'</span><span class="p">,</span> <span class="nv">$ex</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">());</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
+<div class="highlight"><pre><span class="c1">// Sending the password token</span>
+<span class="k">if</span> <span class="p">((</span><span class="nv">$user</span> <span class="o">=</span> <span class="nx">Model_User</span><span class="o">::</span><span class="na">find</span><span class="p">(</span><span class="s1">'first'</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">'where'</span> <span class="o">=&gt;</span> <span class="k">array</span><span class="p">(</span><span class="s1">'email'</span> <span class="o">=&gt;</span> <span class="s1">'myemail@warden.net'</span><span class="p">)))))</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="nv">$user</span><span class="o">-&gt;</span><span class="na">send_reset_password_instructions</span><span class="p">();</span>
+  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">Exception</span> <span class="nv">$ex</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">echo</span> <span class="nb">sprintf</span><span class="p">(</span><span class="s1">'Oops, something went wrong: %s'</span><span class="p">,</span> <span class="nv">$ex</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">());</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 
-    <span class="c1">// Resetting the password</span>
-    <span class="k">try</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">((</span><span class="nv">$user</span> <span class="o">=</span> <span class="nx">Model_User</span><span class="o">::</span><span class="na">reset_password_by_token</span><span class="p">(</span><span class="nx">\Input</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">'reset_password_token'</span><span class="p">),</span> <span class="s1">'new_password'</span><span class="p">)))</span> <span class="p">{</span>
-            <span class="k">echo</span> <span class="s1">'Success!'</span><span class="p">;</span>
-        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-            <span class="k">echo</span> <span class="s1">'Not a valid user'</span><span class="p">;</span>
-        <span class="p">}</span>
-    <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">Exception</span> <span class="nv">$ex</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// something went wrong</span>
-        <span class="k">echo</span> <span class="nb">sprintf</span><span class="p">(</span><span class="s1">'Oops, something went wrong: %s'</span><span class="p">,</span> <span class="nv">$ex</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">());</span>
-    <span class="p">}</span>
+<span class="c1">// Resetting the password</span>
+<span class="k">try</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">((</span><span class="nv">$user</span> <span class="o">=</span> <span class="nx">Model_User</span><span class="o">::</span><span class="na">reset_password_by_token</span><span class="p">(</span><span class="nx">\Input</span><span class="o">::</span><span class="na">get</span><span class="p">(</span><span class="s1">'reset_password_token'</span><span class="p">),</span> <span class="s1">'new_password'</span><span class="p">)))</span> <span class="p">{</span>
+    <span class="k">echo</span> <span class="s1">'Success!'</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="k">echo</span> <span class="s1">'Not a valid user'</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">Exception</span> <span class="nv">$ex</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// something went wrong</span>
+  <span class="k">echo</span> <span class="nb">sprintf</span><span class="p">(</span><span class="s1">'Oops, something went wrong: %s'</span><span class="p">,</span> <span class="nv">$ex</span><span class="o">-&gt;</span><span class="na">getMessage</span><span class="p">());</span>
+<span class="p">}</span>
+</pre></div>
+
+<h2>Callbacks</h2>
+
+<p><code>after_set_user</code>, <code>after_authentication</code>, <code>before_logout</code>, <code>after_authorization</code></p>
+
+<div class="highlight"><pre><span class="nx">Warden</span><span class="o">::</span><span class="na">before_logout</span><span class="p">(</span><span class="k">function</span><span class="p">(</span><span class="nv">$user</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">logger</span><span class="p">(</span><span class="nx">\Fuel</span><span class="o">::</span><span class="na">L_INFO</span><span class="p">,</span> <span class="s1">'User '</span><span class="o">.</span><span class="nv">$user</span><span class="o">-&gt;</span><span class="na">id</span><span class="o">.</span><span class="s1">' logging out'</span><span class="p">,</span> <span class="s1">'Warden::before_logout'</span><span class="p">);</span>
+<span class="p">});</span>
 </pre></div>
 
 <p><em>More examples are in the doc comments for each method.</em></p>
@@ -218,12 +257,9 @@ warden configs before adding the required tables.</strong></p>
 
 <p>Thanks also to the <a href="https://github.com/fuel" class="user-mention">@fuel</a> and <a href="https://github.com/happyninjas" class="user-mention">@happyninjas</a> dev team + many who have contributed code, ideas and issues.</p>
       </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/dre1080">dre1080</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
+
     </div>
-    <script src="javascripts/scale.fix.js"></script>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
               <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
