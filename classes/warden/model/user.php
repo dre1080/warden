@@ -940,9 +940,9 @@ SQL;
 
     if (!empty($this->password)) {
       if (\Str::length($this->password) < $min_length) {
-        throw new \Orm\ValidationFailed(__('warden.validation.password.too_short'));
+        throw new \Orm\ValidationFailed(__('warden.validation.password.too_short'), array('count' => $min_length));
       } elseif (\Str::length($this->password) > $max_length) {
-        throw new \Orm\ValidationFailed(__('warden.validation.password.too_long'));
+        throw new \Orm\ValidationFailed(__('warden.validation.password.too_long', array('count' => $max_length)));
       }
 
       $this->encrypted_password = Warden::encrypt_password($this->password);
