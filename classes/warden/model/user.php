@@ -1014,7 +1014,7 @@ SQL;
   private static function _init_rememberable()
   {
     if (\Config::get('warden.rememberable.in_use') === true) {
-      $this->_add_dynamic_properties(array(
+      static::_add_dynamic_properties(array(
         'remember_token' => array('default' => null)
       ));
     }
@@ -1029,7 +1029,7 @@ SQL;
   private static function _init_trackable()
   {
     if (\Config::get('warden.trackable') === true) {
-      $this->_add_dynamic_properties(array(
+      static::_add_dynamic_properties(array(
         'sign_in_count'      => array('default' => 0),
         'current_sign_in_at' => array('default' => '0000-00-00 00:00:00'),
         'last_sign_in_at'    => array('default' => '0000-00-00 00:00:00'),
@@ -1048,7 +1048,7 @@ SQL;
   private static function _init_recoverable()
   {
     if (\Config::get('warden.recoverable.in_use') === true) {
-      static::$_properties = $this->_add_dynamic_properties(array(
+      static::$_properties = static::_add_dynamic_properties(array(
           'reset_password_token'   => array('default' => null),
           'reset_password_sent_at' => array('default' => '0000-00-00 00:00:00')
       ));
@@ -1064,7 +1064,7 @@ SQL;
   private static function _init_confirmable()
   {
     if (\Config::get('warden.confirmable.in_use') === true) {
-      $this->_add_dynamic_properties(array(
+      static::_add_dynamic_properties(array(
         'is_confirmed'         => array('default' => false),
         'confirmation_token'   => array('default' => null),
         'confirmation_sent_at' => array('default' => '0000-00-00 00:00:00')
@@ -1086,7 +1086,7 @@ SQL;
         static::$_properties[$strategy] = array('default' => 0);
       }
 
-      $this->_add_dynamic_properties(array(
+      static::_add_dynamic_properties(array(
         'unlock_token'    => array('default' => null),
         'locked_at'       => array('default' => '0000-00-00 00:00:00')
       ));
