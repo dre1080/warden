@@ -479,7 +479,7 @@ SQL;
 		if (\Config::get('warden.recoverable.in_use') === true &&
 				$this->generate_reset_password_token())
 		{
-			return Warden_Mailer::send_reset_password_instructions($this);
+			return Mailer::send_reset_password_instructions($this);
 		}
 
 		return false;
@@ -608,7 +608,7 @@ SQL;
 		if (\Config::get('warden.confirmable.in_use') === true &&
 				$this->generate_confirmation_token())
 		{
-			return Warden_Mailer::send_confirmation_instructions($this);
+			return Mailer::send_confirmation_instructions($this);
 		}
 
 		return false;
@@ -811,7 +811,7 @@ SQL;
 		if (\Config::get('warden.lockable.in_use') === true &&
 				$this->generate_unlock_token())
 		{
-			return Warden_Mailer::send_unlock_instructions($this);
+			return Mailer::send_unlock_instructions($this);
 		}
 
 		return false;
@@ -918,7 +918,7 @@ SQL;
 	 WHERE email = $email)
 UNION
 	(SELECT email FROM $table
-			WHERE username = $username)
+			WHERE username = $username AND `id` <> $this->id)
 LIMIT 1;
 SQL;
 
