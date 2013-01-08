@@ -70,7 +70,7 @@ class Warden
    * if (Warden::check('admin', 'delete', 'User')) {
    *     echo "User is an admin and has permission to delete other users";
    * } else {
-   *     throw new Warden_AccessDenied();
+   *     throw new AccessDenied();
    * }
    * </code>
    *
@@ -80,7 +80,7 @@ class Warden
    * if (Warden::check('admin', 'delete')) {
    *     echo "User is an admin and has permission to delete other "admin"";
    * } else {
-   *     throw new Warden_AccessDenied();
+   *     throw new AccessDenied();
    * }
    * </code>
    *
@@ -221,7 +221,7 @@ class Warden
    *
    * @return bool Returns true on success or false on failure
    *
-   * @throws \Warden\Warden_Failure If lockable enabled & attempts exceeded
+   * @throws \Warden\Failure If lockable enabled & attempts exceeded
    */
   public static function authenticate($username_or_email, $password, $remember = false)
   {
@@ -241,7 +241,7 @@ class Warden
    * }
    * </code>
    *
-   * @see \Warden\Warden_Driver::http_authenticate_user()
+   * @see \Warden\Driver::http_authenticate_user()
    *
    * @return array A key/value array of the username => value and password => value
    */
@@ -384,9 +384,9 @@ class Warden
    * @param mixed $resource The resource for the permission.
    * @param array $options
    *
-   * @see {@link \Warden\Warden_AccessDenied}
+   * @see {@link \Warden\AccessDenied}
    *
-   * @throws \Warden\Warden_AccessDenied If the current user cannot perform the given action
+   * @throws \Warden\AccessDenied If the current user cannot perform the given action
    */
   public static function authorize($action, $resource, array $options = array())
   {
@@ -544,7 +544,7 @@ class Warden
   /**
    * Fetches the warden driver instance
    *
-   * @return \Warden\Warden_Driver
+   * @return \Warden\Driver
    */
   protected static function driver()
   {
