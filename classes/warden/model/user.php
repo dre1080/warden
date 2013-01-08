@@ -238,7 +238,7 @@ SQL;
       // Unlock the user if the lock is expired, no matter
       // if the user can login or not (wrong password, etc)
       if ($record->is_lock_expired()) {
-        // unlock but do not save, saving handled by Warden_Driver::complete_login()
+        // unlock but do not save, saving handled by Warden::complete_login()
         $record->unlock_access(false);
       }
 
@@ -446,7 +446,7 @@ SQL;
     if (\Config::get('warden.recoverable.in_use') === true &&
         $this->generate_reset_password_token())
     {
-      return Warden_Mailer::send_reset_password_instructions($this);
+      return Mailer::send_reset_password_instructions($this);
     }
 
     return false;
@@ -575,7 +575,7 @@ SQL;
     if (\Config::get('warden.confirmable.in_use') === true &&
         $this->generate_confirmation_token())
     {
-      return Warden_Mailer::send_confirmation_instructions($this);
+      return Mailer::send_confirmation_instructions($this);
     }
 
     return false;
@@ -778,7 +778,7 @@ SQL;
     if (\Config::get('warden.lockable.in_use') === true &&
         $this->generate_unlock_token())
     {
-      return Warden_Mailer::send_unlock_instructions($this);
+      return Mailer::send_unlock_instructions($this);
     }
 
     return false;
