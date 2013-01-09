@@ -153,7 +153,7 @@ class Driver
    *
    * @return bool
    *
-   * @throws \Warden\Warden_Failure If lockable enabled & attempts exceeded
+   * @throws \Warden\Failure If lockable enabled & attempts exceeded
    */
   public function authenticate_user($username_or_email, $password, $remember)
   {
@@ -185,8 +185,8 @@ class Driver
   /**
    * Logs a user in using Http based authentication
    *
-   * @see \Warden\Warden_Driver::_http_basic()
-   * @see \Warden\Warden_Driver::_http_digest()
+   * @see \Warden\Driver::_http_basic()
+   * @see \Warden\Driver::_http_digest()
    *
    * @return array
    */
