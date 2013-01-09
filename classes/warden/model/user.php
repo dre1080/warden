@@ -1002,7 +1002,7 @@ SQL;
    */
   private static function _add_dynamic_properties(array $props)
   {
-    static::$_properties = array_merge(static::$_properties, $props);
+    static::$_properties = array_merge((array)static::$_properties, (array)$props);
   }
 
   /**
