@@ -54,7 +54,7 @@ class Controller_User
   		} else {
   			\Session::set_flash('Invalid token.');
   		}
-  	} catch (\Warden_Failure $ex) {
+  	} catch (\Warden\Failure $ex) {
           // token has expired (if enabled)
   		\Session::set_flash($ex->getMessage());
   	} catch (Exception $ex) {
