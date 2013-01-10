@@ -1048,7 +1048,7 @@ SQL;
   private static function _init_recoverable()
   {
     if (\Config::get('warden.recoverable.in_use') === true) {
-      static::$_properties = static::_add_dynamic_properties(array(
+      static::_add_dynamic_properties(array(
           'reset_password_token'   => array('default' => null),
           'reset_password_sent_at' => array('default' => '0000-00-00 00:00:00')
       ));
