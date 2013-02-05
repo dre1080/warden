@@ -56,26 +56,6 @@ class Warden
 
     $this->_setup_config();
 
-    if (\Config::get('warden.rememberable.in_use') === true) {
-      $fields = array_merge($fields, $this->rememberable(true));
-    }
-
-    if (\Config::get('warden.recoverable.in_use') === true) {
-      $fields = array_merge($fields, $this->recoverable(true));
-    }
-
-    if (\Config::get('warden.confirmable.in_use') === true) {
-      $fields = array_merge($fields, $this->confirmable(true));
-    }
-
-    if (\Config::get('warden.trackable') === true) {
-      $fields = array_merge($fields, $this->trackable(true));
-    }
-
-    if (\Config::get('warden.lockable.in_use') === true) {
-      $fields = array_merge($fields, $this->lockable(true));
-    }
-
     $fields = array_merge($fields, array(
       'created_at' => array('type' => 'timestamp', 'default' => '0000-00-00 00:00:00'),
       'updated_at' => array('type' => 'timestamp ON UPDATE CURRENT_TIMESTAMP', 'default' => \DB::expr('CURRENT_TIMESTAMP'))
@@ -87,6 +67,8 @@ class Warden
                   ADD UNIQUE index_users_on_email(email),
                   ADD UNIQUE index_users_on_username(username)",
                \DB::UPDATE)->execute();
+
+    $this->feature();
 
     \Cli::write("\n".\Cli::color('Created users table successfully', 'green'));
 
@@ -129,23 +111,23 @@ class Warden
 
   public function feature()
   {
-    if (\Cli::option('rem') || \Cli::option('rememberable')) {
+    if (\Cli::option('rem') || \Cli::option('rememberable') || (\Config::get('warden.rememberable.in_use') === true)) {
       $this->rememberable();
     }
 
-    if (\Cli::option('rc') || \Cli::option('recoverable')) {
+    if (\Cli::option('rc') || \Cli::option('recoverable') || (\Config::get('warden.recoverable.in_use') === true)) {
       $this->recoverable();
     }
 
-    if (\Cli::option('c') || \Cli::option('confirmable')) {
+    if (\Cli::option('c') || \Cli::option('confirmable') || (\Config::get('warden.confirmable.in_use') === true)) {
       $this->confirmable();
     }
 
-    if (\Cli::option('t') || \Cli::option('trackable')) {
+    if (\Cli::option('t') || \Cli::option('trackable') || (\Config::get('warden.trackable') === true)) {
       $this->trackable();
     }
 
-    if (\Cli::option('l') || \Cli::option('lockable')) {
+    if (\Cli::option('l') || \Cli::option('lockable') || (\Config::get('warden.lockable.in_use') === true)) {
       $this->lockable();
     }
 
