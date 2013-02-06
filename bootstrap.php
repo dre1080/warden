@@ -4,7 +4,7 @@
  *
  * @package    Warden
  * @subpackage Warden
- * @version    2.0
+ * @version    2.0.1
  * @author     Andrew Wayne <lifeandcoding@gmail.com>
  * @license    MIT License
  * @copyright  (c) 2011 - 2013 Andrew Wayne
