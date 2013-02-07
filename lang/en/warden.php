@@ -36,7 +36,7 @@ return array(
       'required'  => 'Password is required',
       'invalid'   => 'Password is invalid.',
       'too_short' => 'Password is too short (minimum is :count characters)',
-      'too_short' => 'Password is too long (maximum is :count characters)'
+      'too_long' => 'Password is too long (maximum is :count characters)'
     )
   ),
 
