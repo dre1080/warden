@@ -38,7 +38,7 @@ class Driver
    *
    * @var \Fuel\Session
    */
-  private $_session;
+  protected $_session;
 
   /**
    * Creates a new driver instance, loading the session and storing config.
