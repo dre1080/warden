@@ -38,7 +38,7 @@ class Driver
    *
    * @var \Fuel\Session
    */
-  private $_session;
+  protected $session;
 
   /**
    * Creates a new driver instance, loading the session and storing config.
@@ -50,7 +50,7 @@ class Driver
   public function __construct(array $config)
   {
     $this->config   = $config;
-    $this->_session = \Session::instance();
+    $this->session = \Session::instance();
   }
 
   /**
@@ -62,7 +62,7 @@ class Driver
    */
   public function logged_in($role = null)
   {
-    $user_id = $this->_session->get('warden.user.id');
+    $user_id = $this->session->get('warden.user.id');
 
     if (!empty($user_id) && (!$this->user || $this->user->id !== $user_id)) {
       $this->user = null;
@@ -271,7 +271,7 @@ class Driver
     $this->user = null;
 
     // Delete the session identifier for the user
-    $this->_session->delete('warden.user.id');
+    $this->session->delete('warden.user.id');
 
     // Delete http server variables
     if ($this->config['http_authenticatable']['in_use']) {
@@ -288,10 +288,10 @@ class Driver
 
     if ($destroy === true) {
       // Destroy the session completely
-      $this->_session->destroy();
+      $this->session->destroy();
     } else {
       // Regenerate session_id
-      $this->_session->rotate();
+      $this->session->rotate();
     }
 
     // Double check
@@ -322,8 +322,8 @@ class Driver
         $user->save(false);
       }
 
-      $this->_session->set('warden.user.id', $user->id);
-      $this->_session->rotate();
+      $this->session->set('warden.user.id', $user->id);
+      $this->session->rotate();
 
       $this->set_user($user);
 
