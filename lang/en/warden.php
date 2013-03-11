@@ -24,7 +24,7 @@ return array(
     'already_confirmed'     => ':email was already confirmed, please try signing in.',
     'locked'                => 'Your account is locked.',
     'invalid'               => 'Invalid email or password.',
-    'invalid_token'         => 'Invalid authentication token.',
+    'invalid_token'         => 'Invalid :name token.',
     'expired_token'         => ':name token has expired, please request a new one',
     'timeout'               => 'Your session expired, please sign in again to continue.',
     'inactive'              => 'Your account was not activated yet.'

@@ -368,10 +368,9 @@ SQL;
    * @param string $reset_password_token
    * @param string $new_password
    *
-   * @return \Warden\Model_User|null Returns a user if is found and token is still valid,
-   *                                 or null if no user is found.
+   * @return \Warden\Model_User|null Returns a user if is found and token is still valid.
    *
-   * @throws \Warden\Failure If the token has expired
+   * @throws \Warden\Failure If the token has expired or is invalid.
    */
   public static function reset_password_by_token($reset_password_token, $new_password)
   {
@@ -387,6 +386,8 @@ SQL;
       } else {
         throw new Failure('expired_token', array('name' => 'Reset password'));
       }
+    } else {
+      throw new Failure('invalid_token', array('name' => 'reset password'));
     }
 
     return $recoverable;
@@ -457,10 +458,9 @@ SQL;
    *
    * @param string $confirmation_token
    *
-   * @return \Warden\Model_User|null Returns a user if is found and token is still valid,
-   *                                 or null if no user is found.
+   * @return \Warden\Model_User|null Returns a user if is found and token is still valid.
    *
-   * @throws \Warden\Failure If the token has expired or the user is already confirmed
+   * @throws \Warden\Failure If the token has expired, invalid or the user is already confirmed
    */
   public static function confirm_by_token($confirmation_token)
   {
@@ -476,6 +476,8 @@ SQL;
       } else {
         throw new Failure('expired_token', array('name' => 'Confirmation'));
       }
+    } else {
+      throw new Failure('invalid_token', array('name' => 'confirmation'));
     }
 
     return $confirmable;
