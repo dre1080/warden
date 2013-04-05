@@ -50,8 +50,7 @@ class Warden
       'email' => array('constraint' => 255, 'type' => 'varchar'),
       'username' => array('constraint' => 32, 'type' => 'varchar'),
       'encrypted_password' => array('constraint' => 60, 'type' => 'varbinary'),
-      'authentication_token' => array('constraint' => 60, 'type' => 'varbinary', 'null' => true, 'default' => \DB::expr('NULL')),
-      'remember_token' => array('constraint' => 60, 'type' => 'varbinary', 'null' => true, 'default' => \DB::expr('NULL'))
+      'authentication_token' => array('constraint' => 60, 'type' => 'varbinary', 'null' => true, 'default' => \DB::expr('NULL'))
     );
 
     $this->_setup_config();
