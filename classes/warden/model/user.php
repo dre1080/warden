@@ -203,7 +203,7 @@ class Model_User extends \Orm\Model
   	} else {
       $username_or_email = \DB::escape(\Str::lower($username_or_email_or_id));
 
-      $table = static::table();
+      $table = \DB::table_prefix(static::table());
       $properties = implode('`, `', array_keys(static::properties()));
 
       // Indices lose their speed advantage when using them in OR-situations
@@ -880,7 +880,7 @@ SQL;
     $email    = \DB::escape(\Str::lower($this->email));
     $username = \DB::escape(\Str::lower($this->username));
 
-    $table = \DB::quote_table(static::table());
+    $table = \DB::quote_table(\DB::table_prefix(static::table()));
 
     $sql = <<<SQL
 (SELECT email FROM $table
