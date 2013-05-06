@@ -30,7 +30,7 @@ class Mailer
    *
    * @return bool
    */
-  private static function _send_instructions($name, Model_User $user)
+  protected static function _send_instructions($name, Model_User $user)
   {
     $config_key = null;
 
