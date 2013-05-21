@@ -183,9 +183,9 @@ class Model_User extends \Orm\Model
    * their username into the username field.
    *
    * @param string $username_or_email_or_id The username or email or id of the user to authenticate
-   * @param bool   $force                 Whether to force an authentication, if this is
-   *                                      true, it will bypass checking whether the user
-   *                                      account is locked or confirmed.
+   * @param bool   $force             	  Whether to force an authentication, if this is
+   *                                  	  true, it will bypass checking whether the user
+   *                                  	  account is locked or confirmed.
    *
    * @return \Warden\Model_User|null The user that matches the tokens or
    *                                 null if no user matches that condition.
@@ -198,22 +198,23 @@ class Model_User extends \Orm\Model
         return null;
     }
 
-    if (is_int($username_or_email_or_id)) {
-      $record = static::find($username_or_email_or_id);
-    } else {
+  	if (is_int($username_or_email_or_id)) {
+  		$record = static::find($username_or_email_or_id);
+  	} else {
       $username_or_email = \DB::escape(\Str::lower($username_or_email_or_id));
 
       $table = \DB::quote_table(static::table());
+
       $properties = implode('`, `', array_keys(static::properties()));
 
       // Indices lose their speed advantage when using them in OR-situations
       // so this UNION is much faster than
       // SELECT ... FROM ... WHERE email = 'foo' OR username = 'bar';
       $sql = <<<SQL
- (SELECT `$properties` FROM `$table`
+ (SELECT `$properties` FROM $table
      WHERE `email` = $username_or_email)
  UNION
-    (SELECT `$properties` FROM `$table`
+    (SELECT `$properties` FROM $table
         WHERE `username` = $username_or_email)
  LIMIT 1
 SQL;
