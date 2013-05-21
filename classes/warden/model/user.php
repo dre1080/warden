@@ -183,9 +183,9 @@ class Model_User extends \Orm\Model
    * their username into the username field.
    *
    * @param string $username_or_email_or_id The username or email or id of the user to authenticate
-   * @param bool   $force             	  Whether to force an authentication, if this is
-   *                                  	  true, it will bypass checking whether the user
-   *                                  	  account is locked or confirmed.
+   * @param bool   $force                 Whether to force an authentication, if this is
+   *                                      true, it will bypass checking whether the user
+   *                                      account is locked or confirmed.
    *
    * @return \Warden\Model_User|null The user that matches the tokens or
    *                                 null if no user matches that condition.
@@ -198,12 +198,12 @@ class Model_User extends \Orm\Model
         return null;
     }
 
-  	if (is_int($username_or_email_or_id)) {
-  		$record = static::find($username_or_email_or_id);
-  	} else {
+    if (is_int($username_or_email_or_id)) {
+      $record = static::find($username_or_email_or_id);
+    } else {
       $username_or_email = \DB::escape(\Str::lower($username_or_email_or_id));
 
-      $table = \DB::table_prefix(static::table());
+      $table = \DB::quote_table(static::table());
       $properties = implode('`, `', array_keys(static::properties()));
 
       // Indices lose their speed advantage when using them in OR-situations
@@ -880,7 +880,7 @@ SQL;
     $email    = \DB::escape(\Str::lower($this->email));
     $username = \DB::escape(\Str::lower($this->username));
 
-    $table = \DB::quote_table(\DB::table_prefix(static::table()));
+    $table = \DB::quote_table(static::table());
 
     $sql = <<<SQL
 (SELECT email FROM $table
