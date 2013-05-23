@@ -22,7 +22,7 @@ class Mailer
   public static function __callStatic($method, $arguments)
   {
     $name = str_replace(array('send_', '_instructions'), '', $method);
-    return static::_send_instructions($name, $arguments[0]);
+    return static::send_instructions($name, $arguments[0]);
   }
 
   /**
@@ -30,7 +30,7 @@ class Mailer
    *
    * @return bool
    */
-  private static function _send_instructions($name, Model_User $user)
+  protected static function send_instructions($name, Model_User $user)
   {
     $config_key = null;
 
