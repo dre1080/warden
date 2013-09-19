@@ -98,7 +98,7 @@ class Driver
         $r = (is_object($r) ? $r->name : $r);
         $ur = (is_object($ur) ? $ur->name : $ur);
         // compare each given role against the user's roles
-        return $r != $ur;
+        return strtolower($r) != strtolower($ur);
       });
 
       // empty = true
