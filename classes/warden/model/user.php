@@ -964,7 +964,7 @@ SQL;
   private function _add_default_role()
   {
     // Make sure no roles exist already
-    if (empty($this->roles) || !static::query()->related('roles')->get_one()) {
+    if (empty($this->roles)) {
       // Check for default role
       if (($default_role = \Config::get('warden.default_role'))) {
         $role = \Model_Role::find('first', array(
